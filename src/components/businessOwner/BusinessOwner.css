@@ -1,0 +1,156 @@
+/* ========================= */
+/*   GLOBAL / PAGE WRAPPER   */
+/* ========================= */
+.download-data-owner-page {
+    min-height: 100vh;
+    background: #D2E5E5; /* Light mint */
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1.5rem 2.5rem;
+    font-family: "Ubuntu", sans-serif;
+}
+
+.owner-main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+/* ========================= */
+/*       HEADER TEXT         */
+/* ========================= */
+.upload-header h5 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #082830; /* Dark navy */
+    margin-bottom: 0.2rem;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+.upload-header p {
+    font-size: 1rem;
+    color: #14748a; /* Coral accent */
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 400;
+    margin-top: 0;
+}
+
+/* ========================= */
+/*        CARD STYLE         */
+/* ========================= */
+.upload-card {
+    background: #ffffff;
+    padding: 1.2rem 1.4rem;
+    border-radius: 18px;
+    border: 1px solid rgba(8, 40, 48, 0.05); /* Navy at low opacity */
+    box-shadow: 0 12px 30px rgba(8, 40, 48, 0.08); /* Navy shadow */
+    text-align: center;
+    width: 80%;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+}
+
+.upload-card h6 {
+    color: #082830; /* Dark navy */
+    margin-bottom: 0.4rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.upload-card p {
+    font-size: 0.95rem;
+    color: #14748A; /* Primary dark teal */
+    text-align: center;
+    font-weight: 400;
+    margin: 0.25rem 0 -0.7rem;
+}
+/* ========================= */
+/*     DOWNLOAD BUTTON       */
+/* ========================= */
+
+.download-btn {
+    margin-top: 1.2rem;
+    display: inline-block;
+    padding: 0.8rem 1.7rem;
+    background: linear-gradient(95deg, #1AC6C6, #19b3b3); /* Primary cyan gradient */
+    border-radius: 999px;
+    border: none;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.download-btn:hover {
+    background: #14748A; /* Dark teal */
+    transform: translateY(-2px);
+}
+
+
+/* ========================= */
+/*       UPLOAD SECTION      */
+/* ========================= */
+.hidden-file-input {
+    display: none;
+}
+
+.file-drop-zone {
+    border: 2px dashed #14748A; /* Primary dark teal */
+    background: #f6fbfb;
+    padding: 2.2rem;
+    border-radius: 16px;
+    text-align: center;
+    transition: border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.file-drop-zone.is-dragging {
+    border-color: #1AC6C6; /* Cyan highlight */
+    background: #e6f7f7;
+}
+
+.upload-hint {
+    font-size: 0.8rem;
+    color: #0acf83; /* Coral */
+    margin-top: 0.4rem;
+    text-align: center;
+}
+
+
+/* ========================= */
+/*      CLOUD UPLOAD ICON    */
+/* ========================= */
+.cloud-icon-wrap {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #D2E5E5; /* Light mint circle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.cloud-icon {
+    font-size: 48px;
+    color: #14748A; /* Primary dark teal */
+    transition: 0.25s;
+}
+
+.cloud-icon-wrap:hover {
+    background: #1ac6c6; /* Cyan hover */
+}
+
+.cloud-icon-wrap:hover .cloud-icon {
+    color: #ffffff;
+}
