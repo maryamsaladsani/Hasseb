@@ -1,0 +1,25 @@
+.owner-tools-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem auto 1.3rem;
+    justify-content: center;
+}
+
+.owner-tools-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(8, 40, 48, 0.18);
+    background: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #14748A;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.owner-tools-btn--active {
+    background: linear-gradient(95deg, #1AC6C6, #19b3b3);
+    color: #ffffff;
+    border-color: transparent;
+}

@@ -23,9 +23,10 @@
 */
 import React from "react";
 import Manger from "./Manger";
-import BusinessDataUpload from "./components/businessOwner/BusinessDataUpload";
+import OwnerHome from "./components/businessOwner/BusinessOwnerHome";
+
 
 export default function App() {
   //return <Manger />;
-  return <BusinessDataUpload />;
+  return <OwnerHome />;
 }
