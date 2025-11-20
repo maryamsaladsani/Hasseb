@@ -1,65 +1,23 @@
-/*
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-1. Navigate to the project directory:
-   Open your terminal and run:
-      cd  ....
-
-2. Install project dependencies:
-   Run either of these commands:
-      npm i
-      OR
-      npm install
-
-3. Install React-Bootstrap and Bootstrap:
-   Run the following command:
-      npm install react-bootstrap bootstrap
-
-4. Start the development server:
-   Run:
-      npm  start
-
-
-
-*/
-import React, { useState } from "react";
-import Manager from "./Manger.jsx";   
+import HaseebAuth from "./components/Home/Haseebauth.jsx";
+import Manger from "./Manger.jsx";
 import Advisor from "./Advisor.jsx";
-import BusinessOwnerHome from "./components/businessOwner/BusinessOwnerHome.jsx"
-import HaseebHomePage from "./components/Home/HaseebHomePage";
-import Haseebauth from "./components/Home/Haseebauth";
+import OwnerHome from "./components/businessOwner/BusinessOwnerHome.jsx";
 
 export default function App() {
-  const [mode, setMode] = useState("manager");
-  const [page, setPage] = useState("home");
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Login / Landing */}
+        <Route path="/" element={<HaseebAuth />} />
 
-  if (page === "auth") {
-    return <Haseebauth onBack={() => setPage("home")} />;
-  }
-
-  //return <HaseebHomePage onGetStarted={() => setPage("auth")} />;
-  // manager | advisor
-return <BusinessOwnerHome />;
-  // return (
-  //   <div>
-  //     {/* Switch Buttons */}
-  //     <div className="d-flex gap-2 p-3">
-  //       <button
-  //         className={`btn ${mode === "manager" ? "btn-dark" : "btn-outline-dark"}`}
-  //         onClick={() => setMode("manager")}
-  //       >
-  //         Manager
-  //       </button>
-  //
-  //       <button
-  //         className={`btn ${mode === "advisor" ? "btn-dark" : "btn-outline-dark"}`}
-  //         onClick={() => setMode("advisor")}
-  //       >
-  //         Advisor
-  //       </button>
-  //     </div>
-  //
-  //     {/* Render selected */}
-  //     {mode === "manager" ? <Manager /> : <Advisor />}
-  //   </div>
-  // );
+        {/* Role-based dashboards */}
+        <Route path="/manager" element={<Manger />} />
+        <Route path="/advisor" element={<Advisor />} />
+        <Route path="/owner" element={<OwnerHome />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }

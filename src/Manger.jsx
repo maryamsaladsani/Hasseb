@@ -11,15 +11,24 @@ import AccountPanel from "./components/Mangercopnents/AccountPanel.jsx";
 import { loadState, saveState } from "./information.js";
 
 export default function Manger() {
-  const [tab, setTab] = useState("users"); // Default tab
+  // Auth guard — only manager role can access
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+    if (!user || user.role !== "manager") {
+      window.location.href = "/";
+    }
+  }, []);
+
+  const [tab, setTab] = useState("users"); 
   const [state, setState] = useState(loadState);
   const [query, setQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Theme option stored in settings: 'light' | 'dark' | 'system'
-  const themeOption = state.settings && state.settings.themeOption ? state.settings.themeOption : "light";
+  const themeOption =
+    state.settings && state.settings.themeOption
+      ? state.settings.themeOption
+      : "light";
 
-  // Apply theme based on user setting 
   useEffect(() => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -41,17 +50,16 @@ export default function Manger() {
     }
   }, [themeOption]);
 
-  // Persist all app state changes
   useEffect(() => {
     saveState(state);
   }, [state]);
-
 
   const setSettings = (next) => {
     setState(function (s) {
       const newState = Object.assign({}, s);
       const currentSettings = s.settings ? Object.assign({}, s.settings) : {};
       const newSettings = Object.assign({}, currentSettings);
+
       for (var k in next) {
         if (Object.prototype.hasOwnProperty.call(next, k)) {
           newSettings[k] = next[k];
@@ -63,7 +71,6 @@ export default function Manger() {
     });
   };
 
-  // Filtered users
   const filteredUsers = useMemo(() => {
     const search = query.trim().toLowerCase();
     if (!search) return state.users;
@@ -85,13 +92,17 @@ export default function Manger() {
           setSidebarOpen(false);
         }}
         isOpen={sidebarOpen}
-        onClose={function () { setSidebarOpen(false); }}
+        onClose={function () {
+          setSidebarOpen(false);
+        }}
       />
 
       <div className="flex-grow-1 d-flex flex-column">
         <Header
           theme={document.body.dataset.theme || "light"}
-          onOpenMenu={function () { setSidebarOpen(true); }}
+          onOpenMenu={function () {
+            setSidebarOpen(true);
+          }}
         />
 
         <main className="container-fluid py-4">
@@ -160,7 +171,8 @@ export default function Manger() {
             <AccountPanel
               settings={{
                 sendNotifications:
-                  state.settings && typeof state.settings.sendNotifications !== "undefined"
+                  state.settings &&
+                  typeof state.settings.sendNotifications !== "undefined"
                     ? state.settings.sendNotifications
                     : true,
                 themeOption: themeOption,

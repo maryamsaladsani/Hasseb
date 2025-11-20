@@ -1,6 +1,38 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, Building2, Users, Eye, EyeOff, ArrowRight, CheckCircle2, Coffee } from 'lucide-react';
+import {
+    User,
+    Lock,
+    Mail,
+    Building2,
+    Users,
+    Eye,
+    EyeOff,
+    ArrowRight,
+    CheckCircle2,
+    Coffee
+} from 'lucide-react';
 import './Haseebauth.css';
+
+// -------------------------------------------------
+// Front-end-only "fake" users for testing
+// -------------------------------------------------
+const TEST_USERS = [
+    {
+        email: "mgr.haseeb@haseebcorp.com",
+        password: "Haseeb@2025",
+        role: "manager"
+    },
+    {
+        email: "adv.sara@haseebcorp.com",
+        password: "Haseeb@2025",
+        role: "advisor"
+    },
+    {
+        email: "owner.khalid@haseebco.app",
+        password: "Haseeb@2025",
+        role: "owner"
+    }
+];
 
 export default function HaseebAuth() {
     const [isLogin, setIsLogin] = useState(true);
@@ -60,10 +92,39 @@ export default function HaseebAuth() {
         }));
     };
 
+    // -------------------------------------------------
+    // Login / Signup submit handler
+    // -------------------------------------------------
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission
-        console.log('Form submitted:', formData);
+
+        if (isLogin) {
+            const foundUser = TEST_USERS.find(
+                (u) =>
+                    u.email === formData.email.trim().toLowerCase() &&
+                    u.password === formData.password
+            );
+
+            if (!foundUser) {
+                alert("Invalid email or password");
+                return;
+            }
+
+            // Save in browser storage
+            localStorage.setItem("loggedUser", JSON.stringify(foundUser));
+
+            // Route based on role
+            if (foundUser.role === "manager") {
+                window.location.href = "/manager";
+            } else if (foundUser.role === "advisor") {
+                window.location.href = "/advisor";
+            } else if (foundUser.role === "owner") {
+                window.location.href = "/owner";
+            }
+        } else {
+            // Signup mode is not wired to backend in this demo
+            alert("Signup is disabled in this demo. Use one of the test accounts.");
+        }
     };
 
     const toggleAuthMode = () => {

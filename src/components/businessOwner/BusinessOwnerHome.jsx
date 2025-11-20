@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./BusinessOwnerHome.css";
 
-import BusinessDataUpload from "./BusinessDataUpload";
+import BusinessDataUpload from "./BusinessDataUpload.jsx";
 import BreakEvenCalculator from "./BreakEvenCalculator";
 import PricingSimulator from "./PricingSimulator";
 import CashFlowTool from "./CashFlowTool";
-import AccountPanel from "../Mangercopnents/AccountPanel.jsx";
-import NotificationsPanel from "../Mangercopnents/NotificationsPanel.jsx";
 
-import { bepTestData } from "../../data/bepTestData";
+import { bepTestData } from "../../data/bepTestData"; // expects src/data/bepTestData.js
 
 export default function OwnerHome() {
+
+    // Auth guard — only owner role can access
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("loggedUser"));
+        if (!user || user.role !== "owner") {
+            window.location.href = "/";
+        }
+    }, []);
+
     const [activeTool, setActiveTool] = useState("data");
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [hasUploadedData, setHasUploadedData] = useState(false);
@@ -59,17 +66,60 @@ export default function OwnerHome() {
                 </svg>
             ),
             requiresData: true,
+            comingSoon: true
         },
+        {
+            id: "scenarios",
+            name: "Scenarios",
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            ),
+            requiresData: true,
+            comingSoon: true
+        },
+        {
+            id: "insights",
+            name: "Dashboards & Insights",
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
+            ),
+            requiresData: true,
+            comingSoon: true
+        },
+        {
+            id: "sliders",
+            name: "Real-Time Assumptions",
+            icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+            ),
+            requiresData: true,
+            comingSoon: true
+        }
     ];
 
     const handleToolClick = (toolId, requiresData) => {
         if (requiresData && !hasUploadedData) {
-            // Show warning but still allow navigation to see the tool
             setActiveTool(toolId);
         } else {
             setActiveTool(toolId);
         }
-        // Close sidebar on mobile after selection
+
         if (window.innerWidth < 1024) {
             setSidebarOpen(false);
         }
@@ -95,77 +145,47 @@ export default function OwnerHome() {
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
+                        <div className="owner-logo">
+                            <img
+                                src="/assets/HaseebLogo.png"
+                                alt="Haseeb Logo"
+                                className="logo-image"
+                            />
+                        </div>
                     </div>
-                    
+                    <div className="owner-header-right">
+                        <span className="owner-tagline">Every Decision Counts</span>
+                    </div>
                 </div>
             </header>
 
             {/* Sidebar */}
-    <aside
-        className={`sidebar-neo pm-slide ${sidebarOpen ? "is-open" : ""}`}
-        role="navigation"
-      >
-        <div className="offcanvas-header sidebar-neo__brand">
-          <div className="d-flex align-items-center gap-2">
-            <img
-              src="/assets/Haseeb.png"   
-      alt="Haseeb Logo"
-      className="sidebar-logo-img"
-            />
-          
-          </div>
-        </div>
-
-        <div className="offcanvas-body p-0 d-flex flex-column">
-          <nav className="py-3 px-3 flex-grow-1">
-            {tools.map((tool) => {
-              const active = activeTool === tool.id;
-              const disabled = !!tool.comingSoon;
-
-              return (
-                <button
-                  key={tool.id}
-                  disabled={disabled}
-                  onClick={() => handleToolClick(tool.id, tool.requiresData)}
-                  className={`sidebar-neo__item ${active ? "is-active" : ""} ${disabled ? "is-disabled" : ""}`}
-                >
-                  <span className="sidebar-neo__icon">{tool.icon}</span>
-                  <span className="sidebar-neo__label">{tool.name}</span>
-                  {tool.requiresData && !hasUploadedData && <span className="sidebar-neo__dot" />}
-                  {tool.comingSoon && <span className="sidebar-badge">Soon</span>}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Bottom dock (Account + Notifications) */}
-          <div className="sidebar-neo__dock">
-            <button
-              className="sidebar-neo__dock-btn"
-              title="Account"
-              aria-label="Account"
-              onClick={() => setActiveTool("AccountPanel")}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21a8 8 0 1 0-16 0" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </button>
-
-            <button
-              className="sidebar-neo__dock-btn"
-              title="Notifications"
-              aria-label="Notifications"
-              onClick={() => setActiveTool("notificationsPanel")}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" />
-                <path d="M13.73 21a2 2 0 01-3.46 0" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </aside>
+            <aside className={`owner-sidebar ${sidebarOpen ? 'owner-sidebar--open' : ''}`}>
+                <div className="sidebar-content">
+                    <nav className="sidebar-nav">
+                        {tools.map((tool) => (
+                            <button
+                                key={tool.id}
+                                className={`sidebar-nav-item ${activeTool === tool.id ? 'sidebar-nav-item--active' : ''} ${tool.comingSoon ? 'sidebar-nav-item--disabled' : ''}`}
+                                onClick={() => handleToolClick(tool.id, tool.requiresData)}
+                            >
+                                <span className="sidebar-nav-icon">{tool.icon}</span>
+                                <span className="sidebar-nav-label">{tool.name}</span>
+                                {tool.requiresData && !hasUploadedData && (
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sidebar-nav-warning">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                )}
+                                {tool.comingSoon && (
+                                    <span className="sidebar-badge">Soon</span>
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            </aside>
 
             {/* Overlay for mobile */}
             {sidebarOpen && (
@@ -215,18 +235,20 @@ export default function OwnerHome() {
                     {activeTool === "cashflow" && (
                         <CashFlowTool baseData={bepTestData} />
                     )}
-                   {activeTool === "accountPanel" && (
-            <AccountPanel  />
-          )}
 
-                    {activeTool === "notificationsPanel" && (
-                    <div className="owner-content">
-                        <h4>Notifications</h4>
-                        <NotificationsPanel />
-                    </div>
+                    {(activeTool === "scenarios" || activeTool === "insights" || activeTool === "sliders") && (
+                        <div className="coming-soon-card">
+                            <div className="coming-soon-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <h3>{activToolInfo?.name}</h3>
+                            <p>This feature is currently under development by your team.</p>
+                            <span className="coming-soon-badge">Coming Soon</span>
+                        </div>
                     )}
-
-
                 </div>
             </main>
         </div>

@@ -17,6 +17,15 @@ import AccountPanel from "./components/AdivosrComponents/AccountPanel.jsx";
 import { loadState, saveState } from "./information.js";
 
 export default function Advisor() {
+
+  // Auth guard — only advisor role can access
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+    if (!user || user.role !== "advisor") {
+      window.location.href = "/";
+    }
+  }, []);
+
   const [tab, setTab] = useState("dashboard");
   const [state, setState] = useState(loadState);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,9 +39,11 @@ export default function Advisor() {
   useEffect(() => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
 
-    if (themeOption === "light") document.body.dataset.theme = "light";
-    else if (themeOption === "dark") document.body.dataset.theme = "dark";
-    else {
+    if (themeOption === "light") {
+      document.body.dataset.theme = "light";
+    } else if (themeOption === "dark") {
+      document.body.dataset.theme = "dark";
+    } else {
       document.body.dataset.theme = systemTheme.matches ? "dark" : "light";
       const handleChange = (e) =>
         (document.body.dataset.theme = e.matches ? "dark" : "light");
@@ -64,8 +75,6 @@ export default function Advisor() {
         />
 
         <main className="container-fluid py-4">
-
-          {/* Main Panels */}
           {tab === "dashboard" && (
             <DashboardAdvisorPanel
               setTab={setTab}
@@ -77,7 +86,6 @@ export default function Advisor() {
           {tab === "feedback" && <FeedbackPanel />}
           {tab === "analyzer" && <AnalyzerPanel />}
 
-          {/* Simulation */}
           {tab === "simulation_details" && (
             <BreakEvenSimulationPanel
               client={selectedClient}
@@ -85,7 +93,6 @@ export default function Advisor() {
             />
           )}
 
-          {/* Risk Details */}
           {tab === "risk-details" && (
             <RiskDetailsPanel
               risk={selectedRisk}
@@ -93,7 +100,6 @@ export default function Advisor() {
             />
           )}
 
-          {/* Support Pages */}
           {tab === "support" && (
             <SupportPanel2
               setTab={setTab}
@@ -105,7 +111,6 @@ export default function Advisor() {
             <TicketDetailsPanel ticket={selectedTicket} setTab={setTab} />
           )}
 
-          {/* Account + Notifications */}
           {tab === "notifications" && <NotificationsPanel />}
 
           {tab === "account" && (
@@ -116,7 +121,6 @@ export default function Advisor() {
               }
             />
           )}
-
         </main>
       </div>
     </div>
