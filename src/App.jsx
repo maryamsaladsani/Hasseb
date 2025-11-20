@@ -24,9 +24,28 @@
 import React from "react";
 import Manger from "./Manger";
 import OwnerHome from "./components/businessOwner/BusinessOwnerHome";
+import HaseebHomePage from "./components/Home/HaseebHomePage";
+import Haseebauth from './components/Home/Haseebauth';
+
+//import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import './styles/global.css';
 
 export default function App() {
   //return <Manger />;
-  return <OwnerHome />;
+  //return <OwnerHome />;
+  //return <HaseebHomePage/>;
+     return <Haseebauth/>;
+
 }
+
+// export default function App() {
+//   return (
+//       <BrowserRouter>
+//         <Routes>
+//           <Route path="/" element={<HaseebHomePage />} />
+//           <Route path="/auth" element={<Haseebauth />} />
+//         </Routes>
+//       </BrowserRouter>
+//   );
+// }

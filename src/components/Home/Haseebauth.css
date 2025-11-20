@@ -1,0 +1,628 @@
+/* ================================
+   HASEEB Authentication Styles
+   ================================ */
+
+@import url('../../styles/global.css');
+
+/* ================================
+   Container & Layout
+   ================================ */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #E6F9F9 0%, #F0F9F9 50%, #E6F9F9 100%);
+}
+
+/* ================================
+   Animated Background
+   ================================ */
+.auth-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: float 20s infinite ease-in-out;
+}
+
+.orb-1 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #14748A 100%);
+    top: -200px;
+    left: -200px;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, var(--color-success) 0%, var(--color-primary) 100%);
+    bottom: -250px;
+    right: -250px;
+    animation-delay: 7s;
+}
+
+.orb-3 {
+    width: 350px;
+    height: 350px;
+    background: linear-gradient(135deg, #14748A 0%, var(--color-primary) 100%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 14s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    33% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+/* ================================
+   Main Content Grid
+   ================================ */
+.auth-content {
+    width: 100%;
+    max-width: 1400px;
+    margin: 2rem auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+    padding: 0 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .auth-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+}
+
+/* ================================
+   Branding Section (Left)
+   ================================ */
+.auth-branding {
+    display: none;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #14748A 100%);
+    border-radius: 24px;
+    padding: 3rem;
+    color: white;
+    box-shadow: 0 20px 60px rgba(26, 198, 198, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-branding::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.4;
+}
+
+@media (min-width: 1024px) {
+    .auth-branding {
+        display: block;
+    }
+}
+
+.branding-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.logo-section {
+    text-align: center;
+}
+
+.auth-logo {
+    width: 400px;
+    height: 400px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    filter: brightness(0) invert(1);
+}
+
+.brand-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.brand-name {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.brand-tagline {
+    font-size: 1.125rem;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* ================================
+   Form Container (Right)
+   ================================ */
+.auth-form-container {
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(26, 198, 198, 0.1);
+}
+
+.auth-form-wrapper {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ================================
+   Header
+   ================================ */
+.auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ================================
+   Role Selection
+   ================================ */
+.role-selection {
+    margin-bottom: 2rem;
+}
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.role-card {
+    position: relative;
+    background: white;
+    border: 2px solid var(--color-gray-200);
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.role-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(26, 198, 198, 0.15);
+    transform: translateY(-2px);
+}
+
+.role-card.selected {
+    border-width: 2px;
+    box-shadow: 0 4px 20px rgba(26, 198, 198, 0.2);
+}
+
+.role-card.color-primary.selected {
+    border-color: var(--color-primary);
+    background: linear-gradient(to bottom, white, rgba(26, 198, 198, 0.03));
+}
+
+.role-card.color-success.selected {
+    border-color: var(--color-success);
+    background: linear-gradient(to bottom, white, rgba(16, 185, 129, 0.03));
+}
+
+.role-card.color-dark.selected {
+    border-color: #14748A;
+    background: linear-gradient(to bottom, white, rgba(20, 116, 138, 0.03));
+}
+
+.role-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.color-primary .role-icon-wrapper {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #14748A 100%);
+}
+
+.color-success .role-icon-wrapper {
+    background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+}
+
+.color-dark .role-icon-wrapper {
+    background: linear-gradient(135deg, #14748A 0%, #082830 100%);
+}
+
+.role-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.role-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.role-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.role-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.role-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.role-feature .feature-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--color-success);
+    flex-shrink: 0;
+}
+
+/* ================================
+   Form Elements
+   ================================ */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    width: 20px;
+    height: 20px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid var(--color-gray-200);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(26, 198, 198, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: var(--color-primary);
+}
+
+/* ================================
+   Form Options
+   ================================ */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.forgot-link {
+    font-size: 0.875rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* ================================
+   Submit Button
+   ================================ */
+.btn-submit {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #14748A 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.3);
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 198, 198, 0.4);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.btn-submit:hover .btn-icon {
+    transform: translateX(4px);
+}
+
+/* ================================
+   Auth Toggle
+   ================================ */
+.auth-toggle {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.auth-toggle p {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.toggle-link {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.25rem;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.toggle-link:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* ================================
+   Terms & Privacy
+   ================================ */
+.auth-terms {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 1.5rem;
+    line-height: 1.6;
+}
+
+.auth-terms a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-terms a:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   Responsive Design
+   ================================ */
+@media (max-width: 1023px) {
+    .auth-form-container {
+        padding: 2rem;
+    }
+
+    .auth-logo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .brand-name {
+        font-size: 2rem;
+    }
+
+    .auth-title {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 767px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-form-container {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-subtitle {
+        font-size: 0.9375rem;
+    }
+
+    .roles-grid {
+        gap: 0.75rem;
+    }
+
+    .role-card {
+        padding: 1rem;
+    }
+
+    .role-icon-wrapper {
+        width: 40px;
+        height: 40px;
+    }
+
+    .role-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+}
+
+/* ================================
+   Accessibility
+   ================================ */
+.form-input:focus-visible,
+.btn-submit:focus-visible,
+.toggle-link:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .role-card {
+        border-width: 3px;
+    }
+
+    .form-input {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .gradient-orb,
+    .feature-item,
+    .role-card,
+    .btn-submit,
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
