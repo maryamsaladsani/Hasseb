@@ -24,7 +24,7 @@
 import React from "react";
 import Manger from "./Manger";
 import OwnerHome from "./components/businessOwner/BusinessOwnerHome";
-
+import './styles/global.css';
 
 export default function App() {
   //return <Manger />;
