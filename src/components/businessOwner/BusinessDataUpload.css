@@ -1,0 +1,403 @@
+
+/* ========================= */
+/*      MAIN CONTAINER       */
+/* ========================= */
+.owner-main {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* ========================= */
+/*       HEADER TEXT         */
+/* ========================= */
+.upload-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    width: 100%;
+    padding-top: 1rem; /* Add extra space at top */
+}
+
+.upload-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #082830;
+    margin-bottom: 1rem;
+    letter-spacing: -0.5px;
+}
+
+.upload-header p {
+    font-size: 1.1rem;
+    color: #14748A;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ========================= */
+/*        CARD STYLE         */
+/* ========================= */
+.upload-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 700px;
+}
+
+.upload-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(8, 40, 48, 0.15);
+}
+
+.card-content-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.upload-card h2 {
+    color: #082830;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.upload-card p {
+    font-size: 0.95rem;
+    color: #14748A;
+    line-height: 1.5;
+    margin-bottom: 1.75rem;
+}
+
+/* ========================= */
+/*       ICON WRAPPER        */
+/* ========================= */
+.icon-wrapper {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.download-icon {
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.3);
+}
+
+.card-icon {
+    width: 36px;
+    height: 36px;
+    color: #ffffff;
+}
+
+/* ========================= */
+/*     DOWNLOAD BUTTON       */
+/* ========================= */
+.download-btn {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(90deg, #1AC6C6 0%, #19b3b3 100%);
+    border-radius: 999px;
+    border: none;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.25);
+}
+
+.download-btn:hover {
+    background: #14748A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(20, 116, 138, 0.3);
+}
+
+/* ========================= */
+/*    UPLOAD CARD HEADER     */
+/* ========================= */
+.upload-card-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.upload-card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #082830;
+    margin-bottom: 0.5rem;
+}
+
+.upload-subtitle {
+    font-size: 0.9rem !important;
+    color: #14748A !important;
+    margin-bottom: 0 !important;
+}
+
+/* ========================= */
+/*       UPLOAD SECTION      */
+/* ========================= */
+.hidden-file-input {
+    display: none;
+}
+
+.file-drop-zone {
+    border: 2px dashed #14748A;
+    background: #f6fbfb;
+    padding: 3rem 2rem;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.file-drop-zone.is-dragging {
+    border-color: #1AC6C6;
+    background: rgba(26, 198, 198, 0.05);
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.drop-zone-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #082830;
+    margin-bottom: 0.5rem;
+}
+
+.drop-zone-subtitle {
+    font-size: 0.9rem;
+    color: #14748A;
+    margin-bottom: 1.5rem;
+}
+
+.upload-hint {
+    font-size: 0.8rem;
+    color: #0ACF83;
+    margin-top: 1.5rem;
+}
+
+/* ========================= */
+/*      CLOUD UPLOAD ICON    */
+/* ========================= */
+.cloud-icon-wrap {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: #D2E5E5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #14748A;
+}
+
+.cloud-icon-wrap:hover {
+    background: #1AC6C6;
+    transform: scale(1.1);
+    color: #ffffff;
+}
+
+.cloud-icon-wrap.uploading {
+    background: #1AC6C6;
+    color: #ffffff;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ========================= */
+/*      BROWSE BUTTON        */
+/* ========================= */
+.browse-btn {
+    padding: 0.75rem 1.75rem;
+    border: 2px solid #14748A;
+    background: transparent;
+    color: #14748A;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.browse-btn:hover {
+    background: #14748A;
+    color: #ffffff;
+}
+
+/* ========================= */
+/*      UPLOADED FILE        */
+/* ========================= */
+.uploaded-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(210, 229, 229, 0.3);
+    border-radius: 12px;
+    padding: 1.25rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.success-icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: #0ACF83;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-icon {
+    width: 28px;
+    height: 28px;
+    color: #ffffff;
+}
+
+.file-details {
+    text-align: left;
+}
+
+.file-name {
+    font-weight: 600;
+    color: #082830;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #14748A;
+}
+
+/* ========================= */
+/*      REMOVE BUTTON        */
+/* ========================= */
+.remove-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 87, 87, 0.1);
+    border: none;
+    color: #FF5757;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background: #FF5757;
+    color: #ffffff;
+}
+
+.remove-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* ========================= */
+/*     PROCESS BUTTON        */
+/* ========================= */
+.process-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.process-btn {
+    padding: 0.875rem 2.5rem;
+    background: linear-gradient(90deg, #0ACF83 0%, #09b574 100%);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(10, 207, 131, 0.25);
+    transition: all 0.2s ease;
+}
+
+.process-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(10, 207, 131, 0.35);
+}
+
+/* ========================= */
+/*      RESPONSIVE DESIGN    */
+/* ========================= */
+@media (max-width: 768px) {
+    .upload-header h1 {
+        font-size: 2rem;
+    }
+
+    .upload-header p {
+        font-size: 1rem;
+    }
+
+    .upload-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .cloud-icon-wrap {
+        width: 80px;
+        height: 80px;
+    }
+
+    .file-drop-zone {
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .upload-card h2 {
+        font-size: 1.25rem;
+    }
+}

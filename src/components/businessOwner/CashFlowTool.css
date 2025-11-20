@@ -1,0 +1,504 @@
+/* ========================= */
+/*     CASH FLOW TOOL        */
+/* ========================= */
+.cashflow-card {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+/* ========================= */
+/*          HEADER           */
+/* ========================= */
+.cashflow-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.cashflow-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.cashflow-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #082830;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.cashflow-empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #14748A;
+    font-size: 1rem;
+}
+
+.cashflow-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #082830;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ========================= */
+/*   TOP SECTION (HORIZONTAL)*/
+/* ========================= */
+.cashflow-top-section {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ========================= */
+/*      DANGER ZONE SECTION  */
+/* ========================= */
+.danger-zone-section {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1.5px solid rgba(255, 87, 87, 0.2);
+}
+
+.danger-zone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.danger-zone-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FF5757;
+}
+
+.danger-zone-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(to right, #0ACF83 0%, #FFB84D 50%, #FF5757 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FF5757;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 87, 87, 0.4);
+    transition: all 0.2s ease;
+}
+
+.danger-zone-slider::-webkit-slider-thumb:hover {
+    background: #e04545;
+    transform: scale(1.15);
+}
+
+.danger-zone-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FF5757;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(255, 87, 87, 0.4);
+    transition: all 0.2s ease;
+}
+
+.danger-zone-slider::-moz-range-thumb:hover {
+    background: #e04545;
+    transform: scale(1.15);
+}
+
+.danger-zone-hint {
+    font-size: 0.8rem;
+    color: #14748A;
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+}
+
+/* ========================= */
+/*      WARNING BANNER       */
+/* ========================= */
+.warning-banner-cashflow {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #FFE8E8 0%, #FFCCCC 100%);
+    border: 2px solid #FF5757;
+    border-radius: 16px;
+}
+
+.warning-banner-cashflow svg {
+    color: #FF5757;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.warning-title-cashflow {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #082830;
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.warning-text-cashflow {
+    font-size: 0.9rem;
+    color: #14748A;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ========================= */
+/*      SUMMARY CARDS        */
+/* ========================= */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #f6fbfb 0%, #ffffff 100%);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #14748A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #082830;
+}
+
+.danger-value {
+    color: #FF5757 !important;
+}
+
+.safe-value {
+    color: #0ACF83 !important;
+}
+
+/* ========================= */
+/*   MAIN CONTENT HORIZONTAL */
+/* ========================= */
+.cashflow-main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* ========================= */
+/*      CHART SECTION        */
+/* ========================= */
+.chart-section {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    min-height: 500px;
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #082830;
+    margin: 0 0 1.5rem;
+}
+
+/* ========================= */
+/*      TABLE SECTION        */
+/* ========================= */
+.table-section {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+}
+
+.table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #082830;
+    margin: 0 0 1rem;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 450px;
+    border-radius: 12px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+}
+
+.cashflow-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.cashflow-table thead {
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.cashflow-table th {
+    padding: 0.875rem 0.625rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.cashflow-table td {
+    padding: 0.75rem 0.625rem;
+    border-bottom: 1px solid rgba(20, 116, 138, 0.1);
+    font-size: 0.8rem;
+}
+
+.cashflow-table tbody tr:hover {
+    background: #f6fbfb;
+}
+
+.row-danger {
+    background: rgba(255, 87, 87, 0.1) !important;
+}
+
+.row-warning {
+    background: rgba(255, 184, 77, 0.1) !important;
+}
+
+.cash-in {
+    color: #0ACF83;
+    font-weight: 600;
+}
+
+.cash-out {
+    color: #FF5757;
+    font-weight: 600;
+}
+
+.positive {
+    color: #0ACF83;
+    font-weight: 600;
+}
+
+.negative {
+    color: #FF5757;
+    font-weight: 600;
+}
+
+/* ========================= */
+/*      STATUS BADGES        */
+/* ========================= */
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.status-badge.safe {
+    background: rgba(10, 207, 131, 0.1);
+    color: #0ACF83;
+}
+
+.status-badge.warning {
+    background: rgba(255, 184, 77, 0.1);
+    color: #FFB84D;
+}
+
+.status-badge.danger {
+    background: rgba(255, 87, 87, 0.1);
+    color: #FF5757;
+}
+
+/* ========================= */
+/*         TOOLTIPS          */
+/* ========================= */
+.tooltip-wrapper {
+    position: relative;
+}
+
+.info-icon {
+    margin-left: 0.25rem;
+    vertical-align: middle;
+    color: #14748A;
+    cursor: help;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.info-icon:hover {
+    color: #1AC6C6;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #082830;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    width: 280px;
+    text-align: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-shadow: 0 4px 12px rgba(8, 40, 48, 0.3);
+}
+
+.tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #082830 transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Specific positioning for cards */
+.summary-card.tooltip-wrapper .tooltip-text {
+    bottom: auto;
+    top: 125%;
+}
+
+.summary-card.tooltip-wrapper .tooltip-text::after {
+    top: auto;
+    bottom: 100%;
+    border-color: transparent transparent #082830 transparent;
+}
+
+/* Danger zone section tooltip */
+.danger-zone-section.tooltip-wrapper .tooltip-text {
+    width: 320px;
+}
+
+/* Warning banner tooltip */
+.warning-banner-cashflow.tooltip-wrapper .tooltip-text {
+    width: 320px;
+    left: 20%;
+}
+
+/* ========================= */
+/*      RESPONSIVE DESIGN    */
+/* ========================= */
+@media (max-width: 1400px) {
+    .cashflow-main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-section {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cashflow-top-section {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .cashflow-card {
+        padding: 1rem;
+    }
+
+    .cashflow-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .cashflow-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .table-wrapper {
+        overflow-x: scroll;
+    }
+
+    .tooltip-text {
+        width: 240px;
+        font-size: 0.8rem;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .warning-banner-cashflow.tooltip-wrapper .tooltip-text,
+    .danger-zone-section.tooltip-wrapper .tooltip-text {
+        width: 260px;
+    }
+}

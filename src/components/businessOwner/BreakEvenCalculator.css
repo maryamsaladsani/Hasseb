@@ -1,0 +1,500 @@
+/* ========================= */
+/*          PAGE LAYOUT      */
+/* ========================= */
+.bep-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* ========================= */
+/*     CALCULATOR CARD       */
+/* ========================= */
+.bep-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    width: 100%;
+    max-width: 600px;
+    transition: all 0.3s ease;
+}
+
+/* ========================= */
+/*          HEADER           */
+/* ========================= */
+.bep-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.bep-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.bep-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #082830;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+/* ========================= */
+/*        FORM FIELDS        */
+/* ========================= */
+.bep-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.bep-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.bep-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #082830;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bep-label-icon {
+    font-size: 1.1rem;
+}
+
+.bep-input,
+.bep-select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(20, 116, 138, 0.2);
+    background: #ffffff;
+    font-size: 1rem;
+    color: #082830;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.bep-input:focus,
+.bep-select:focus {
+    outline: none;
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.1);
+}
+
+.bep-input:disabled {
+    background: #f6fbfb;
+    border-style: dashed;
+    color: #7b8b91;
+    cursor: not-allowed;
+}
+
+.bep-select {
+    cursor: pointer;
+}
+
+/* ========================= */
+/*        MODE TOGGLE        */
+/* ========================= */
+.bep-toggle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem 0 0.75rem;
+}
+
+.bep-toggle {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #f6fbfb;
+    padding: 0.25rem;
+    border: 1px solid rgba(20, 116, 138, 0.15);
+}
+
+.bep-toggle-btn {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: #14748A;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.bep-toggle-btn--active {
+    background: linear-gradient(90deg, #1AC6C6 0%, #19b3b3 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(26, 198, 198, 0.3);
+}
+
+/* ========================= */
+/*       HELPER TEXT         */
+/* ========================= */
+.bep-helper-text {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #14748A;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.bep-empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #14748A;
+    font-size: 0.95rem;
+}
+
+/* ========================= */
+/*      CALCULATE BUTTON     */
+/* ========================= */
+.bep-submit-btn {
+    margin-top: 0.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(90deg, #1AC6C6 0%, #19b3b3 100%);
+    border-radius: 999px;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.25);
+}
+
+.bep-submit-btn:hover {
+    background: #14748A;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(20, 116, 138, 0.3);
+}
+
+/* ========================= */
+/*         RESULTS           */
+/* ========================= */
+.bep-result {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f6fbfb 0%, #ffffff 100%);
+    border: 1.5px solid rgba(26, 198, 198, 0.2);
+}
+
+.bep-error {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #FF5757;
+    font-size: 0.95rem;
+}
+
+.bep-error svg {
+    flex-shrink: 0;
+}
+
+.bep-error p {
+    margin: 0;
+}
+
+.bep-result-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.bep-result-header svg {
+    flex-shrink: 0;
+    color: #0ACF83;
+    margin-top: 0.125rem;
+}
+
+.bep-result-main {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #082830;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.bep-highlight {
+    color: #1AC6C6;
+    font-weight: 700;
+}
+
+.bep-result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.bep-result-item {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.bep-result-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #14748A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bep-result-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #082830;
+}
+
+/* ========================= */
+/*      RESPONSIVE DESIGN    */
+/* ========================= */
+@media (max-width: 640px) {
+    .bep-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .bep-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .bep-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .bep-toggle-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .bep-result-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/*!* ========================= *!*/
+/*!*     BEP CALCULATOR CARD   *!*/
+/*!* ========================= *!*/
+/*.bep-card {*/
+/*    background: #ffffff;*/
+/*    padding: 1.6rem 1.8rem 1.9rem;*/
+/*    border-radius: 18px;*/
+/*    border: 1px solid rgba(8, 40, 48, 0.05); !* same as upload-card *!*/
+/*    box-shadow: 0 12px 30px rgba(8, 40, 48, 0.08);*/
+/*    width: 80%;*/
+/*    max-width: 700px;*/
+/*    margin: 0 auto 1.5rem;*/
+/*}*/
+
+/*!* Title *!*/
+/*.bep-title {*/
+/*    font-size: 1.6rem;*/
+/*    font-weight: 600;*/
+/*    color: #082830; !* dark navy *!*/
+/*    text-align: center;*/
+/*    margin: 0 0 1.2rem;*/
+/*    letter-spacing: -0.4px;*/
+/*}*/
+
+/*!* ========================= *!*/
+/*!*        MODE TOGGLE        *!*/
+/*!* ========================= *!*/
+
+/*.bep-toggle-wrapper {*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    margin-bottom: 0.8rem;*/
+/*}*/
+
+/*.bep-toggle {*/
+/*    display: flex;*/
+/*    border-radius: 999px;*/
+/*    border: 1.5px solid #082830;*/
+/*    background: #ffffff;*/
+/*    overflow: hidden;*/
+/*    min-width: 230px;*/
+/*}*/
+
+/*.bep-toggle-btn {*/
+/*    flex: 1;*/
+/*    padding: 0.5rem 0.9rem;*/
+/*    font-size: 0.9rem;*/
+/*    font-weight: 500;*/
+/*    border: none;*/
+/*    background: transparent;*/
+/*    color: #082830;*/
+/*    cursor: pointer;*/
+/*    transition: all 0.2s ease;*/
+/*}*/
+
+/*.bep-toggle-btn--active {*/
+/*    background: linear-gradient(95deg, #1AC6C6, #19b3b3); !* same cyan gradient *!*/
+/*    color: #ffffff;*/
+/*}*/
+
+/*!* Small helper text under toggle *!*/
+/*.bep-helper-text {*/
+/*    text-align: center;*/
+/*    font-size: 0.8rem;*/
+/*    color: #14748A;*/
+/*    margin-bottom: 1rem;*/
+/*}*/
+
+/*!* ========================= *!*/
+/*!*         FORM FIELDS       *!*/
+/*!* ========================= *!*/
+
+/*.bep-form {*/
+/*    margin-top: 0.4rem;*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 1.1rem;*/
+/*    text-align: left;*/
+/*}*/
+
+/*.bep-field {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 0.25rem;*/
+/*}*/
+
+/*.bep-label {*/
+/*    font-size: 0.95rem;*/
+/*    font-weight: 500;*/
+/*    color: #082830;*/
+/*}*/
+
+/*.bep-input {*/
+/*    border: none;*/
+/*    border-bottom: 1px solid #d0dde1;*/
+/*    padding: 0.4rem 0;*/
+/*    font-size: 0.95rem;*/
+/*    font-family: "Ubuntu", sans-serif;*/
+/*    background: transparent;*/
+/*    outline: none;*/
+/*    color: #082830;*/
+/*}*/
+
+/*.bep-input:focus {*/
+/*    border-color: #1AC6C6;*/
+/*}*/
+
+/*!* Disabled (read-only) look *!*/
+/*.bep-input:disabled {*/
+/*    background: transparent;*/
+/*    border-bottom-style: dashed;*/
+/*    color: #7b8b91;*/
+/*}*/
+
+/*!* ========================= *!*/
+/*!*      PRODUCT OPTIONS      *!*/
+/*!* ========================= *!*/
+/*.bep-products {*/
+/*    margin-bottom: 1rem;*/
+/*    text-align: left;*/
+/*}*/
+
+/*.bep-select {*/
+/*    width: 100%;*/
+/*    padding: 0.65rem 0.8rem;*/
+/*    border-radius: 10px;*/
+/*    border: 1px solid rgba(8, 40, 48, 0.15);*/
+/*    background: #ffffff;*/
+/*    font-size: 0.95rem;*/
+/*    color: #082830;*/
+/*    font-family: "Ubuntu", sans-serif;*/
+/*    margin-top: 0.4rem;*/
+/*    transition: 0.2s ease;*/
+/*}*/
+
+/*.bep-select:focus {*/
+/*    outline: none;*/
+/*    border-color: #1AC6C6;*/
+/*    box-shadow: 0 0 0 2px rgba(26, 198, 198, 0.2);*/
+/*}*/
+
+/*!* ========================= *!*/
+/*!*       CALCULATE BUTTON    *!*/
+/*!* ========================= *!*/
+/*.bep-submit-btn {*/
+/*    margin-top: 1.2rem;*/
+/*    align-self: center;*/
+/*    padding: 0.75rem 2.2rem;*/
+/*    background: linear-gradient(95deg, #1AC6C6, #19b3b3);*/
+/*    border-radius: 999px;*/
+/*    border: none;*/
+/*    color: #ffffff;*/
+/*    font-size: 0.98rem;*/
+/*    font-weight: 600;*/
+/*    cursor: pointer;*/
+/*    transition: all 0.2s ease;*/
+/*}*/
+
+/*.bep-submit-btn:hover {*/
+/*    background: #14748A; !* dark teal *!*/
+/*    transform: translateY(-2px);*/
+/*}*/
+
+/*!* ========================= *!*/
+/*!*         RESULT BOX        *!*/
+/*!* ========================= *!*/
+
+/*.bep-result {*/
+/*    margin-top: 1.4rem;*/
+/*    padding: 1rem 1.1rem;*/
+/*    border-radius: 14px;*/
+/*    background: #f6fbfb;*/
+/*    border: 1px solid rgba(20, 116, 138, 0.18);*/
+/*    text-align: left;*/
+/*}*/
+
+/*.bep-error {*/
+/*    color: #c0392b;*/
+/*    font-size: 0.9rem;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.bep-result-main {*/
+/*    font-size: 1rem;*/
+/*    font-weight: 600;*/
+/*    color: #082830;*/
+/*    margin: 0 0 0.3rem;*/
+/*}*/
+
+/*.bep-result-sub {*/
+/*    font-size: 0.9rem;*/
+/*    color: #14748A;*/
+/*    margin: 0.1rem 0;*/
+/*}*/
+
