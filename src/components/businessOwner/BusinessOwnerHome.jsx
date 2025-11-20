@@ -4,6 +4,9 @@ import "./BusinessOwnerHome.css";
 import BusinessDataUpload from "./BusinessDataUpload";
 import BreakEvenCalculator from "./BreakEvenCalculator";
 import PricingSimulator from "./PricingSimulator";
+import CashFlowTool from "./CashFlowTool";
+
+
 
 import { bepTestData } from "../../data/bepTestData";
 
@@ -221,19 +224,8 @@ export default function OwnerHome() {
                     {activeTool === "pricing" && (
                         <PricingSimulator baseData={bepTestData} />
                     )}
-
                     {activeTool === "cashflow" && (
-                        <div className="coming-soon-card">
-                            <div className="coming-soon-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </div>
-                            <h3>Cash Flow Tool</h3>
-                            <p>Visualize your monthly cash inflows and outflows to identify potential financial shortfalls.</p>
-                            <span className="coming-soon-badge">Coming Soon</span>
-                        </div>
+                        <CashFlowTool baseData={bepTestData} />
                     )}
 
                     {(activeTool === "scenarios" || activeTool === "insights" || activeTool === "sliders") && (
