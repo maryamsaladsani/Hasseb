@@ -9,6 +9,17 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     position: relative;
 }
+.owner-logo {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.logo-image {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+}
 
 /* ========================= */
 /*          HEADER           */

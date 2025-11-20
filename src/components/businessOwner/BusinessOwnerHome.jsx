@@ -132,17 +132,19 @@ export default function OwnerHome() {
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             aria-label="Toggle sidebar"
                         >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 strokeWidth="2">
                                 <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
                         <div className="owner-logo">
-                            <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
-                                <path d="M20 80 L40 40 L50 60 L70 20 L90 50" stroke="#1AC6C6" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                            </svg>
-                            <span className="owner-logo-text">HASEEB</span>
+                            <img
+                                src="/assets/HaseebLogo.png"
+                                alt="Haseeb Logo"
+                                className="logo-image"
+                            />
                         </div>
                     </div>
                     <div className="owner-header-right">
