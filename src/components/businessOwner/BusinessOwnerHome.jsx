@@ -8,7 +8,7 @@ import CashFlowTool from "./CashFlowTool";
 
 
 
-import { bepTestData } from "../../data/bepTestData";
+import { bepTestData } from "../../public/data/bepTestData";
 
 export default function OwnerHome() {
     const [activeTool, setActiveTool] = useState("data");

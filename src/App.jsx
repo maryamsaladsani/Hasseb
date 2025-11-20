@@ -27,8 +27,10 @@ import Advisor from "./Advisor.jsx";
 import BusinessOwnerHome from "./components/businessOwner/BusinessOwnerHome.jsx"
 
 export default function App() {
+  
   const [mode, setMode] = useState("manager"); // manager | advisor
   return <BusinessOwnerHome/>;
+
   // return (
   //   <div>
   //     {/* Switch Buttons */}
