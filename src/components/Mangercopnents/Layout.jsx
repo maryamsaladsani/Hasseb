@@ -46,12 +46,13 @@ export function Sidebar({ tab, setTab, isOpen, onClose }) {
       >
         <div className="offcanvas-header sidebar-neo__brand">
           <div className="d-flex align-items-center gap-2">
+              <img
+      src="/assets/Haseeb.png"   
+      alt="Haseeb Logo"
+      className="sidebar-logo-img"
+    />
             <div className="sidebar-neo__logo">
               <FiTrendingUp size={20} color="#fff" />
-            </div>
-            <div className="sidebar-neo__brandtext">
-              <h5 className="mb-0 fw-bold text-dark">HASEEB</h5>
-              <small className="sidebar-neo__tagline">Every Decision Counts</small>
             </div>
           </div>
         </div>

@@ -28,28 +28,28 @@ import BusinessOwnerHome from "./components/businessOwner/BusinessOwnerHome.jsx"
 
 export default function App() {
   const [mode, setMode] = useState("manager"); // manager | advisor
-  return <BusinessOwnerHome/>;
-  // return (
-  //   <div>
-  //     {/* Switch Buttons */}
-  //     <div className="d-flex gap-2 p-3">
-  //       <button
-  //         className={`btn ${mode === "manager" ? "btn-dark" : "btn-outline-dark"}`}
-  //         onClick={() => setMode("manager")}
-  //       >
-  //         Manager
-  //       </button>
-  //
-  //       <button
-  //         className={`btn ${mode === "advisor" ? "btn-dark" : "btn-outline-dark"}`}
-  //         onClick={() => setMode("advisor")}
-  //       >
-  //         Advisor
-  //       </button>
-  //     </div>
-  //
-  //     {/* Render selected */}
-  //     {mode === "manager" ? <Manager /> : <Advisor />}
-  //   </div>
-  // );
+ //return <BusinessOwnerHome/>;
+  return (
+    <div>
+      {/* Switch Buttons */}
+      <div className="d-flex gap-2 p-3">
+        <button
+          className={`btn ${mode === "manager" ? "btn-dark" : "btn-outline-dark"}`}
+          onClick={() => setMode("manager")}
+        >
+          Manager
+        </button>
+  
+        <button
+          className={`btn ${mode === "advisor" ? "btn-dark" : "btn-outline-dark"}`}
+          onClick={() => setMode("advisor")}
+        >
+          Advisor
+        </button>
+      </div>
+  
+      {/* Render selected */}
+      {mode === "manager" ? <Manager /> : <Advisor />}
+    </div>
+  );
 }

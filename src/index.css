@@ -22,7 +22,7 @@ body, .navbar, .card, .card-neo, .acct__section, .notif__wrap,
   display: flex; flex-direction: column; border-right: none;
 }
 .sidebar-neo__brand {
-  background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.1));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(249, 243, 243, 0.1));
   border-bottom: 1px solid rgba(255,255,255,.25);
   padding: 14px 18px;
 }
@@ -475,4 +475,87 @@ body[data-theme="dark"] .toolbar .form-select {
   background-color: #0f172a !important;
   border-color: #1e293b !important;
   color: #ffffff !important;
+}
+/* === Sidebar White Default / Teal Active (Opposite version) === */
+.sidebar-neo,
+.owner-sidebar {
+  background: #ffffff !important;
+  color: #0b1220 !important;
+  border-right: 1px solid #e5e7eb;
+}
+
+/* Header / logo area */
+.sidebar-neo__brand,
+.owner-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+.sidebar-neo__logo,
+.owner-logo img {
+  filter: none !important;
+}
+.sidebar-neo__tagline {
+  color: #6b7280 !important;
+}
+
+/* Sidebar items default white / dark text */
+.sidebar-neo__item,
+.owner-sidebar button {
+  background: #ffffff !important;
+  color: #0b1220 !important;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+/* Hover: subtle gray */
+.sidebar-neo__item:hover,
+.owner-sidebar button:hover {
+  background: #f3f4f6 !important;
+  color: #0f766e !important;
+}
+
+/* Active: teal gradient */
+.sidebar-neo__item.is-active,
+.owner-sidebar button.active,
+.owner-sidebar button:focus {
+  background: linear-gradient(135deg, #3dd6c4 0%, #26a69a 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(38, 166, 154, 0.25);
+}
+
+/* Active icons white */
+.sidebar-neo__item.is-active .sidebar-neo__icon svg,
+.owner-sidebar button.active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Dock area */
+.sidebar-neo__dock,
+.owner-sidebar .sidebar-dock {
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+}
+.sidebar-neo__dock-btn,
+.owner-sidebar .sidebar-dock button {
+  background: #f9fafb !important;
+  color: #475569 !important;
+}
+.sidebar-neo__dock-btn:hover,
+.owner-sidebar .sidebar-dock button:hover {
+  background: #e0f2f1 !important;
+  color: #0b1220 !important;
+}
+.sidebar-logo-img {
+  width: 120px;       /* increased from 40px */
+  height: 120px;
+  object-fit: contain;
+  margin-right: 8px;
+  image-rendering: crisp-edges;
+  filter: none;
+}
+
+.sidebar-neo__brand .d-flex {
+  align-items: center;
+  gap: 10px;   /* space between logo and text */
 }
