@@ -1,0 +1,210 @@
+/* ================================
+   DASHBOARD CONTAINER
+================================ */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: "Inter", sans-serif;
+    color: #082830;
+}
+
+/* ================================
+   HEADER
+================================ */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #082830;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    font-size: 1rem;
+    color: #14748A;
+}
+
+/* ================================
+   HEALTH SCORE CARD
+================================ */
+.health-score-card {
+    background: linear-gradient(135deg, #f6fbfb 0%, #ffffff 100%);
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.06);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.health-score-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1AC6C6;
+    margin: 0.5rem 0;
+}
+
+.health-score-desc {
+    color: #14748A;
+    font-size: 0.9rem;
+}
+
+/* ================================
+   SECTION CARDS
+================================ */
+.section-card {
+    background: #ffffff;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 4px 16px rgba(8, 40, 48, 0.08);
+}
+
+.section-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #082830;
+}
+
+/* ================================
+   INSIGHT BOXES (3 per row)
+================================ */
+.insight-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.insight-box {
+    background: linear-gradient(135deg, #f6fbfb 0%, #ffffff 100%);
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(8, 40, 48, 0.06);
+    text-align: center;
+}
+
+.insight-box h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #14748A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.insight-number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #082830;
+    margin-top: 0.25rem;
+}
+
+/* ================================
+   BREAK-EVEN & PRICING ITEMS
+================================ */
+.bep-item,
+.pricing-item {
+    background: #f6fbfb;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+}
+
+.bep-warning {
+    background: rgba(255, 87, 87, 0.1);
+    border-color: #FF5757;
+}
+
+/* ================================
+   RECOMMENDATIONS LIST
+================================ */
+.recs-list {
+    padding-left: 1rem;
+}
+
+.recs-list li {
+    margin-bottom: 0.5rem;
+    color: #082830;
+}
+
+/* ================================
+   ACTION BUTTONS
+================================ */
+.dashboard-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+
+.export-btn,
+.share-btn {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* EXPORT BUTTON */
+.export-btn {
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(20, 116, 138, 0.25);
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(20, 116, 138, 0.35);
+}
+
+/* SHARE BUTTON */
+.share-btn {
+    background: linear-gradient(135deg, #ffe8cc 0%, #ffb84d 100%);
+    color: #082830;
+    box-shadow: 0 4px 12px rgba(255, 184, 77, 0.25);
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 184, 77, 0.35);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 900px) {
+    .insight-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .health-score-number {
+        font-size: 2.4rem;
+    }
+
+    .dashboard-actions {
+        flex-direction: column;
+    }
+
+    .export-btn,
+    .share-btn {
+        width: 100%;
+        text-align: center;
+    }
+}

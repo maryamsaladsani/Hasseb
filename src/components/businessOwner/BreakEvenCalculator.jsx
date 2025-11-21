@@ -1,3 +1,4 @@
+// BreakEvenCalculator.jsx
 import React, { useState, useEffect } from "react";
 import "./BreakEvenCalculator.css";
 
@@ -23,10 +24,30 @@ function calcBreakEven({ fixedCost, variableCostPerUnit, pricePerUnit }) {
     const breakEvenUnits = Math.ceil(rawUnits);
     const breakEvenSales = breakEvenUnits * p;
 
-    return { breakEvenUnits, breakEvenSales, cmPerUnit };
+    return { breakEvenUnits, breakEvenSales, cmPerUnit, pricePerUnit: p, variableCostPerUnit: v };
 }
 
-export default function BreakEvenCalculator({ baseData }) {
+// --- Build summary object for dashboard ---
+function buildBreakEvenSummary(result, productName) {
+    if (!result || result.error) return null;
+
+    const { breakEvenUnits, breakEvenSales, cmPerUnit, pricePerUnit, variableCostPerUnit } = result;
+
+    const cmRatio =
+        pricePerUnit && pricePerUnit > 0
+            ? ((pricePerUnit - variableCostPerUnit) / pricePerUnit) * 100
+            : null;
+
+    return {
+        productName: productName || null,
+        breakEvenUnits,
+        breakEvenSales,
+        contributionMarginPerUnit: cmPerUnit,
+        contributionMarginRatio: cmRatio,
+    };
+}
+
+export default function BreakEvenCalculator({ baseData, onUpdate }) {
     const [mode, setMode] = useState("readOnly");
     const [selectedProductId, setSelectedProductId] = useState(
         baseData?.products?.[0]?.id ?? null
@@ -47,17 +68,21 @@ export default function BreakEvenCalculator({ baseData }) {
         });
         setWhatIfByProduct(initial);
         setSelectedProductId(baseData.products[0]?.id ?? null);
-    }, [baseData]);
+        setResult(null);
+        if (onUpdate) {
+            onUpdate(null); // reset dashboard summary when baseData changes
+        }
+    }, [baseData, onUpdate]);
 
     const selectedProduct =
         baseData?.products?.find((p) => p.id === selectedProductId) || null;
 
     const baseValues = selectedProduct
         ? {
-            fixedCost: baseData.fixedCost ?? "",
-            variableCostPerUnit: selectedProduct.variableCostPerUnit ?? "",
-            pricePerUnit: selectedProduct.pricePerUnit ?? "",
-        }
+              fixedCost: baseData.fixedCost ?? "",
+              variableCostPerUnit: selectedProduct.variableCostPerUnit ?? "",
+              pricePerUnit: selectedProduct.pricePerUnit ?? "",
+          }
         : {};
 
     const currentWhatIf =
@@ -68,6 +93,9 @@ export default function BreakEvenCalculator({ baseData }) {
     function handleProductChange(id) {
         setSelectedProductId(id);
         setResult(null);
+        if (onUpdate) {
+            onUpdate(null);
+        }
     }
 
     function handleInputChange(e) {
@@ -87,12 +115,20 @@ export default function BreakEvenCalculator({ baseData }) {
         e.preventDefault();
 
         if (!selectedProduct) {
-            setResult({ error: "Please select a product first." });
+            const err = { error: "Please select a product first." };
+            setResult(err);
+            if (onUpdate) onUpdate(null);
             return;
         }
 
         const inputs = mode === "readOnly" ? baseValues : currentWhatIf;
-        setResult(calcBreakEven(inputs));
+        const calc = calcBreakEven(inputs);
+        setResult(calc);
+
+        if (onUpdate) {
+            const summary = buildBreakEvenSummary(calc, selectedProduct.name);
+            onUpdate(summary);
+        }
     }
 
     return (
@@ -124,7 +160,7 @@ export default function BreakEvenCalculator({ baseData }) {
                         <label className="bep-label">Select Product</label>
                         <select
                             className="bep-select"
-                            value={selectedProductId}
+                            value={selectedProductId || ""}
                             onChange={(e) => handleProductChange(e.target.value)}
                         >
                             {baseData.products.map((p) => (
@@ -148,7 +184,11 @@ export default function BreakEvenCalculator({ baseData }) {
                             className={`bep-toggle-btn ${
                                 mode === "readOnly" ? "bep-toggle-btn--active" : ""
                             }`}
-                            onClick={() => setMode("readOnly")}
+                            onClick={() => {
+                                setMode("readOnly");
+                                setResult(null);
+                                if (onUpdate) onUpdate(null);
+                            }}
                         >
                             From Data
                         </button>
@@ -157,7 +197,11 @@ export default function BreakEvenCalculator({ baseData }) {
                             className={`bep-toggle-btn ${
                                 mode === "whatIf" ? "bep-toggle-btn--active" : ""
                             }`}
-                            onClick={() => setMode("whatIf")}
+                            onClick={() => {
+                                setMode("whatIf");
+                                setResult(null);
+                                if (onUpdate) onUpdate(null);
+                            }}
                         >
                             What-If Analysis
                         </button>

@@ -1,3 +1,4 @@
+// PricingSimulator.jsx
 import React, { useState, useEffect } from "react";
 import "./PricingSimulator.css";
 
@@ -75,7 +76,27 @@ function calcPricing({ fixedCost, variableCostPerUnit, pricePerUnit, newPrice })
     };
 }
 
-export default function PricingSimulator({ baseData }) {
+// --- Build summary for dashboard ---
+function buildPricingSummary(result, productName) {
+    if (!result || result.error) return null;
+
+    const { current, new: newMetrics, optimalPrice, breakEvenUnits, fixedCostPerUnit } = result;
+
+    return {
+        productName: productName || null,
+        currentPrice: current.price,
+        currentMarginPercent: current.profitMargin,
+        newPrice: newMetrics.price,
+        newMarginPercent: newMetrics.profitMargin,
+        optimalPrice,
+        breakEvenUnits,
+        fixedCostPerUnit,
+        profitDelta: result.differences.profit,
+        revenueDelta: result.differences.revenue,
+    };
+}
+
+export default function PricingSimulator({ baseData, onUpdate }) {
     const [mode, setMode] = useState("readOnly");
     const [selectedProductId, setSelectedProductId] = useState(
         baseData?.products?.[0]?.id ?? null
@@ -86,17 +107,19 @@ export default function PricingSimulator({ baseData }) {
     useEffect(() => {
         if (!baseData || !baseData.products) return;
         setSelectedProductId(baseData.products[0]?.id ?? null);
-    }, [baseData]);
+        setResult(null);
+        if (onUpdate) onUpdate(null);
+    }, [baseData, onUpdate]);
 
     const selectedProduct =
         baseData?.products?.find((p) => p.id === selectedProductId) || null;
 
     const baseValues = selectedProduct
         ? {
-            fixedCost: baseData.fixedCost ?? "",
-            variableCostPerUnit: selectedProduct.variableCostPerUnit ?? "",
-            pricePerUnit: selectedProduct.pricePerUnit ?? "",
-        }
+              fixedCost: baseData.fixedCost ?? "",
+              variableCostPerUnit: selectedProduct.variableCostPerUnit ?? "",
+              pricePerUnit: selectedProduct.pricePerUnit ?? "",
+          }
         : {};
 
     // Initialize slider to current price
@@ -115,15 +138,19 @@ export default function PricingSimulator({ baseData }) {
                 pricePerUnit: baseValues.pricePerUnit,
                 newPrice: baseValues.pricePerUnit,
             });
-            if (!optimal.error) {
-                setResult(optimal);
+            setResult(optimal);
+
+            if (onUpdate) {
+                const summary = buildPricingSummary(optimal, selectedProduct.name);
+                onUpdate(summary);
             }
         }
-    }, [mode, selectedProduct, baseValues]);
+    }, [mode, selectedProduct, baseValues.fixedCost, baseValues.variableCostPerUnit, baseValues.pricePerUnit, onUpdate]);
 
     function handleProductChange(id) {
         setSelectedProductId(id);
         setResult(null);
+        if (onUpdate) onUpdate(null);
     }
 
     function handleSliderChange(e) {
@@ -140,6 +167,11 @@ export default function PricingSimulator({ baseData }) {
         });
 
         setResult(calculated);
+
+        if (onUpdate) {
+            const summary = buildPricingSummary(calculated, selectedProduct.name);
+            onUpdate(summary);
+        }
     }
 
     const minPrice = selectedProduct
@@ -177,7 +209,7 @@ export default function PricingSimulator({ baseData }) {
                     <label className="pricing-label">Select Product</label>
                     <select
                         className="pricing-select"
-                        value={selectedProductId}
+                        value={selectedProductId || ""}
                         onChange={(e) => handleProductChange(e.target.value)}
                     >
                         {baseData.products.map((p) => (
@@ -201,7 +233,11 @@ export default function PricingSimulator({ baseData }) {
                         className={`pricing-toggle-btn ${
                             mode === "readOnly" ? "pricing-toggle-btn--active" : ""
                         }`}
-                        onClick={() => setMode("readOnly")}
+                        onClick={() => {
+                            setMode("readOnly");
+                            setResult(null);
+                            if (onUpdate) onUpdate(null);
+                        }}
                     >
                         From Data
                     </button>
@@ -210,7 +246,11 @@ export default function PricingSimulator({ baseData }) {
                         className={`pricing-toggle-btn ${
                             mode === "whatIf" ? "pricing-toggle-btn--active" : ""
                         }`}
-                        onClick={() => setMode("whatIf")}
+                        onClick={() => {
+                            setMode("whatIf");
+                            setResult(null);
+                            if (onUpdate) onUpdate(null);
+                        }}
                     >
                         What-If Analysis
                     </button>
@@ -284,8 +324,8 @@ export default function PricingSimulator({ baseData }) {
                                 <span className="projection-value optimal-highlight">
                                     {(
                                         ((result.optimalPrice -
-                                                baseValues.variableCostPerUnit -
-                                                result.fixedCostPerUnit) /
+                                            baseValues.variableCostPerUnit -
+                                            result.fixedCostPerUnit) /
                                             result.optimalPrice) *
                                         100
                                     ).toFixed(1)}
