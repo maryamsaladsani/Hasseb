@@ -7,11 +7,13 @@ import BreakEvenCalculator from "./BreakEvenCalculator";
 import PricingSimulator from "./PricingSimulator";
 import CashFlowTool from "./CashFlowTool";
 import OwnerDashboardPanel from "./OwnerDashboardPanel.jsx";
+import AccountPanel from "./AccountPanel.jsx";
+import NotificationsPanel from "./NotificationsPanel.jsx";
+import { FiUser, FiBell } from "react-icons/fi";
 import { bepTestData } from "../../data/bepTestData";
 
 export default function OwnerHome() {
-
-    // Auth guard — only owner role can access
+    // Auth guard
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem("loggedUser"));
         if (!user || user.role !== "owner") {
@@ -28,6 +30,7 @@ export default function OwnerHome() {
         localStorage.removeItem("loggedUser");
         navigate("/");
     };
+
     const tools = [
         {
             id: "data",
@@ -60,7 +63,7 @@ export default function OwnerHome() {
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
             ),
-            requiresData: true,
+            requiresData: true
         },
         {
             id: "cashflow",
@@ -71,7 +74,7 @@ export default function OwnerHome() {
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
             ),
-            requiresData: true,
+            requiresData: true
         },
         {
             id: "scenarios",
@@ -82,7 +85,7 @@ export default function OwnerHome() {
                 </svg>
             ),
             requiresData: true,
-            comingSoon: true,
+            comingSoon: true
         },
         {
             id: "insights",
@@ -94,48 +97,32 @@ export default function OwnerHome() {
                     <line x1="9" y1="21" x2="9" y2="9"></line>
                 </svg>
             ),
-            requiresData: true,
-        },
+            requiresData: true
+        }
     ];
 
     const handleToolClick = (toolId, requiresData) => {
-        if (requiresData && !hasUploadedData) {
-            setActiveTool(toolId);
-        } else {
-            setActiveTool(toolId);
-        }
-
-        if (window.innerWidth < 1024) {
-            setSidebarOpen(false);
-        }
+        setActiveTool(toolId);
+        if (window.innerWidth < 1024) setSidebarOpen(false);
     };
 
     const activToolInfo = tools.find(t => t.id === activeTool);
 
     return (
         <div className="owner-home">
-            {/* Top Header */}
+            {/* Header */}
             <header className="owner-header">
                 <div className="owner-header-content">
                     <div className="owner-header-left">
-                        <button
-                            className="sidebar-toggle"
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            aria-label="Toggle sidebar"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 strokeWidth="2">
-                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
                         <div className="owner-logo">
-                            <img
-                                src="/assets/HaseebLogo.png"
-                                alt="Haseeb Logo"
-                                className="logo-image"
-                            />
+                            <img src="/assets/HaseebLogo.png" alt="Haseeb Logo" className="logo-image" />
                         </div>
                     </div>
                     <div className="owner-header-right">
@@ -145,34 +132,26 @@ export default function OwnerHome() {
             </header>
 
             {/* Sidebar */}
-            <aside className={`owner-sidebar ${sidebarOpen ? 'owner-sidebar--open' : ''}`}>
+            <aside className={`owner-sidebar ${sidebarOpen ? "owner-sidebar--open" : ""}`}>
                 <div className="sidebar-content">
                     <nav className="sidebar-nav">
                         {tools.map((tool) => (
                             <button
                                 key={tool.id}
-                                className={`sidebar-nav-item ${activeTool === tool.id ? 'sidebar-nav-item--active' : ''} ${tool.comingSoon ? 'sidebar-nav-item--disabled' : ''}`}
+                                className={`sidebar-nav-item ${activeTool === tool.id ? "sidebar-nav-item--active" : ""} ${
+                                    tool.comingSoon ? "sidebar-nav-item--disabled" : ""
+                                }`}
                                 onClick={() => handleToolClick(tool.id, tool.requiresData)}
                             >
                                 <span className="sidebar-nav-icon">{tool.icon}</span>
                                 <span className="sidebar-nav-label">{tool.name}</span>
-                                {tool.requiresData && !hasUploadedData && (
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         strokeWidth="2" className="sidebar-nav-warning">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                    </svg>
-                                )}
-                                {tool.comingSoon && (
-                                    <span className="sidebar-badge">Soon</span>
-                                )}
+
+                                {tool.comingSoon && <span className="sidebar-badge">Soon</span>}
                             </button>
                         ))}
-                        <button
-                            className="sidebar-nav-item sidebar-nav-item--logout"
-                            onClick={handleLogout}>
 
+                        {/* Logout */}
+                        <button className="sidebar-nav-item sidebar-nav-item--logout" onClick={handleLogout}>
                             <span className="sidebar-nav-icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -180,74 +159,49 @@ export default function OwnerHome() {
                                     <line x1="21" y1="12" x2="9" y2="12"></line>
                                 </svg>
                             </span>
-                                        <span className="sidebar-nav-label">Logout</span>
+                            <span className="sidebar-nav-label">Logout</span>
                         </button>
+
+                        {/* FOOTER BUTTONS */}
+                        <div className="sidebar-footer">
+                            <button
+                                className="footer-icon-btn"
+                                onClick={() => handleToolClick("account")}
+                            >
+                                <FiUser size={18} />
+                            </button>
+
+                            <button
+                                className="footer-icon-btn"
+                                onClick={() => handleToolClick("notifications")}
+                            >
+                                <FiBell size={18} />
+                            </button>
+                        </div>
                     </nav>
                 </div>
             </aside>
 
-            {/* Overlay for mobile */}
             {sidebarOpen && (
-                <div
-                    className="sidebar-overlay"
-                    onClick={() => setSidebarOpen(false)}
-                ></div>
+                <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
             )}
 
             {/* Main Content */}
             <main className="owner-main">
                 <div className="owner-content">
-                    {/* Warning Banner */}
-                    {activToolInfo?.requiresData && !hasUploadedData && (
-                        <div className="warning-banner">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                            <div className="warning-content">
-                                <p className="warning-title">Data Upload Required</p>
-                                <p className="warning-text">
-                                    Upload your business data template to unlock this feature.{" "}
-                                    <button
-                                        className="warning-link"
-                                        onClick={() => setActiveTool("data")}
-                                    >
-                                        Go to Business Data
-                                    </button>
-                                </p>
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Tool Content */}
-                    {activeTool === "data" && (
-                        <BusinessDataUpload onUploadSuccess={() => setHasUploadedData(true)} />
-                    )}
+                    {activeTool === "data" && <BusinessDataUpload onUploadSuccess={() => setHasUploadedData(true)} />}
+                    {activeTool === "breakEven" && <BreakEvenCalculator baseData={hasUploadedData ? bepTestData : null} />}
+                    {activeTool === "pricing" && <PricingSimulator baseData={bepTestData} />}
+                    {activeTool === "cashflow" && <CashFlowTool baseData={bepTestData} />}
+                    {activeTool === "insights" && <OwnerDashboardPanel baseData={bepTestData} />}
+                    {activeTool === "account" && <AccountPanel settings={{}} setSettings={() => {}} />}
+                    {activeTool === "notifications" && <NotificationsPanel />}
 
-                    {activeTool === "breakEven" && (
-                        <BreakEvenCalculator baseData={hasUploadedData ? bepTestData : null} />
-                    )}
-                    {activeTool === "pricing" && (
-                        <PricingSimulator baseData={bepTestData} />
-                    )}
-                    {activeTool === "cashflow" && (
-                        <CashFlowTool baseData={bepTestData} />
-                    )}
-                    {activeTool === "insights" && (
-                        <OwnerDashboardPanel baseData={bepTestData}/>
-                    )}
-                
-                    {(activeTool === "scenarios") && (
+                    {activeTool === "scenarios" && (
                         <div className="coming-soon-card">
-                            <div className="coming-soon-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </div>
-                            <h3>{activToolInfo?.name}</h3>
-                            <p>This feature is currently under development by your team.</p>
+                            <h3>Scenarios</h3>
+                            <p>This feature is under development.</p>
                             <span className="coming-soon-badge">Coming Soon</span>
                         </div>
                     )}
