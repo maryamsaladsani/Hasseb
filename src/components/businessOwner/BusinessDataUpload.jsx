@@ -1,165 +1,183 @@
-import React, { useState, useRef } from "react";
+
+import React, { useState } from "react";
 import "./BusinessDataUpload.css";
+import { Download, CheckCircle, X } from "lucide-react";
 
 export default function BusinessDataUpload({ onUploadSuccess }) {
-    const [file, setFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
-
-    const fileInputRef = useRef();
-
-    const handleFileSelect = (event) => {
-        const selected = event.target.files[0];
-        if (selected) {
-            setFile(selected);
-            if (onUploadSuccess) onUploadSuccess(selected);
-        }
-    };
-
-    const handleDrop = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        setIsDragging(false);
-
-        const droppedFile = event.dataTransfer.files[0];
-        if (droppedFile) {
-            setFile(droppedFile);
-            if (onUploadSuccess) onUploadSuccess(droppedFile);
-        }
-    };
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleDragOver = (e) => {
         e.preventDefault();
         setIsDragging(true);
     };
 
-    const handleDragLeave = () => {
+    const handleDragLeave = (e) => {
+        e.preventDefault();
         setIsDragging(false);
     };
 
-    const removeFile = () => {
-        setFile(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
         }
     };
 
+    const handleFileSelect = (file) => {
+        const validTypes = [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel"
+        ];
+
+        if (!validTypes.includes(file.type)) {
+            alert("Please upload an Excel file (.xlsx or .xls)");
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert("File size must be less than 10MB");
+            return;
+        }
+
+        setIsUploading(true);
+        setTimeout(() => {
+            setUploadedFile(file);
+            setIsUploading(false);
+            if (onUploadSuccess) {
+                onUploadSuccess();
+            }
+        }, 1200);
+    };
+
+    const handleFileInputChange = (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    };
+
+    const removeFile = () => {
+        setUploadedFile(null);
+    };
+
+    const UploadCloudIcon = () => (
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+    );
+
     return (
-        <div className="owner-main">
+        <>
+            {/* Header */}
             <div className="upload-header">
-                <h1>Upload Your Business Data</h1>
-                <p>
-                    Upload your Excel or CSV data file to enable break-even analysis,
-                    pricing simulation, and cash flow tools.
-                </p>
+                <h1>Import Your Business Data</h1>
+                <p>Structure your business data using Haseeb's standardized Excel template for accurate financial analysis.</p>
             </div>
 
+            {/* Download Template Card */}
+            <div className="upload-card">
+                <div className="card-content-center">
+                    <div className="icon-wrapper download-icon">
+                        <Download className="card-icon" />
+                    </div>
+
+                    <h2>Download Haseeb Template</h2>
+                    <p>Pre-formatted Excel workbook with three sheets: Cash Flow, Cost-Volume-Profit, and Pricing Analysis.</p>
+
+                    <button
+                        onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = '/assets/Haseeb-Business-Template.xlsx';
+                            link.download = 'Haseeb-Business-Template.xlsx';
+                            link.click();
+                        }}
+                        className="download-btn"
+                    >
+                        Download Template
+                    </button>
+                </div>
+            </div>
+
+            {/* Upload Template Card */}
             <div className="upload-card">
                 <div className="upload-card-header">
-                    <h2>Business Data Upload</h2>
-                    <p className="upload-subtitle">Supported formats: .xlsx, .xls, .csv</p>
+                    <h2>Upload Completed Template</h2>
+                    <p className="upload-subtitle">Ensure all required fields are filled before uploading</p>
                 </div>
 
-                {!file && (
-                    <div
-                        className={`file-drop-zone ${isDragging ? "is-dragging" : ""}`}
-                        onDrop={handleDrop}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                    >
+                {/* Drop Zone */}
+                <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`file-drop-zone ${isDragging ? 'is-dragging' : ''}`}
+                >
+                    {!uploadedFile ? (
                         <div className="drop-zone-content">
                             <div
-                                className={`cloud-icon-wrap ${isDragging ? "uploading" : ""}`}
-                                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                                onClick={() => document.getElementById("file-input").click()}
+                                className={`cloud-icon-wrap ${isUploading ? 'uploading' : ''}`}
                             >
-                                <svg
-                                    width="48"
-                                    height="48"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
-                                    <path d="M16 16l-4-4-4 4" />
-                                    <path d="M12 12v8" />
-                                    <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25" />
-                                </svg>
+                                <UploadCloudIcon />
                             </div>
 
-                            <p className="drop-zone-title">Drag & drop your file here</p>
-                            <p className="drop-zone-subtitle">or browse from your device</p>
+                            <p className="drop-zone-title">
+                                {isUploading ? "Processing file..." : "Select a file to upload"}
+                            </p>
+                            <p className="drop-zone-subtitle">
+                                or drag and drop your completed template here
+                            </p>
 
                             <button
+                                onClick={() => document.getElementById("file-input").click()}
                                 className="browse-btn"
-                                type="button"
-                                onClick={() => fileInputRef.current && fileInputRef.current.click()}
                             >
                                 Browse Files
                             </button>
 
-                            <input
-                                ref={fileInputRef}
-                                className="hidden-file-input"
-                                type="file"
-                                accept=".xlsx, .xls, .csv"
-                                onChange={handleFileSelect}
-                            />
-
                             <p className="upload-hint">
-                                Your data stays private in this demo environment.
+                                Accepted formats: .xlsx, .xls — Maximum size: 10MB
                             </p>
                         </div>
-                    </div>
-                )}
-
-                {file && (
-                    <div className="uploaded-file">
-                        <div className="file-info">
-                            <div className="success-icon-wrap">
-                                <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="white"
-                                    strokeWidth="3"
-                                >
-                                    <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                            </div>
-
-                            <div className="file-details">
-                                <div className="file-name">{file.name}</div>
-                                <div className="file-size">
-                                    {(file.size / 1024).toFixed(1)} KB
+                    ) : (
+                        <div className="uploaded-file">
+                            <div className="file-info">
+                                <div className="success-icon-wrap">
+                                    <CheckCircle className="success-icon" />
+                                </div>
+                                <div className="file-details">
+                                    <p className="file-name">{uploadedFile.name}</p>
+                                    <p className="file-size">{(uploadedFile.size / 1024).toFixed(2)} KB</p>
                                 </div>
                             </div>
+                            <button onClick={removeFile} className="remove-btn">
+                                <X className="remove-icon" />
+                            </button>
                         </div>
+                    )}
 
-                        <button className="remove-btn" onClick={removeFile}>
-                            <svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            >
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
+                    <input
+                        id="file-input"
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleFileInputChange}
+                        className="hidden-file-input"
+                    />
+                </div>
+
+                {uploadedFile && (
+                    <div className="process-btn-wrapper">
+                        <button className="process-btn">
+                            Process Template
                         </button>
                     </div>
                 )}
             </div>
-
-            {file && (
-                <div className="process-btn-wrapper">
-                    <button className="process-btn" type="button">
-                        Process File
-                    </button>
-                </div>
-            )}
-        </div>
+        </>
     );
 }
