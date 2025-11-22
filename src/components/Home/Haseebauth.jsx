@@ -9,9 +9,11 @@ import {
     EyeOff,
     ArrowRight,
     CheckCircle2,
-    Coffee
+    Coffee,
+    ArrowLeft,
 } from 'lucide-react';
 import './Haseebauth.css';
+import { useNavigate } from 'react-router-dom';
 
 // -------------------------------------------------
 // Front-end-only "fake" users for testing
@@ -46,6 +48,7 @@ export default function HaseebAuth() {
         businessName: '',
         role: ''
     });
+    const navigate = useNavigate();
 
     const userRoles = [
         {
@@ -90,6 +93,9 @@ export default function HaseebAuth() {
             ...prev,
             role: roleId
         }));
+    };
+    const handleBackToHome = () => {
+        navigate('/');
     };
 
     // -------------------------------------------------
@@ -160,13 +166,17 @@ export default function HaseebAuth() {
                                 alt="HASEEB Logo"
                                 className="auth-logo"
                             />
+                            <button className="back-to-home-btn" onClick={handleBackToHome}>
+                                <ArrowLeft className="back-icon"/>
+                                <span>Back to Home</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Right Side - Auth Form */}
                 <div className="auth-form-container">
-                    <div className="auth-form-wrapper">
+                <div className="auth-form-wrapper">
                         {/* Header */}
                         <div className="auth-header">
                             <h2 className="auth-title">

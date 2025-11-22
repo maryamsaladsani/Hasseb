@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { TrendingUp, DollarSign, AlertTriangle, BarChart3, PieChart, Target, ArrowRight, CheckCircle, Coffee, Lightbulb, Shield, Receipt, CreditCard, Coins, Moon } from 'lucide-react';
 import './HaseebHomePage.css';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function HaseebHomePage({ onGetStarted }) {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [activeCard, setActiveCard] = useState(null);
     const [activeSection, setActiveSection] = useState('home');
@@ -112,6 +113,15 @@ export default function HaseebHomePage({ onGetStarted }) {
         }
     };
 
+    // Handle Get Started button click
+    const handleGetStarted = () => {
+        if (onGetStarted) {
+            onGetStarted();
+
+        } else {
+                navigate('/auth'); // Navigate to auth page
+        }
+    };
     // Update active section on scroll
     React.useEffect(() => {
         const handleScroll = () => {
@@ -203,7 +213,7 @@ export default function HaseebHomePage({ onGetStarted }) {
 
                         <button
                             className="btn-get-started"
-                            onClick={onGetStarted}
+                            onClick={handleGetStarted}
                         >
                             Get Started
                             <ArrowRight className="btn-icon"/>
@@ -324,7 +334,7 @@ export default function HaseebHomePage({ onGetStarted }) {
                             Join coffee suppliers who are making smarter decisions with HASEEB
                         </p>
                         <button className="btn-cta-primary"
-                                onClick={onGetStarted}
+                                onClick={handleGetStarted}
                         >
                             Get Started
                             <ArrowRight className="btn-icon" />

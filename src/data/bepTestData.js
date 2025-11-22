@@ -2,20 +2,20 @@ export const bepTestData = {
     fixedCost: 25000,
     products: [
         {
-            id: "espresso",
-            name: "Espresso",
-            pricePerUnit: 12,
-            variableCostPerUnit: 7.5
+            id: "bean01",
+            name: "Coffee Bean",
+            pricePerUnit: 50,
+            variableCostPerUnit: 38
         },
         {
-            id: "latte",
-            name: "Latte",
+            id: "grinder01",
+            name: "Coffee Grinder",
             pricePerUnit: 16,
             variableCostPerUnit: 9.2
         },
         {
-            id: "iced-tea",
-            name: "Iced Tea",
+            id: "timer",
+            name: "Timer",
             pricePerUnit: 10,
             variableCostPerUnit: 5.3
         }
