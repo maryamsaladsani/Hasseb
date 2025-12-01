@@ -39,7 +39,7 @@ function buildBreakEvenSummary(result, productName) {
             ? ((pricePerUnit - variableCostPerUnit) / pricePerUnit) * 100
             : null;
 
-            //TODO save to DB 
+            //TODO save to DB
     return {
         productName: productName || null,
         breakEvenUnits,
