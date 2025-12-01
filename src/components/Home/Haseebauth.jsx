@@ -3,7 +3,6 @@ import {
     User,
     Lock,
     Mail,
-    Building2,
     Users,
     Eye,
     EyeOff,
@@ -15,54 +14,30 @@ import {
 import './Haseebauth.css';
 import { useNavigate } from 'react-router-dom';
 
-// -------------------------------------------------
-// Front-end-only "fake" users for testing
-// -------------------------------------------------
-const TEST_USERS = [
-    {
-        email: "mgr.haseeb@haseebcorp.com",
-        password: "Haseeb@2025",
-        role: "manager"
-    },
-    {
-        email: "adv.sara@haseebcorp.com",
-        password: "Haseeb@2025",
-        role: "advisor"
-    },
-    {
-        email: "owner.khalid@haseebco.app",
-        password: "Haseeb@2025",
-        role: "owner"
-    }
-];
-
 export default function HaseebAuth() {
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState('');
     const [formData, setFormData] = useState({
         email: '',
+        username: '',
         password: '',
         confirmPassword: '',
         fullName: '',
-        businessName: '',
         role: ''
     });
+
     const navigate = useNavigate();
 
+    /* ROLES */
     const userRoles = [
         {
-            id: 'business_owner',
+            id: 'owner',
             title: 'Business Owner',
             description: 'Manage your coffee supply business finances',
             icon: <Coffee className="role-icon" />,
             color: 'primary',
-            features: [
-                'Create financial simulations',
-                'Track cash flow',
-                'Manage business data',
-                'View insights & analytics'
-            ]
+            features: ['Create financial simulations', 'Track cash flow', 'Manage business data', 'View insights & analytics']
         },
         {
             id: 'advisor',
@@ -70,67 +45,84 @@ export default function HaseebAuth() {
             description: 'Guide and support your clients',
             icon: <Users className="role-icon" />,
             color: 'success',
-            features: [
-                'Access client simulations',
-                'Provide recommendations',
-                'Identify financial risks',
-                'Collaborate with clients'
-            ]
+            features: ['Access client simulations', 'Provide recommendations', 'Identify financial risks', 'Collaborate with clients']
         }
     ];
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleRoleSelect = (roleId) => {
         setSelectedRole(roleId);
-        setFormData(prev => ({
-            ...prev,
-            role: roleId
-        }));
-    };
-    const handleBackToHome = () => {
-        navigate('/');
+        setFormData(prev => ({ ...prev, role: roleId }));
     };
 
-    // -------------------------------------------------
-    // Login / Signup submit handler
-    // -------------------------------------------------
-    const handleSubmit = (e) => {
+    const handleBackToHome = () => navigate('/');
+
+    /* SAFE JSON PARSER */
+    const safeJSON = async (res) => {
+        try {
+            return await res.json();
+        } catch (err) {
+            return null;
+        }
+    };
+
+    /* LOGIN + SIGNUP SUBMISSION */
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (isLogin) {
-            const foundUser = TEST_USERS.find(
-                (u) =>
-                    u.email === formData.email.trim().toLowerCase() &&
-                    u.password === formData.password
-            );
+            /* LOGIN WITH USERNAME + PASSWORD */
+            const res = await fetch("/api/users/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    username: formData.username.trim(),
+                    password: formData.password
+                })
+            });
 
-            if (!foundUser) {
-                alert("Invalid email or password");
+            const data = await safeJSON(res);
+
+            if (!res.ok) {
+                alert(data?.msg || "Login failed. Server returned invalid response.");
                 return;
             }
 
-            // Save in browser storage
-            localStorage.setItem("loggedUser", JSON.stringify(foundUser));
+            localStorage.setItem("loggedUser", JSON.stringify(data.user));
 
-            // Route based on role
-            if (foundUser.role === "manager") {
-                window.location.href = "/manager";
-            } else if (foundUser.role === "advisor") {
-                window.location.href = "/advisor";
-            } else if (foundUser.role === "owner") {
-                window.location.href = "/owner";
-            }
-        } else {
-            // Signup mode is not wired to backend in this demo
-            alert("Signup is disabled in this demo. Use one of the test accounts.");
+            if (data.user.role === "owner") return (window.location.href = "/owner");
+            if (data.user.role === "advisor") return (window.location.href = "/advisor");
+            if (data.user.role === "manager") return (window.location.href = "/manager");
+
+            alert("Unknown role. Contact system admin.");
+            return;
         }
+
+        /* SIGNUP */
+        if (!selectedRole) return alert("Please select a role.");
+        if (formData.password !== formData.confirmPassword)
+            return alert("Passwords do not match.");
+
+        const res = await fetch("/api/users/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await safeJSON(res);
+
+        if (!res.ok) {
+            alert(data?.msg || "Signup failed. Server returned invalid response.");
+            return;
+        }
+
+        alert("Account created! Your username is: " + data.user.username);
+
+        setIsLogin(true);
     };
 
     const toggleAuthMode = () => {
@@ -138,50 +130,39 @@ export default function HaseebAuth() {
         setSelectedRole('');
         setFormData({
             email: '',
+            username: '',
             password: '',
             confirmPassword: '',
             fullName: '',
-            businessName: '',
             role: ''
         });
     };
 
     return (
         <div className="auth-container">
-            {/* Animated Background */}
             <div className="auth-background">
                 <div className="gradient-orb orb-1"></div>
                 <div className="gradient-orb orb-2"></div>
                 <div className="gradient-orb orb-3"></div>
             </div>
 
-            {/* Main Content */}
             <div className="auth-content">
-                {/* Left Side - Branding */}
                 <div className="auth-branding">
                     <div className="branding-inner">
                         <div className="logo-section">
-                            <img
-                                src="/assets/HaseebLogo.png"
-                                alt="HASEEB Logo"
-                                className="auth-logo"
-                            />
+                            <img src="/assets/HaseebLogo.png" alt="HASEEB Logo" className="auth-logo" />
                             <button className="back-to-home-btn" onClick={handleBackToHome}>
-                                <ArrowLeft className="back-icon"/>
+                                <ArrowLeft className="back-icon" />
                                 <span>Back to Home</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side - Auth Form */}
                 <div className="auth-form-container">
-                <div className="auth-form-wrapper">
-                        {/* Header */}
+                    <div className="auth-form-wrapper">
                         <div className="auth-header">
-                            <h2 className="auth-title">
-                                {isLogin ? 'Welcome Back' : 'Join HASEEB'}
-                            </h2>
+                            <h2 className="auth-title">{isLogin ? 'Welcome Back' : 'Join HASEEB'}</h2>
                             <p className="auth-subtitle">
                                 {isLogin
                                     ? 'Sign in to access your financial dashboard'
@@ -189,7 +170,6 @@ export default function HaseebAuth() {
                             </p>
                         </div>
 
-                        {/* Role Selection (Only for Signup) */}
                         {!isLogin && (
                             <div className="role-selection">
                                 <label className="form-label">Join as:</label>
@@ -200,9 +180,7 @@ export default function HaseebAuth() {
                                             onClick={() => handleRoleSelect(role.id)}
                                             className={`role-card ${selectedRole === role.id ? 'selected' : ''} color-${role.color}`}
                                         >
-                                            <div className="role-icon-wrapper">
-                                                {role.icon}
-                                            </div>
+                                            <div className="role-icon-wrapper">{role.icon}</div>
                                             <h4 className="role-title">{role.title}</h4>
                                             <p className="role-description">{role.description}</p>
 
@@ -222,9 +200,7 @@ export default function HaseebAuth() {
                             </div>
                         )}
 
-                        {/* Auth Form */}
                         <form onSubmit={handleSubmit} className="auth-form">
-                            {/* Full Name (Signup only) */}
                             {!isLogin && (
                                 <div className="form-group">
                                     <label className="form-label">Full Name</label>
@@ -237,49 +213,50 @@ export default function HaseebAuth() {
                                             onChange={handleInputChange}
                                             placeholder="Enter your full name"
                                             className="form-input"
-                                            required={!isLogin}
+                                            required
                                         />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Business Name (Signup only for Business Owner) */}
-                            {!isLogin && selectedRole === 'business_owner' && (
+                            {/* EMAIL ONLY IN SIGNUP */}
+                            {!isLogin && (
                                 <div className="form-group">
-                                    <label className="form-label">Business Name</label>
+                                    <label className="form-label">Email Address</label>
                                     <div className="input-wrapper">
-                                        <Building2 className="input-icon" />
+                                        <Mail className="input-icon" />
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter your email"
+                                            className="form-input"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* USERNAME ONLY IN LOGIN */}
+                            {isLogin && (
+                                <div className="form-group">
+                                    <label className="form-label">Username</label>
+                                    <div className="input-wrapper">
+                                        <User className="input-icon" />
                                         <input
                                             type="text"
-                                            name="businessName"
-                                            value={formData.businessName}
+                                            name="username"
+                                            value={formData.username}
                                             onChange={handleInputChange}
-                                            placeholder="Enter your business name"
+                                            placeholder="Enter your username"
                                             className="form-input"
-                                            required={selectedRole === 'business_owner'}
+                                            required
                                         />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Email */}
-                            <div className="form-group">
-                                <label className="form-label">Email Address</label>
-                                <div className="input-wrapper">
-                                    <Mail className="input-icon" />
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter your email"
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Password */}
                             <div className="form-group">
                                 <label className="form-label">Password</label>
                                 <div className="input-wrapper">
@@ -303,7 +280,6 @@ export default function HaseebAuth() {
                                 </div>
                             </div>
 
-                            {/* Confirm Password (Signup only) */}
                             {!isLogin && (
                                 <div className="form-group">
                                     <label className="form-label">Confirm Password</label>
@@ -316,13 +292,12 @@ export default function HaseebAuth() {
                                             onChange={handleInputChange}
                                             placeholder="Confirm your password"
                                             className="form-input"
-                                            required={!isLogin}
+                                            required
                                         />
                                     </div>
                                 </div>
                             )}
 
-                            {/* Remember Me & Forgot Password (Login only) */}
                             {isLogin && (
                                 <div className="form-options">
                                     <label className="checkbox-label">
@@ -333,28 +308,21 @@ export default function HaseebAuth() {
                                 </div>
                             )}
 
-                            {/* Submit Button */}
                             <button type="submit" className="btn-submit">
                                 {isLogin ? 'Sign In' : 'Create Account'}
                                 <ArrowRight className="btn-icon" />
                             </button>
 
-                            {/* Toggle Auth Mode */}
                             <div className="auth-toggle">
                                 <p>
                                     {isLogin ? "Don't have an account?" : "Already have an account?"}
-                                    <button
-                                        type="button"
-                                        onClick={toggleAuthMode}
-                                        className="toggle-link"
-                                    >
+                                    <button type="button" onClick={toggleAuthMode} className="toggle-link">
                                         {isLogin ? 'Sign Up' : 'Sign In'}
                                     </button>
                                 </p>
                             </div>
                         </form>
 
-                        {/* Terms & Privacy */}
                         <p className="auth-terms">
                             By continuing, you agree to HASEEB's
                             <a href="#"> Terms of Service</a> and
