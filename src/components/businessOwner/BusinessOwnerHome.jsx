@@ -10,7 +10,7 @@ import OwnerDashboardPanel from "./OwnerDashboardPanel.jsx";
 import AccountPanel from "./AccountPanel.jsx";
 import NotificationsPanel from "./NotificationsPanel.jsx";
 import { FiUser, FiBell } from "react-icons/fi";
-import { bepTestData } from "../../data/bepTestData";
+//import { bepTestData } from "../../data/bepTestData";
 
 export default function OwnerHome() {
     // Auth guard
@@ -23,13 +23,52 @@ export default function OwnerHome() {
 
     const [activeTool, setActiveTool] = useState("data");
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [hasUploadedData, setHasUploadedData] = useState(false);
+    const [uploadedData, setUploadedData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     const handleLogout = () => {
         localStorage.removeItem("loggedUser");
         navigate("/");
     };
+
+    // Fetch uploaded data on mount
+    useEffect(() => {
+        fetchBusinessData();
+    }, []);
+
+    const fetchBusinessData = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem("loggedUser"));
+            if (!user) return;
+
+            // Get user ID from logged user
+            const username = user.username;
+
+            const response = await fetch(`http://localhost:5001/api/business-data/${username}`);
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                setUploadedData(result.data);
+                console.log("✅ Business data loaded:", result.data);
+            } else {
+                console.log("ℹ️ No business data found for user");
+                setUploadedData(null);
+            }
+        } catch (error) {
+            console.error("🔥 Error fetching business data:", error);
+            setUploadedData(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleUploadSuccess = (data) => {
+        console.log("✅ Upload successful, refreshing data...");
+        fetchBusinessData(); // Refresh data after upload
+        setActiveTool("breakEven"); // Optionally switch to calculator
+    };
+
 
     const tools = [
         {
@@ -106,6 +145,15 @@ export default function OwnerHome() {
         if (window.innerWidth < 1024) setSidebarOpen(false);
     };
 
+    if (isLoading) {
+        return (
+            <div className="owner-home">
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+                    <h3>Loading your data...</h3>
+                </div>
+            </div>
+        );
+    }
     const activToolInfo = tools.find(t => t.id === activeTool);
 
     return (
@@ -190,11 +238,11 @@ export default function OwnerHome() {
             <main className="owner-main">
                 <div className="owner-content">
 
-                    {activeTool === "data" && <BusinessDataUpload onUploadSuccess={() => setHasUploadedData(true)} />}
-                    {activeTool === "breakEven" && <BreakEvenCalculator baseData={hasUploadedData ? bepTestData : null} />}
-                    {activeTool === "pricing" && <PricingSimulator baseData={bepTestData} />}
-                    {activeTool === "cashflow" && <CashFlowTool baseData={bepTestData} />}
-                    {activeTool === "insights" && <OwnerDashboardPanel baseData={bepTestData} />}
+                    {activeTool === "data" && <BusinessDataUpload onUploadSuccess={handleUploadSuccess} />}
+                    {activeTool === "breakEven" && <BreakEvenCalculator baseData={uploadedData} />}
+                    {activeTool === "pricing" && <PricingSimulator baseData={uploadedData} />}
+                    {activeTool === "cashflow" && <CashFlowTool baseData={uploadedData} />}
+                    {activeTool === "insights" && <OwnerDashboardPanel baseData={uploadedData} />}
                     {activeTool === "account" && <AccountPanel settings={{}} setSettings={() => {}} />}
                     {activeTool === "notifications" && <NotificationsPanel />}
 

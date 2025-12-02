@@ -1,55 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const XLSX = require("xlsx");
 const BusinessData = require("../models/BusinessData");
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, "../../uploads");
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-        // Create uploads directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        // Generate unique filename: timestamp-originalname
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + "-" + file.originalname);
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-    fileFilter: function (req, file, cb) {
-        // Accept only Excel files
-        const allowedTypes = [
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.ms-excel"
-        ];
-
-        if (allowedTypes.includes(file.mimetype)) {
-            cb(null, true);
-        } else {
-            cb(new Error("Only Excel files (.xlsx, .xls) are allowed"));
-        }
-    }
-});
-
-/* ------------------------------------
-   POST: Upload and Parse Excel File
-------------------------------------- */
-router.post("/upload", upload.single("excelFile"), async (req, res) => {
+// Upload business data
+router.post("/upload", upload.single("file"), async (req, res) => {
     try {
-        console.log("📥 Received file upload request");
-
-        // Check if file was uploaded
         if (!req.file) {
             return res.status(400).json({
                 success: false,
@@ -57,108 +17,74 @@ router.post("/upload", upload.single("excelFile"), async (req, res) => {
             });
         }
 
-        // Get parsed data from request body (sent by frontend)
-        const { parsedData, userId } = req.body;
+        const { username } = req.body;
 
-        if (!parsedData) {
+        if (!username) {
             return res.status(400).json({
                 success: false,
-                msg: "No parsed data provided"
+                msg: "Username is required"
             });
         }
 
-        // Parse the stringified JSON
-        const data = JSON.parse(parsedData);
+        // Parse Excel file
+        const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        console.log("✅ File received:", req.file.originalname);
-        console.log("📊 Parsed data structure:", {
-            products: data.products?.length,
-            cashFlow: data.cashFlow?.length,
-            pricingScenarios: data.pricingScenarios?.length
-        });
-
-        // Validate data structure
-        if (!data.fixedCost || !data.products || !data.cashFlow) {
+        if (!sheet || sheet.length === 0) {
             return res.status(400).json({
                 success: false,
-                msg: "Invalid data structure. Missing required sheets or data."
+                msg: "Excel file is empty or improperly formatted"
             });
         }
 
-        // Check if user already has business data
-        let businessData = await BusinessData.findOne({ userId });
+        // Extract data (assuming first row has the data)
+        const row = sheet[0];
+        const businessData = {
+            username,
+            businessName: row["Business Name"] || row.businessName || "My Business",
+            fixedCosts: parseFloat(row["Fixed Costs"] || row.fixedCosts || 0),
+            variableCostPerUnit: parseFloat(row["Variable Cost Per Unit"] || row.variableCostPerUnit || 0),
+            sellingPricePerUnit: parseFloat(row["Selling Price Per Unit"] || row.sellingPricePerUnit || 0)
+        };
 
-        if (businessData) {
-            // Update existing data
-            businessData.fixedCost = data.fixedCost;
-            businessData.products = data.products;
-            businessData.cashFlow = data.cashFlow;
-            businessData.pricingScenarios = data.pricingScenarios || [];
-            businessData.fileName = req.file.originalname;
-            businessData.fileSize = req.file.size;
-            businessData.filePath = req.file.path;
-            businessData.uploadedAt = new Date();
-
-            await businessData.save();
-
-            console.log("✅ Business data updated for user:", userId);
-        } else {
-            // Create new business data
-            businessData = new BusinessData({
-                userId,
-                fixedCost: data.fixedCost,
-                products: data.products,
-                cashFlow: data.cashFlow,
-                pricingScenarios: data.pricingScenarios || [],
-                fileName: req.file.originalname,
-                fileSize: req.file.size,
-                filePath: req.file.path
+        // Validation
+        if (!businessData.fixedCosts || !businessData.variableCostPerUnit || !businessData.sellingPricePerUnit) {
+            return res.status(400).json({
+                success: false,
+                msg: "Missing required fields in Excel file"
             });
-
-            await businessData.save();
-
-            console.log("✅ Business data created for user:", userId);
         }
+
+        // Update or create business data
+        const updatedData = await BusinessData.findOneAndUpdate(
+            { username },
+            businessData,
+            { new: true, upsert: true }
+        );
 
         return res.status(200).json({
             success: true,
-            msg: "File uploaded and data saved successfully",
-            data: {
-                id: businessData._id,
-                fileName: businessData.fileName,
-                uploadedAt: businessData.uploadedAt,
-                summary: {
-                    products: businessData.products.length,
-                    cashFlowEntries: businessData.cashFlow.length,
-                    pricingScenarios: businessData.pricingScenarios.length
-                }
-            }
+            msg: "Business data uploaded successfully",
+            data: updatedData
         });
 
     } catch (err) {
         console.error("🔥 Upload error:", err);
-
-        // Delete uploaded file if error occurs
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
-
         return res.status(500).json({
             success: false,
-            msg: "Server error during file upload",
+            msg: "Server error",
             error: err.message
         });
     }
 });
 
-/* ------------------------------------
-   GET: Fetch User's Business Data
-------------------------------------- */
-router.get("/:userId", async (req, res) => {
+// Get business data by username
+router.get("/:username", async (req, res) => {
     try {
-        const { userId } = req.params;
+        const { username } = req.params;
 
-        const businessData = await BusinessData.findOne({ userId });
+        const businessData = await BusinessData.findOne({ username });
 
         if (!businessData) {
             return res.status(404).json({
@@ -174,42 +100,6 @@ router.get("/:userId", async (req, res) => {
 
     } catch (err) {
         console.error("🔥 Fetch error:", err);
-        return res.status(500).json({
-            success: false,
-            msg: "Server error",
-            error: err.message
-        });
-    }
-});
-
-/* ------------------------------------
-   DELETE: Remove User's Business Data
-------------------------------------- */
-router.delete("/:userId", async (req, res) => {
-    try {
-        const { userId } = req.params;
-
-        const businessData = await BusinessData.findOneAndDelete({ userId });
-
-        if (!businessData) {
-            return res.status(404).json({
-                success: false,
-                msg: "No business data found for this user"
-            });
-        }
-
-        // Delete the uploaded file
-        if (businessData.filePath && fs.existsSync(businessData.filePath)) {
-            fs.unlinkSync(businessData.filePath);
-        }
-
-        return res.status(200).json({
-            success: true,
-            msg: "Business data deleted successfully"
-        });
-
-    } catch (err) {
-        console.error("🔥 Delete error:", err);
         return res.status(500).json({
             success: false,
             msg: "Server error",

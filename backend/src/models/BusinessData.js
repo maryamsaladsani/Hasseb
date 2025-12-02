@@ -2,9 +2,14 @@
 const mongoose = require("mongoose");
 
 const BusinessDataSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+    username: {
+        type: String,
+        required: true,
+        unique: true,  // One business data per owner
+        ref: "User"
+    },
+    businessName: {
+        type: String,
         required: true
     },
 
@@ -67,7 +72,7 @@ const BusinessDataSchema = new mongoose.Schema({
         default: Date.now
     },
 
-    // Store the raw file path 
+    // Store the raw file path
     filePath: String
 });
 
