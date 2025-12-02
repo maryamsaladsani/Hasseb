@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const XLSX = require("xlsx");
-const BusinessData = require("../models/BusinessData");
+const BusinessData = require("../models/BusinessData.js")
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });

@@ -1,0 +1,704 @@
+/* ================================
+   01 — RESET + BASE STYLES
+================================ */
+
+/* Box model reset */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+html, body {
+  scroll-behavior: smooth;
+}
+
+/* Base body styling */
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #f8fafc;
+  color: #0b1220;
+}
+
+/* Smooth theme transitions across all surfaces */
+body,
+.navbar,
+.card,
+.card-neo,
+.acct__section,
+.notif__wrap,
+.form-control,
+.form-select,
+.sidebar-neo,
+.sidebar-neo__dock,
+.sidebar-neo__dock-btn {
+  transition: background-color .25s ease,
+              color .25s ease,
+              border-color .25s ease,
+              box-shadow .25s ease;
+}
+
+/* Default text color helpers */
+h5, h6, strong {
+  color: #0b1220;
+}
+
+small, .text-muted {
+  color: #475569;
+}
+
+/* Slide panel behavior */
+.pm-slide {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  transform: translateX(-100%);
+  transition: transform .25s ease;
+  z-index: 1045;
+}
+
+.pm-slide.is-open {
+  transform: translateX(0);
+}
+
+/* Backdrop behind sidebar or modals */
+.pm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease, visibility .2s ease;
+  z-index: 1040;
+}
+
+.pm-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+/* ================================
+   02 — SIDEBAR (LIGHT THEME)
+================================ */
+
+/* Sidebar container */
+.sidebar-neo {
+  width: 280px !important;
+  background: #ffffff !important;
+  color: #0b1220 !important;
+  border-right: 1px solid #e5e7eb !important;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 35px rgba(0,0,0,.08);
+}
+
+/* Brand area */
+.sidebar-neo__brand {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 14px 18px;
+}
+
+/* Logo image */
+.sidebar-logo-img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-right: 8px;
+  image-rendering: crisp-edges;
+}
+
+/* Logo box */
+.sidebar-neo__logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.05);
+  display: grid;
+  place-items: center;
+  color: #0b1220 !important;
+  font-weight: 700;
+}
+
+.sidebar-neo__tagline {
+  color: #6b7280 !important;
+}
+
+/* Sidebar item */
+.sidebar-neo__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: #ffffff !important;
+  color: #0b1220 !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+/* Hover state */
+.sidebar-neo__item:hover {
+  background: #f3f4f6 !important;
+  color: #0f766e !important;
+}
+
+/* Active item */
+.sidebar-neo__item.is-active {
+  background: linear-gradient(135deg, #3dd6c4 0%, #26a69a 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(38,166,154,0.25);
+}
+
+/* Active icon color override */
+.sidebar-neo__item.is-active .sidebar-neo__icon svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Dot indicator */
+.sidebar-neo__dot {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffd86b;
+}
+
+/* Bottom dock */
+.sidebar-neo__dock {
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+/* Dock buttons */
+.sidebar-neo__dock-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb !important;
+  color: #475569 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .25s ease;
+}
+
+.sidebar-neo__dock-btn:hover {
+  background: #e0f2f1 !important;
+  color: #0b1220 !important;
+  transform: translateY(-2px);
+}
+
+/* Scrollbar */
+.sidebar-neo::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-neo::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.12);
+  border-radius: 4px;
+}
+
+
+/* ================================
+   03 — SIDEBAR (DARK THEME)
+================================ */
+
+body[data-theme="dark"] .sidebar-neo {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__brand {
+  background: #0f172a !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+body[data-theme="dark"] .sidebar-logo-img {
+  filter: brightness(0.85);
+}
+
+body[data-theme="dark"] .sidebar-neo__item {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__item:hover {
+  background: #1e293b !important;
+  color: #3dd6c4 !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__item.is-active {
+  background: linear-gradient(135deg, #3dd6c4 0%, #26a69a 100%) !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__dock {
+  background: #0f172a !important;
+  border-top: 1px solid #1e293b !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__dock-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .sidebar-neo__dock-btn:hover {
+  background: #334155 !important;
+  transform: translateY(-2px);
+}
+/* ================================
+   04 — NAVBAR (LIGHT + DARK)
+================================ */
+
+.navbar {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  padding: 12px 18px;
+}
+
+.navbar .btn {
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+body[data-theme="dark"] .navbar {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .navbar .btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+
+/* ================================
+   05 — CARDS & SURFACES
+================================ */
+
+.card,
+.card-neo {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  transition: all .25s ease;
+}
+
+.card:hover,
+.card-neo:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+/* Dark mode */
+body[data-theme="dark"] .card,
+body[data-theme="dark"] .card-neo {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.45);
+}
+
+
+/* ================================
+   06 — TEXT / HEADINGS / COLORS
+================================ */
+
+h1, h2, h3, h4, h5, h6, label, strong {
+  color: #0b1220;
+}
+
+.text-muted {
+  color: #64748b !important;
+}
+
+body[data-theme="dark"] h1,
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h3,
+body[data-theme="dark"] h4,
+body[data-theme="dark"] h5,
+body[data-theme="dark"] h6,
+body[data-theme="dark"] label,
+body[data-theme="dark"] strong,
+body[data-theme="dark"] .text-muted {
+  color: #ffffff !important;
+}
+
+
+/* ================================
+   07 — INPUTS / SELECTS
+================================ */
+
+.form-control,
+.form-select {
+  border-radius: 10px !important;
+  border: 1px solid rgba(0,0,0,.12);
+  padding: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #3dd6c4 !important;
+  box-shadow: 0 0 0 3px rgba(61, 214, 196, .35);
+}
+
+body[data-theme="dark"] .form-control,
+body[data-theme="dark"] .form-select {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .form-control::placeholder {
+  color: #9ca3af !important;
+}
+
+
+/* ================================
+   08 — BUTTONS
+================================ */
+
+.btn-dark,
+.btn {
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+body[data-theme="dark"] .btn,
+body[data-theme="dark"] .btn-dark {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .btn:hover,
+body[data-theme="dark"] .btn-dark:hover {
+  background: #334155 !important;
+  border-color: #475569 !important;
+}
+
+
+/* ================================
+   09 — TABLES (LIGHT + DARK)
+================================ */
+
+.table-neo {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-neo thead th {
+  background: #f8fafc;
+  color: #475569;
+  padding: 12px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.table-neo tbody tr {
+  transition: .2s;
+}
+
+.table-neo tbody tr:hover {
+  background: #f3f4f6;
+}
+
+.table-neo tbody td {
+  padding: 14px;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* DARK */
+body[data-theme="dark"] .table-neo thead th {
+  background: #1e293b !important;
+  color: #ffffff !important;
+  border-bottom-color: #334155 !important;
+}
+
+body[data-theme="dark"] .table-neo tbody td {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #e2e8f0 !important;
+}
+
+body[data-theme="dark"] .table-neo tbody tr:hover {
+  background: #1e293b !important;
+}
+
+
+/* ================================
+   10 — MODALS
+================================ */
+
+.modal-content {
+  border-radius: 14px;
+}
+
+body[data-theme="dark"] .modal-content {
+  background: #111827 !important;
+  color: #ffffff !important;
+  border-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .modal-header,
+body[data-theme="dark"] .modal-footer {
+  border-color: #1e293b !important;
+}
+
+
+/* ================================
+   11 — NOTIFICATIONS LIST
+================================ */
+
+.notif__wrap {
+  border: 2px solid rgba(160, 190, 225, 0.65);
+  border-radius: 14px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.notif__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+
+body[data-theme="dark"] .notif__wrap {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .notif__item {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+
+/* ================================
+   12 — SCROLLBARS
+================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+/* ============================================
+   13 — ANALYZER PANEL (Cards + Sections)
+=============================================== */
+
+.analyzer-card,
+.simulation-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,.08);
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.05);
+  transition: .25s;
+}
+
+.analyzer-card:hover,
+.simulation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.08);
+}
+
+/* Dark mode */
+body[data-theme="dark"] .analyzer-card,
+body[data-theme="dark"] .simulation-card {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.45) !important;
+}
+
+body[data-theme="dark"] .analyzer-card:hover,
+body[data-theme="dark"] .simulation-card:hover {
+  box-shadow: 0 10px 35px rgba(0,0,0,.55) !important;
+}
+
+
+/* ============================================
+   15 — SUPPORT PANEL (Search + Ticket List)
+=============================================== */
+
+.support-search-box {
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.06);
+  display: flex;
+  gap: 10px;
+}
+
+.support-search-box input {
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+}
+
+body[data-theme="dark"] .support-search-box {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .support-search-box input {
+  background: #111827 !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.ticket-card {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  transition: .25s;
+  cursor: pointer;
+}
+
+.ticket-card:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+/* Dark mode for ticket list */
+body[data-theme="dark"] .ticket-card {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .ticket-card:hover {
+  background: #1e293b !important;
+}
+
+
+/* ============================================
+   16 — TICKET DETAILS PANEL
+=============================================== */
+
+.ticket-details-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  transition: .25s;
+}
+
+.ticket-details-box:hover {
+  box-shadow: 0 10px 26px rgba(0,0,0,.1);
+}
+
+body[data-theme="dark"] .ticket-details-box {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+}
+
+/* Messages inside the ticket */
+.ticket-message {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+body[data-theme="dark"] .ticket-message {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+
+/* ============================================
+   17 — ANIMATIONS (Smooth UI)
+=============================================== */
+
+.fade-in {
+  animation: fadeIn .35s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.scale-in {
+  animation: scaleIn .25s ease forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+
+/* ============================================
+   18 — BUTTONS (Extra Enhancements)
+=============================================== */
+
+.btn-teal {
+  background: #3dd6c4;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(61,214,196,.35);
+  transition: .25s;
+}
+
+.btn-teal:hover {
+  background: #26a69a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(61,214,196,.45);
+}
+
+body[data-theme="dark"] .btn-teal {
+  box-shadow: 0 6px 16px rgba(61,214,196,.55) !important;
+}
+/* Alert Cards – Light Mode */
+.alert-card {
+  background: #ffffff !important;
+  color: #0b1220 !important;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Alert Cards – Dark Mode */
+body[data-theme="dark"] .alert-card {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border: 1px solid #1e293b !important;
+}
+/* FIX Recharts disappearing due to grid layouts */
+.card-neo,
+.card {
+  display: block !important;
+}
