@@ -1,4 +1,6 @@
+// src/components/AdivosrComponents/BreakEvenSimulationPanel.jsx
 import React, { useState } from "react";
+import axios from "axios";
 import { FiArrowLeft, FiPenTool } from "react-icons/fi";
 import {
   LineChart,
@@ -7,27 +9,83 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
+  ResponsiveContainer
 } from "recharts";
 
 export default function BreakEvenSimulationPanel({ client, setTab }) {
-  const [price, setPrice] = useState(20);
-  const [variableCost, setVariableCost] = useState(8);
-  const [fixedCost, setFixedCost] = useState(1500);
-  const [units, setUnits] = useState(200);
+  const [price, setPrice] = useState(Number(client?.pricePerUnit) || 0);
+  const [variableCost, setVariableCost] = useState(Number(client?.variableCost) || 0);
+  const [fixedCost, setFixedCost] = useState(Number(client?.fixedCosts) || 0);
+  const [units, setUnits] = useState(Number(client?.salesVolume) || 0);
 
-  const breakEvenUnits = Math.round(fixedCost / (price - variableCost));
 
-  const chartData = Array.from({ length: 7 }).map((_, i) => ({
-    day: `Day ${i + 1}`,
-    revenue: (i + 1) * price * 20,
-    cost: fixedCost + variableCost * (i + 1) * 20,
-  }));
+  const breakEvenUnits =
+    price - variableCost > 0
+      ? Math.round(fixedCost / (price - variableCost))
+      : 0;
+
+  const chartData = Array.from({ length: 7 }).map((_, i) => {
+    const u = (i + 1) * (units / 7);
+    return {
+      point: `P${i + 1}`,
+      revenue: u * price,
+      cost: fixedCost + variableCost * u
+    };
+  });
+
+  // 🟢 NEW — Save Suggestion API call
+  const sendSuggestion = async () => {
+    try {
+      const advisor = JSON.parse(localStorage.getItem("loggedUser"));
+
+      const payload = {
+        advisorId: advisor?.userId,
+        ownerId: client?._id,
+        suggestion: {
+          price,
+          variableCost,
+          fixedCost,
+          units,
+          breakEvenUnits
+        }
+      };
+
+      await axios.post("http://localhost:5001/api/advisor/suggestions", payload);
+
+      alert("Suggestion sent to the owner successfully!");
+    } catch (err) {
+      console.error("Suggestion Error:", err);
+      alert("Error sending suggestion");
+    }
+  };
+
+  // Early UI if no client selected
+  if (!client) {
+    return (
+      <div className="container-xxl">
+        <div className="d-flex align-items-center mb-4">
+          <button
+            className="btn btn-outline-secondary me-3"
+            onClick={() => setTab("dashboard")}
+          >
+            <FiArrowLeft /> Back
+          </button>
+          <h3 className="fw-bold mb-0">Break-even Simulation</h3>
+        </div>
+
+        <div className="alert alert-warning">
+          No business owner is selected. Please go back to the dashboard and
+          choose an owner.
+        </div>
+      </div>
+    );
+  }
+
+  const ownerName = client.businessName || client.fullName || "Business";
 
   return (
     <div className="container-xxl">
-
-      {/* Back button */}
+      {/* Header */}
       <div className="d-flex align-items-center mb-4">
         <button
           className="btn btn-outline-secondary me-3"
@@ -37,7 +95,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
         </button>
 
         <h3 className="fw-bold mb-0">
-          Break-even Simulation — {client?.name}
+          Break-even Simulation — {ownerName}
         </h3>
       </div>
 
@@ -47,7 +105,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
 
         <div className="row g-3">
           <div className="col-md-3">
-            <label className="form-label fw-semibold">Price</label>
+            <label className="form-label fw-semibold">Price per Unit (SAR)</label>
             <input
               type="number"
               value={price}
@@ -57,7 +115,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
           </div>
 
           <div className="col-md-3">
-            <label className="form-label fw-semibold">Variable Cost</label>
+            <label className="form-label fw-semibold">Variable Cost (SAR)</label>
             <input
               type="number"
               value={variableCost}
@@ -67,7 +125,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
           </div>
 
           <div className="col-md-3">
-            <label className="form-label fw-semibold">Fixed Cost</label>
+            <label className="form-label fw-semibold">Fixed Cost (SAR)</label>
             <input
               type="number"
               value={fixedCost}
@@ -77,7 +135,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
           </div>
 
           <div className="col-md-3">
-            <label className="form-label fw-semibold">Units Sold</label>
+            <label className="form-label fw-semibold">Expected Units Sold</label>
             <input
               type="number"
               value={units}
@@ -98,7 +156,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
         </div>
 
         <div className="text-muted small">
-          * This is a simplified simulation for display/demo purposes only.
+          * You can tweak the inputs to test different scenario recommendations.
         </div>
       </div>
 
@@ -110,7 +168,7 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
           <ResponsiveContainer>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
+              <XAxis dataKey="point" />
               <YAxis />
               <Tooltip />
               <Line type="monotone" dataKey="revenue" stroke="#28a745" strokeWidth={2} />
@@ -120,17 +178,26 @@ export default function BreakEvenSimulationPanel({ client, setTab }) {
         </div>
       </div>
 
-      {/* WRITE FEEDBACK BUTTON */}
+      {/* 🔥 NEW — Save Suggestion Button */}
+      <div className="text-end mt-3">
+        <button
+          className="btn btn-success d-inline-flex align-items-center gap-2"
+          onClick={sendSuggestion}
+        >
+          💾 Save Suggestion
+        </button>
+      </div>
+
+      {/* Write feedback button */}
       <div className="text-end mt-4">
         <button
-          className="btn btn-primary d-flex align-items-center gap-2"
+          className="btn btn-primary d-inline-flex align-items-center gap-2"
           onClick={() => setTab("feedback")}
         >
           <FiPenTool size={16} />
           Write Feedback
         </button>
       </div>
-
     </div>
   );
 }

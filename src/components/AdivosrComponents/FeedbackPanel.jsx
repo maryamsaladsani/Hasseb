@@ -1,51 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
-  FiMessageCircle,
+  FiEye,
   FiTrash2,
   FiDownload,
-  FiEye,
   FiArrowLeft,
   FiEdit2,
 } from "react-icons/fi";
 
-export default function FeedbackPanel() {
-  const [items, setItems] = useState([
-    {
-      id: "1",
-      author: "john.doe@company.com",
-      text: "Please check VC vs price margin.",
-      at: "Jan 15, 2024, 10:15 AM",
-    },
-    {
-      id: "2",
-      author: "nancy@company.com",
-      text: "Pricing experiment shows abnormal variance.",
-      at: "Jan 14, 2024, 4:20 PM",
-    },
-  ]);
+export default function FeedbackPanel({ feedback = [], owners = [], advisorId }) {
+  const [items, setItems] = useState([]);
+  const [ownerId, setOwnerId] = useState("");
+  const [content, setContent] = useState("");
 
-  const [txt, setTxt] = useState("");
-  const [activeFeedback, setActiveFeedback] = useState(null);
+  const [active, setActive] = useState(null);
   const [editText, setEditText] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
-  // Add comment
-  const addComment = () => {
-    const v = txt.trim();
-    if (!v) return;
-    setItems((prev) => [
-      {
-        id: Math.random().toString(36).slice(2),
-        author: "you@haseeb.sa",
-        text: v,
-        at: new Date().toLocaleString(),
-      },
-      ...prev,
-    ]);
-    setTxt("");
+  // Load feedback from props
+  useEffect(() => {
+    setItems(feedback);
+  }, [feedback]);
+
+  /* -------------------------------------
+        ADD FEEDBACK
+  ------------------------------------- */
+  const addFeedback = async () => {
+    if (!ownerId?.trim()) {
+      alert("Please select an owner");
+      return;
+    }
+    if (!content.trim()) {
+      alert("Please enter feedback");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5001/api/advisor/feedback", {
+        advisorId,
+        ownerId,
+        content,
+      });
+
+      setItems([res.data, ...items]);
+      setContent("");
+      setOwnerId("");
+    } catch (err) {
+      console.error("Add feedback error:", err);
+      alert("Error adding feedback");
+    }
   };
 
-  // Export ALL feedback
+  /* -------------------------------------
+        DELETE
+  ------------------------------------- */
+  const deleteOne = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5001/api/advisor/feedback/${id}`);
+
+      setItems(items.filter((i) => i._id !== id));
+      setActive(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* -------------------------------------
+        EDIT
+  ------------------------------------- */
+  const saveEdit = async () => {
+    if (!editText.trim()) return;
+
+    try {
+      const res = await axios.put(
+        `http://localhost:5001/api/advisor/feedback/${active._id}`,
+        { content: editText }
+      );
+
+      setItems(items.map((i) => (i._id === active._id ? res.data : i)));
+      setActive(res.data);
+      setShowEdit(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* -------------------------------------
+        EXPORT ALL
+  ------------------------------------- */
   const exportAll = () => {
     const blob = new Blob([JSON.stringify(items, null, 2)], {
       type: "application/json",
@@ -54,88 +96,71 @@ export default function FeedbackPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "all-feedback.json";
+    a.download = "feedback.json";
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  // Delete single item
-  const deleteOne = (id) => {
-    setItems(items.filter((i) => i.id !== id));
-    setActiveFeedback(null);
-  };
+  /* -------------------------------------
+        VIEW MODE
+  ------------------------------------- */
+  if (active) {
+    const owner = owners.find((o) => o._id === active.ownerId);
 
-  // Edit feedback
-  const openEdit = (item) => {
-    setEditText(item.text);
-    setShowEditModal(true);
-  };
-
-  const saveEdit = () => {
-    setItems(
-      items.map((i) =>
-        i.id === activeFeedback.id ? { ...i, text: editText } : i
-      )
-    );
-    setActiveFeedback({ ...activeFeedback, text: editText });
-    setShowEditModal(false);
-  };
-
-  // DETAILS VIEW
-  if (activeFeedback) {
     return (
       <div className="container-xxl">
-        <button
-          className="btn btn-light mb-3 border"
-          onClick={() => setActiveFeedback(null)}
-        >
+        <button className="btn btn-light mb-3 border" onClick={() => setActive(null)}>
           <FiArrowLeft /> Back
         </button>
 
         <div className="card-neo p-4">
-          <h4 className="fw-bold d-flex align-items-center gap-2">
-            <FiMessageCircle /> Feedback Details
-          </h4>
+          <h4 className="fw-bold">Feedback Details</h4>
 
-          <div className="mt-3">
-            <div className="fw-semibold">{activeFeedback.author}</div>
-            <div className="text-muted small mb-3">{activeFeedback.at}</div>
-            <p>{activeFeedback.text}</p>
-          </div>
+          <p className="text-muted small">
+            {new Date(active.createdAt).toLocaleString()}
+          </p>
+
+          {owner && (
+            <p className="fw-semibold">
+              For: {owner.fullName}
+            </p>
+          )}
+
+          <p>{active.content}</p>
 
           <div className="d-flex gap-3 mt-4">
-            <button className="btn btn-dark" onClick={() => openEdit(activeFeedback)}>
+            <button
+              className="btn btn-dark"
+              onClick={() => {
+                setShowEdit(true);
+                setEditText(active.content);
+              }}
+            >
               <FiEdit2 /> Edit
             </button>
 
-            <button
-              className="btn btn-danger"
-              onClick={() => deleteOne(activeFeedback.id)}
-            >
+            <button className="btn btn-danger" onClick={() => deleteOne(active._id)}>
               <FiTrash2 /> Delete
             </button>
           </div>
         </div>
 
         {/* Edit Modal */}
-        {showEditModal && (
+        {showEdit && (
           <>
             <div className="modal-backdrop fade show" />
             <div className="modal fade show d-block">
               <div className="modal-dialog modal-sm modal-dialog-centered">
                 <div className="modal-content">
                   <div className="modal-header">
-                    <h6 className="modal-title">Edit Feedback</h6>
-                    <button
-                      className="btn-close"
-                      onClick={() => setShowEditModal(false)}
-                    />
+                    <h6>Edit Feedback</h6>
+                    <button className="btn-close" onClick={() => setShowEdit(false)} />
                   </div>
 
                   <div className="modal-body">
                     <textarea
                       className="form-control"
-                      rows="3"
+                      rows={3}
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
                     ></textarea>
@@ -144,7 +169,7 @@ export default function FeedbackPanel() {
                   <div className="modal-footer">
                     <button
                       className="btn btn-outline-secondary"
-                      onClick={() => setShowEditModal(false)}
+                      onClick={() => setShowEdit(false)}
                     >
                       Cancel
                     </button>
@@ -161,11 +186,11 @@ export default function FeedbackPanel() {
     );
   }
 
-  // MAIN LIST VIEW
+  /* -------------------------------------
+        MAIN VIEW
+  ------------------------------------- */
   return (
     <div className="container-xxl">
-
-      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold">Feedback</h4>
 
@@ -174,41 +199,66 @@ export default function FeedbackPanel() {
         </button>
       </div>
 
-      {/* Add Feedback */}
+      {/* ADD FEEDBACK */}
       <div className="card-neo p-3 mb-4">
+        <select
+          className="form-select mb-2"
+          value={ownerId}
+          onChange={(e) => setOwnerId(e.target.value)}
+        >
+          <option value="">Select owner</option>
+          {owners.map((o) => (
+            <option key={o._id} value={o._id}>
+              {o.fullName}
+            </option>
+          ))}
+        </select>
+
         <textarea
           className="form-control"
-          rows="2"
+          rows={2}
           placeholder="Add a comment…"
-          value={txt}
-          onChange={(e) => setTxt(e.target.value)}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
 
-        <button className="btn btn-dark mt-2" onClick={addComment}>
+        <button className="btn btn-dark mt-2" onClick={addFeedback}>
           Add Comment
         </button>
       </div>
 
-      {/* List */}
+      {/* LIST */}
       <div className="d-flex flex-column gap-3">
-        {items.map((c) => (
-          <div key={c.id} className="card-neo p-3 d-flex gap-3">
+        {items.map((fb) => {
+          const owner = owners.find((o) => o._id === fb.ownerId);
 
-            <div className="flex-grow-1">
-              <div className="fw-semibold">{c.author}</div>
-              <div className="text-muted small">{c.at}</div>
-              <div className="mt-2">{c.text}</div>
+          return (
+            <div key={fb._id} className="card-neo p-3 d-flex justify-content-between">
+              <div>
+                {/* التاريخ */}
+                <div className="text-muted small">
+                  {new Date(fb.createdAt).toLocaleString()}
+                </div>
+
+                {/* الفيدباك لمين */}
+                {owner && (
+                  <div className="fw-semibold small">
+                    Feedback for: {owner.fullName}
+                  </div>
+                )}
+
+                {/* نص الفيدباك */}
+                <div>{fb.content}</div>
+              </div>
+
+              <button className="btn btn-outline-dark" onClick={() => setActive(fb)}>
+                <FiEye /> View
+              </button>
             </div>
-
-            <button
-              className="btn btn-outline-dark"
-              onClick={() => setActiveFeedback(c)}
-            >
-              <FiEye /> View
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
+
