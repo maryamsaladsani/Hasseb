@@ -117,4 +117,32 @@ router.post("/login", async (req, res) => {
     }
 });
 
+// TEMP ROUTE: Fix manager user (username + password)
+router.post("/fix-manager", async (req, res) => {
+    try {
+        // Find the manager by email (adjust if you used a different one)
+        const user = await User.findOne({ email: "haseeb@manager.com" });
+
+        if (!user) {
+            return res.status(404).json({ msg: "Manager user not found" });
+        }
+
+        // Force correct username + plain text password.
+        // The pre-save hook in User.js WILL hash this when saving.
+        user.username = "manager.norah.202500000"; // all lowercase, matches login
+        user.password = "Haseeb@2027";             // plain text, will be hashed
+
+        await user.save();
+
+        return res.json({
+            msg: "Manager fixed successfully",
+            username: user.username,
+            role: user.role
+        });
+    } catch (err) {
+        console.error("Fix manager error:", err);
+        return res.status(500).json({ msg: "Server error", error: err.message });
+    }
+});
+
 module.exports = router;
