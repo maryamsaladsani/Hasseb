@@ -1,31 +1,24 @@
-Backend:
-Manager:
+Norah:
 1- Connect Manager to Advisor about ticket
 2- Connect Manager to Owner about ticket
-3- Assign projects to advisors
-4- Counter Usage over time
-5- Based on (), users are active or no
-6-
+4- Counter Usage over time: Based on (), users are active or no
+5- Assign projects to advisors, Get Assigned Owners done by manager
 
-Owner:
-1- Feedback Page: see prev feedback from advisor
-2- Comparing scenarios
-3- Owner Profile
-4- Parcing excel sheet
-5-
+Shoroq:
+1- Compiring Scenarios page
+2- Email while signup
+3- Forget Password
 
-Advisor:
-1-Get Assigned Owners
-2-View client simulations
-3-Write feedback and recommendation for client
-4-Risk Analysis for Owner
-5-Show and edit and delete All Feedback for Advisor
-6-Accumulate activity points
-7-Advisor Profile
-8-submit and show new ticket 
+Zahra:
+1- View client dashboard: Write feedback and recommendation for client
+2- Risk Analysis for Owner based on thresholds
+3- Feedback Page on thr owner side: see prev feedback from advisor
+
+Maryam:
+1- connect Profiles to backend
+2- Connect to database
+3- unify overall UI
+4- Average burn rate
 
 
-
-Password and Authentication
-
-
+ 
