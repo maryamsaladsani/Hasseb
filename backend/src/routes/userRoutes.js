@@ -226,4 +226,38 @@ router.post("/forgot-password/reset", async (req, res) => {
   }
 });
 
+/* ===========================
+      TEMP FIX — HASH MANAGER PASSWORD
+   =========================== */
+
+router.get("/fix-manager", async (req, res) => {
+  try {
+    const bcrypt = require("bcryptjs");
+    const managerUsername = "manager.norah.202500000";  // <-- change if needed
+    const newPlainPassword = "Haseeb@2027";             // <-- the password manager should use
+
+    // Find manager
+    const user = await User.findOne({ username: managerUsername });
+
+    if (!user) {
+      return res.status(404).json({ msg: "Manager user not found" });
+    }
+
+    // Hash the new password
+    const hashed = await bcrypt.hash(newPlainPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    return res.json({
+      msg: "Manager password re-hashed successfully",
+      username: user.username,
+      role: user.role
+    });
+
+  } catch (err) {
+    console.error("Fix manager error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;
