@@ -1,8 +1,39 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FiSearch, FiMail, FiClock } from "react-icons/fi";
-import {ROLES, STATUS, nowISO, uid, labelOf, isValidEmail, roleBadgeClass, statusBadgeClass, initialsOf,} from "../../information";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,} from "recharts";
+
+import {
+  FiSearch,
+  FiMail,
+  FiClock,
+  FiUsers,
+  FiUserCheck,
+  FiAlertCircle,
+} from "react-icons/fi";
+
+import {
+  ROLES,
+  STATUS,
+  nowISO,
+  uid,
+  labelOf,
+  isValidEmail,
+  roleBadgeClass,
+  statusBadgeClass,
+  initialsOf,
+} from "../../information";
+
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
+
 const USERS_API_URL = "http://localhost:5001/api/users";
+const TICKETS_API_URL = "http://localhost:5001/api/tickets";
+
 
 
 /* USERS  */
@@ -89,35 +120,44 @@ export function UsersPanel({ users, setUsers, query, setQuery }) {
       return;
     }
 
-    // ✏️ EDIT EXISTING USER (still local)
+    // EDIT EXISTING USER (still local)
     if (editingId) {
-      const emailTaken = users.some(
-        (u) =>
-          u.id !== editingId &&
-          u.email.toLowerCase() === draft.email.toLowerCase()
-      );
-      if (emailTaken) {
-        setErrorMessage("Email already belongs to another user.");
+      try {
+        const payload = {
+          name: draft.name.trim(),
+          email: draft.email.trim(),
+          role: draft.role,
+          status: draft.status,
+        };
+
+        const res = await fetch(`${USERS_API_URL}/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          setErrorMessage(err.message || "Failed to update user.");
+          return;
+        }
+
+        const updatedUser = await res.json();
+
+        setUsers(
+          users.map((u) => (u.id === editingId ? updatedUser : u))
+        );
+
+        setSuccessMessage("User updated successfully!");
+        setTimeout(closeModal, 800);
+        return;
+      } catch (err) {
+        console.error(err);
+        setErrorMessage("Cannot connect to the server.");
         return;
       }
-
-      const updated = users.map((u) =>
-        u.id === editingId
-          ? {
-              ...u,
-              name: draft.name.trim(),
-              email: draft.email.trim(),
-              role: draft.role,
-              status: draft.status,
-            }
-          : u
-      );
-
-      setUsers(updated);
-      setSuccessMessage("User updated successfully!");
-      setTimeout(closeModal, 800);
-      return;
     }
+
 
     // ➕ ADD NEW USER (POST → Backend → MongoDB)
     try {
@@ -299,18 +339,32 @@ export function UsersPanel({ users, setUsers, query, setQuery }) {
                           >
                             Edit
                           </button>
-                          <button
-                            className="btn btn-sm btn-dark"
-                            onClick={() => {
-                              if (window.confirm("Delete this user?")) {
-                                setUsers(
-                                  users.filter((x) => x.id !== u.id)
-                                );
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
+                         <button
+                        className="btn btn-sm btn-dark"
+                        onClick={async () => {
+                          if (!window.confirm("Delete this user?")) return;
+
+                          try {
+                            const res = await fetch(`${USERS_API_URL}/${u.id}`, {
+                              method: "DELETE",
+                            });
+
+                            if (!res.ok) {
+                              const err = await res.json().catch(() => ({}));
+                              alert(err.message || "Failed to delete user.");
+                              return;
+                            }
+
+                            setUsers(users.filter((x) => x.id !== u.id));
+                          } catch (err) {
+                            console.error("Delete user error:", err);
+                            alert("Cannot connect to the server.");
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+
                         </div>
                       </td>
                     </tr>
@@ -451,70 +505,110 @@ export function UsersPanel({ users, setUsers, query, setQuery }) {
 
 
 /* SETTINGS  */
-export function SettingsPanel({ settings, setSettings }) {
+export function SettingsPanel({ settings, setSettings, users = [] }) {
+  // --------- Helpers ---------
   function makeInitial(s) {
-    var out = {
-      currency: s && s.currency ? s.currency : "",
-      defaultMarginPct:
-        s && typeof s.defaultMarginPct === "number" ? s.defaultMarginPct : 0,
-      manager: {
-        name: s && s.manager && s.manager.name ? s.manager.name : "",
-        email: s && s.manager && s.manager.email ? s.manager.email : "",
-        phone: s && s.manager && s.manager.phone ? s.manager.phone : "",
-      },
+    const base = s || {};
+
+    return {
+      // advisor-owner pairs
+      assignments: Array.isArray(base.assignments) ? base.assignments : [],
+
+      // notification switches
       notifications: {
         emailAlerts:
-          s && s.notifications && typeof s.notifications.emailAlerts === "boolean"
-            ? s.notifications.emailAlerts
+          base.notifications && typeof base.notifications.emailAlerts === "boolean"
+            ? base.notifications.emailAlerts
             : false,
         ticketBadge:
-          s && s.notifications && typeof s.notifications.ticketBadge === "boolean"
-            ? s.notifications.ticketBadge
+          base.notifications && typeof base.notifications.ticketBadge === "boolean"
+            ? base.notifications.ticketBadge
             : false,
         push:
-          s && s.notifications && typeof s.notifications.push === "boolean"
-            ? s.notifications.push
+          base.notifications && typeof base.notifications.push === "boolean"
+            ? base.notifications.push
             : false,
       },
     };
-    return out;
   }
 
   const [draft, setDraft] = useState(makeInitial(settings));
 
-  useEffect(function () {
+  // when parent settings change
+  useEffect(() => {
     setDraft(makeInitial(settings));
   }, [settings]);
 
+  // pull advisors & owners from users prop
+  const advisors = (users || []).filter((u) => u.role === "advisor");
+  const owners = (users || []).filter((u) => u.role === "owner");
+
+  // local selects for new assignment
+  const [selectedAdvisorId, setSelectedAdvisorId] = useState(
+    advisors[0]?.id || ""
+  );
+  const [selectedOwnerId, setSelectedOwnerId] = useState(
+    owners[0]?.id || ""
+  );
+
+  // ensure selects stay valid when users change
+  useEffect(() => {
+    if (!advisors.find((a) => a.id === selectedAdvisorId)) {
+      setSelectedAdvisorId(advisors[0]?.id || "");
+    }
+    if (!owners.find((o) => o.id === selectedOwnerId)) {
+      setSelectedOwnerId(owners[0]?.id || "");
+    }
+  }, [advisors, owners]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // --------- Assignment actions ---------
+  function addAssignment(e) {
+    e.preventDefault();
+    if (!selectedAdvisorId || !selectedOwnerId) return;
+
+    // prevent duplicates
+    const exists = (draft.assignments || []).some(
+      (a) =>
+        a.advisorId === selectedAdvisorId && a.ownerId === selectedOwnerId
+    );
+    if (exists) {
+      alert("This advisor already has that owner assigned.");
+      return;
+    }
+
+    const nextAssignments = [
+      ...(draft.assignments || []),
+      { advisorId: selectedAdvisorId, ownerId: selectedOwnerId },
+    ];
+
+    const nextDraft = { ...draft, assignments: nextAssignments };
+    setDraft(nextDraft);
+
+    // 👇 IMPORTANT: your setSettings expects a plain object
+    setSettings({
+      assignments: nextAssignments,
+      notifications: nextDraft.notifications,
+    });
+  }
+
+  function removeAssignment(advisorId, ownerId) {
+    const nextAssignments = (draft.assignments || []).filter(
+      (a) => !(a.advisorId === advisorId && a.ownerId === ownerId)
+    );
+
+    const nextDraft = { ...draft, assignments: nextAssignments };
+    setDraft(nextDraft);
+
+    setSettings({
+      assignments: nextAssignments,
+      notifications: nextDraft.notifications,
+    });
+  }
+
+  // --------- Save notifications only ---------
   function save() {
-    var mgr = draft.manager || {};
-    var pct = Number(draft.defaultMarginPct);
-
-    if (Number.isNaN(pct) || pct < 0 || pct > 95) {
-      alert("Margin must be between 0 and 95.");
-      return;
-    }
-    if (!draft.currency || draft.currency.trim() === "") {
-      alert("Currency is required.");
-      return;
-    }
-    if (!mgr.name || mgr.name.trim() === "") {
-      alert("Manager name is required.");
-      return;
-    }
-    if (!mgr.email || mgr.email.trim() === "") {
-      alert("Manager email is required.");
-      return;
-    }
-
-    var clean = {
-      currency: draft.currency.trim(),
-      defaultMarginPct: pct,
-      manager: {
-        name: mgr.name.trim(),
-        email: mgr.email.trim(),
-        phone: (mgr.phone ? mgr.phone : "").trim(),
-      },
+    const clean = {
+      assignments: draft.assignments || [],
       notifications: {
         emailAlerts: !!(draft.notifications && draft.notifications.emailAlerts),
         ticketBadge: !!(draft.notifications && draft.notifications.ticketBadge),
@@ -522,48 +616,130 @@ export function SettingsPanel({ settings, setSettings }) {
       },
     };
 
+    // again: plain object, not callback
     setSettings(clean);
+    alert("Settings saved successfully!");
   }
+
+  // --------- SUMMARY CALCULATIONS ---------
+  const assignments = draft.assignments || [];
+
+  const assignedOwnerIds = new Set(assignments.map((a) => a.ownerId));
+  const assignedOwnersCount = assignedOwnerIds.size;
+
+  const unassignedOwners = owners.filter((o) => !assignedOwnerIds.has(o.id));
+
+  const advisorLoad = {};
+  assignments.forEach((a) => {
+    advisorLoad[a.advisorId] = (advisorLoad[a.advisorId] || 0) + 1;
+  });
+
+  const averageLoad =
+    advisors.length > 0
+      ? (assignedOwnersCount / advisors.length).toFixed(1)
+      : 0;
 
   return (
     <div className="row g-3">
-      {/* LEFT COLUMN: Default settings + Notifications (stacked) */}
+      {/* LEFT COLUMN: Assignments + Notifications */}
       <div className="col-12 col-lg-6">
-        {/* Default Simulation Settings */}
+        {/* Advisor–Owner assignment card */}
         <div className="card shadow-sm mb-3">
           <div className="card-body">
-            <h5>Default Simulation Settings</h5>
-            <div className="vstack gap-2">
-              <div>
-                <label className="form-label">Currency</label>
-                <input
-                  className="form-control"
-                  value={draft.currency}
-                  onChange={function (e) {
-                    var copy = Object.assign({}, draft);
-                    copy.currency = e.target.value;
-                    setDraft(copy);
-                  }}
-                />
-              </div>
-              <div>
-                <label className="form-label">Default Margin (%)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={draft.defaultMarginPct}
-                  onChange={function (e) {
-                    var copy = Object.assign({}, draft);
-                    copy.defaultMarginPct = Number(e.target.value);
-                    setDraft(copy);
-                  }}
-                />
-              </div>
+            <div className="d-flex align-items-center mb-3">
+              <FiUserCheck className="me-2 text-primary" size={20} />
+              <h5 className="mb-0">Advisor Assignments</h5>
             </div>
+
+            {advisors.length === 0 || owners.length === 0 ? (
+              <div className="alert alert-warning small d-flex align-items-center">
+                <FiAlertCircle className="me-2" />
+                You need at least one advisor and one owner to create
+                assignments.
+              </div>
+            ) : (
+              <form onSubmit={addAssignment} className="vstack gap-2 mb-3">
+                <div>
+                  <label className="form-label small text-muted">
+                    Advisor
+                  </label>
+                  <select
+                    className="form-select"
+                    value={selectedAdvisorId}
+                    onChange={(e) => setSelectedAdvisorId(e.target.value)}
+                  >
+                    {advisors.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name} ({a.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="form-label small text-muted">
+                    Owner
+                  </label>
+                  <select
+                    className="form-select"
+                    value={selectedOwnerId}
+                    onChange={(e) => setSelectedOwnerId(e.target.value)}
+                  >
+                    {owners.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name} ({o.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="text-end">
+                  <button type="submit" className="btn btn-dark">
+                    Assign Owner
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Existing assignments list */}
+            <h6 className="fw-semibold mb-2">Current Assignments</h6>
+            {assignments.length === 0 ? (
+              <div className="text-muted small">
+                No assignments yet. Use the form above to assign owners to
+                advisors.
+              </div>
+            ) : (
+              <ul className="list-group small">
+                {assignments.map((a, idx) => {
+                  const adv = advisors.find((x) => x.id === a.advisorId);
+                  const own = owners.find((x) => x.id === a.ownerId);
+                  if (!adv || !own) return null;
+                  return (
+                    <li
+                      key={idx}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span>
+                        <strong>{adv.name}</strong> → {own.name}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() =>
+                          removeAssignment(a.advisorId, a.ownerId)
+                        }
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
 
-        {/* Notifications (now directly under Default Simulation Settings) */}
+        {/* Notifications card */}
         <div className="card shadow-sm">
           <div className="card-body">
             <h5>Notifications</h5>
@@ -578,9 +754,9 @@ export function SettingsPanel({ settings, setSettings }) {
                     ? draft.notifications.emailAlerts
                     : false
                 }
-                onChange={function (e) {
-                  var copy = Object.assign({}, draft);
-                  var notif = Object.assign({}, copy.notifications || {});
+                onChange={(e) => {
+                  const copy = { ...draft };
+                  const notif = { ...(copy.notifications || {}) };
                   notif.emailAlerts = e.target.checked;
                   copy.notifications = notif;
                   setDraft(copy);
@@ -601,9 +777,9 @@ export function SettingsPanel({ settings, setSettings }) {
                     ? draft.notifications.ticketBadge
                     : false
                 }
-                onChange={function (e) {
-                  var copy = Object.assign({}, draft);
-                  var notif = Object.assign({}, copy.notifications || {});
+                onChange={(e) => {
+                  const copy = { ...draft };
+                  const notif = { ...(copy.notifications || {}) };
                   notif.ticketBadge = e.target.checked;
                   copy.notifications = notif;
                   setDraft(copy);
@@ -614,7 +790,7 @@ export function SettingsPanel({ settings, setSettings }) {
               </label>
             </div>
 
-            <div className="form-check">
+            <div className="form-check mb-3">
               <input
                 id="n3"
                 className="form-check-input"
@@ -624,9 +800,9 @@ export function SettingsPanel({ settings, setSettings }) {
                     ? draft.notifications.push
                     : false
                 }
-                onChange={function (e) {
-                  var copy = Object.assign({}, draft);
-                  var notif = Object.assign({}, copy.notifications || {});
+                onChange={(e) => {
+                  const copy = { ...draft };
+                  const notif = { ...(copy.notifications || {}) };
                   notif.push = e.target.checked;
                   copy.notifications = notif;
                   setDraft(copy);
@@ -636,65 +812,89 @@ export function SettingsPanel({ settings, setSettings }) {
                 Push Notifications
               </label>
             </div>
+
+            <button className="btn btn-dark mt-1" onClick={save}>
+              Save Settings
+            </button>
           </div>
         </div>
       </div>
 
+      {/* RIGHT COLUMN: Assignment Summary */}
       <div className="col-12 col-lg-6">
         <div className="card shadow-sm h-100">
           <div className="card-body">
-            <h5>Manager Information</h5>
-            <div className="vstack gap-2">
-              <div>
-                <label className="form-label">Name</label>
-                <input
-                  className="form-control"
-                  value={draft.manager.name}
-                  onChange={function (e) {
-                    var copy = Object.assign({}, draft);
-                    var mgr = Object.assign({}, copy.manager || {});
-                    mgr.name = e.target.value;
-                    copy.manager = mgr;
-                    setDraft(copy);
-                  }}
-                />
+            <div className="d-flex align-items-center mb-3">
+              <FiUsers className="me-2 text-primary" size={20} />
+              <h5 className="mb-0">Assignment Summary</h5>
+            </div>
+
+            <div className="vstack gap-2 mb-3">
+              <div className="d-flex justify-content-between">
+                <span className="text-muted">Total Owners</span>
+                <strong>{owners.length}</strong>
               </div>
-              <div>
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  value={draft.manager.email}
-                  onChange={function (e) {
-                    var copy = Object.assign({}, draft);
-                    var mgr = Object.assign({}, copy.manager || {});
-                    mgr.email = e.target.value;
-                    copy.manager = mgr;
-                    setDraft(copy);
-                  }}
-                />
+
+              <div className="d-flex justify-content-between">
+                <span className="text-muted">Total Advisors</span>
+                <strong>{advisors.length}</strong>
               </div>
-              <div>
-                <label className="form-label">Phone</label>
-                <input
-                  className="form-control"
-                  value={draft.manager.phone}
-                  onChange={function (e) {
-                    var copy = Object.assign({}, draft);
-                    var mgr = Object.assign({}, copy.manager || {});
-                    mgr.phone = e.target.value;
-                    copy.manager = mgr;
-                    setDraft(copy);
-                  }}
-                />
+
+              <div className="d-flex justify-content-between">
+                <span className="text-muted">Assigned Owners</span>
+                <strong>{assignedOwnersCount}</strong>
+              </div>
+
+              <div className="d-flex justify-content-between text-danger">
+                <span>Unassigned Owners</span>
+                <strong>{unassignedOwners.length}</strong>
+              </div>
+
+              <div className="d-flex justify-content-between">
+                <span className="text-muted">Average Owners per Advisor</span>
+                <strong>{averageLoad}</strong>
               </div>
             </div>
 
-          <button className="btn btn-dark mt-3" onClick={() => { save(); alert("Settings saved successfully!"); }}>
-             Save Settings
-            </button>
-          
-            
+            <hr />
+
+            <h6 className="fw-semibold mb-2">Unassigned Owners</h6>
+            {unassignedOwners.length === 0 ? (
+              <div className="text-muted small">
+                All owners have an advisor assigned 🎉
+              </div>
+            ) : (
+              <ul className="list-group small mb-3">
+                {unassignedOwners.map((o) => (
+                  <li
+                    key={o.id}
+                    className="list-group-item d-flex justify-content-between"
+                  >
+                    <span>{o.name}</span>
+                    <span className="text-muted">{o.email}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <h6 className="fw-semibold mb-2">Advisor Load</h6>
+            {advisors.length === 0 ? (
+              <div className="text-muted small">
+                No advisors in the system.
+              </div>
+            ) : (
+              <ul className="list-group small">
+                {advisors.map((a) => (
+                  <li
+                    key={a.id}
+                    className="list-group-item d-flex justify-content-between"
+                  >
+                    <span>{a.name}</span>
+                    <strong>{advisorLoad[a.id] || 0} owners</strong>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
@@ -703,16 +903,18 @@ export function SettingsPanel({ settings, setSettings }) {
 }
 
 
+
 /*  ANALYTICS  */
 export function AnalyticsPanel({ analytics, users, refresh }) {
+  // Summary counts from real users coming from the backend
   const actives = users.filter((u) => u.status === "active").length;
   const total = users.length;
   const inactive = users.filter((u) => u.status === "inactive").length;
   const suspended = users.filter((u) => u.status === "suspended").length;
   const ratio = total ? Math.round((actives / total) * 100) : 0;
 
-  // Usage insights
-  const mostRunKey = Object.entries(analytics.simulations || {}).sort(
+  // Which simulator is used most – still using analytics.simulations
+  const mostRunKey = Object.entries(analytics?.simulations || {}).sort(
     (a, b) => b[1] - a[1]
   )[0]?.[0];
 
@@ -720,40 +922,53 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
     total === 0
       ? "You have no users yet. Invite your first user to get started."
       : `You have ${total} total users and ${actives} active (${ratio}%).`,
-    inactive > 0 ? `${inactive} user(s) are inactive — consider onboarding emails.` : null,
-    suspended > 0 ? `${suspended} user(s) are suspended — review and resolve if needed.` : null,
+    inactive > 0
+      ? `${inactive} user(s) are inactive — consider onboarding emails.`
+      : null,
+    suspended > 0
+      ? `${suspended} user(s) are suspended — review and resolve if needed.`
+      : null,
     mostRunKey
       ? `Most used simulator: ${mostRunKey}. Consider prioritizing improvements there.`
       : null,
   ].filter(Boolean);
 
-  // Chart data
+  // 🔥 Usage Over Time chart data: ONLY from users[]
   const chartData = useMemo(() => {
-    if (Array.isArray(analytics.activityByMonth) && analytics.activityByMonth.length) {
-      return analytics.activityByMonth;
-    }
-
-    // Fallback from users[].createdAt
     const countsByMonthKey = {};
+
+    // Count ONLY active users, grouped by last activity month
     users.forEach((u) => {
-      const d = new Date(u.createdAt);
+      if (u.status !== "active") return;
+
+      const baseDate = u.lastLoginAt || u.createdAt;
+      if (!baseDate) return;
+
+      const d = new Date(baseDate);
       if (Number.isNaN(d.getTime())) return;
-      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+      const monthKey = `${d.getFullYear()}-${String(
+        d.getMonth() + 1
+      ).padStart(2, "0")}`;
+
       countsByMonthKey[monthKey] = (countsByMonthKey[monthKey] || 0) + 1;
     });
 
+    // Build last 6 months timeline
     const out = [];
     const now = new Date();
     for (let i = 5; i >= 0; i--) {
       const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+      const monthKey = `${dt.getFullYear()}-${String(
+        dt.getMonth() + 1
+      ).padStart(2, "0")}`;
       out.push({
         month: dt.toLocaleString(undefined, { month: "short" }),
         users: countsByMonthKey[monthKey] || 0,
       });
     }
     return out;
-  }, [analytics.activityByMonth, users]);
+  }, [users]);
 
   return (
     <div className="row g-3">
@@ -794,8 +1009,10 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <h5 className="mb-0">Usage Over Time</h5>
               <small className="text-muted">
-                {analytics.lastUpdated
-                  ? `Last updated: ${new Date(analytics.lastUpdated).toLocaleString()}`
+                {analytics?.lastUpdated
+                  ? `Last updated: ${new Date(
+                      analytics.lastUpdated
+                    ).toLocaleString()}`
                   : null}
               </small>
             </div>
@@ -826,18 +1043,29 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
             </div>
             <ul className="list-group mt-2">
               <li className="list-group-item d-flex justify-content-between">
-                Break-even <span className="fw-bold">{analytics.simulations?.breakeven ?? 0}</span>
+                Break-even{" "}
+                <span className="fw-bold">
+                  {analytics?.simulations?.breakeven ?? 0}
+                </span>
               </li>
               <li className="list-group-item d-flex justify-content-between">
-                Pricing <span className="fw-bold">{analytics.simulations?.pricing ?? 0}</span>
+                Pricing{" "}
+                <span className="fw-bold">
+                  {analytics?.simulations?.pricing ?? 0}
+                </span>
               </li>
               <li className="list-group-item d-flex justify-content-between">
-                Cash Flow <span className="fw-bold">{analytics.simulations?.cashflow ?? 0}</span>
+                Cash Flow{" "}
+                <span className="fw-bold">
+                  {analytics?.simulations?.cashflow ?? 0}
+                </span>
               </li>
             </ul>
             <div className="small text-muted mt-2">
-              {analytics.lastUpdated
-                ? `Last updated: ${new Date(analytics.lastUpdated).toLocaleString()}`
+              {analytics?.lastUpdated
+                ? `Last updated: ${new Date(
+                    analytics.lastUpdated
+                  ).toLocaleString()}`
                 : null}
             </div>
           </div>
@@ -853,7 +1081,9 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
               {insights.map((line, i) => (
                 <li key={i}>{line}</li>
               ))}
-              {insights.length === 0 && <li className="text-muted">No insights to show yet.</li>}
+              {insights.length === 0 && (
+                <li className="text-muted">No insights to show yet.</li>
+              )}
             </ul>
           </div>
         </div>
@@ -862,114 +1092,167 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
   );
 }
 
+
 /*  SUPPORT  */
 export function SupportPanel({ tickets, setTickets }) {
-
   const safeTickets = Array.isArray(tickets) ? tickets : [];
-  const firstId = safeTickets.length > 0 ? safeTickets[0].id : null;
-
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [reply, setReply] = useState("");
-  const [activeId, setActiveId] = useState(firstId);
+  const [activeId, setActiveId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // keep activeId valid if ticket list changes
-  useEffect(function () {
-    var hasActive = false;
-    for (var i = 0; i < safeTickets.length; i++) {
-      if (safeTickets[i].id === activeId) { hasActive = true; break; }
+  // ----- Load tickets from backend -----
+  async function fetchTickets() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(TICKETS_API_URL);
+      if (!res.ok) {
+        throw new Error("Failed to fetch tickets");
+      }
+
+      const data = await res.json(); // backend array
+
+      // Normalize into shape SupportPanel expects
+      const normalized = (data || []).map((t) => ({
+        id: t.id,
+        subject: t.subject,
+        fromEmail: t.fromEmail || "",
+        fromName: t.fromName || "",
+        status: t.status || "open",
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        messages: (t.messages || []).map((m, idx) => ({
+          id: m._id || idx, // we just need a stable key
+          sender: m.senderRole === "manager" ? "pm" : "user",
+          text: m.text,
+          at: m.at,
+        })),
+      }));
+
+      setTickets(normalized);
+
+      // If no active ticket yet, pick first
+      if (!activeId && normalized.length > 0) {
+        setActiveId(normalized[0].id);
+      }
+    } catch (err) {
+      console.error("fetchTickets error:", err);
+      setError("Failed to load tickets.");
+    } finally {
+      setLoading(false);
     }
-    if (!hasActive) setActiveId(safeTickets.length > 0 ? safeTickets[0].id : null);
-  }, [safeTickets, activeId]);
+  }
 
-  // filter tickets
-  var term = q ? q.trim().toLowerCase() : "";
-  var filtered = [];
-  for (var i = 0; i < safeTickets.length; i++) {
-    var t = safeTickets[i];
+  // Load tickets on first mount
+  useEffect(() => {
+    fetchTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    var matchesQ = false;
-    if (term === "") {
+  // Keep activeId valid if tickets change
+  useEffect(
+    function () {
+      const hasActive = safeTickets.some((t) => t.id === activeId);
+      if (!hasActive) {
+        setActiveId(safeTickets.length > 0 ? safeTickets[0].id : null);
+      }
+    },
+    [safeTickets, activeId]
+  );
+
+  // ----- Filter tickets -----
+  const term = q ? q.trim().toLowerCase() : "";
+  const filtered = safeTickets.filter((t) => {
+    let matchesQ = false;
+
+    if (!term) {
       matchesQ = true;
     } else {
-      var subj = t.subject ? t.subject.toLowerCase() : "";
-      var email = t.fromEmail ? t.fromEmail.toLowerCase() : "";
-      var msgHit = false;
-      if (t.messages && Array.isArray(t.messages)) {
-        for (var m = 0; m < t.messages.length; m++) {
-          var txt = t.messages[m] && t.messages[m].text ? t.messages[m].text.toLowerCase() : "";
-          if (txt.indexOf(term) !== -1) { msgHit = true; break; }
-        }
-      }
-      matchesQ = subj.indexOf(term) !== -1 || email.indexOf(term) !== -1 || msgHit;
+      const subj = (t.subject || "").toLowerCase();
+      const email = (t.fromEmail || "").toLowerCase();
+      const msgHit =
+        t.messages &&
+        t.messages.some((m) => (m.text || "").toLowerCase().includes(term));
+
+      matchesQ = subj.includes(term) || email.includes(term) || msgHit;
     }
 
-    var matchesStatus = statusFilter === "all" || t.status === statusFilter;
-    if (matchesQ && matchesStatus) filtered.push(t);
-  }
+    const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+    return matchesQ && matchesStatus;
+  });
 
-  // pick active
-  var active = null;
+  // Pick active ticket
+  let active = null;
   if (filtered.length > 0) {
-    for (var a = 0; a < filtered.length; a++) {
-      if (filtered[a].id === activeId) { active = filtered[a]; break; }
-    }
-    if (!active) active = filtered[0];
+    active = filtered.find((t) => t.id === activeId) || filtered[0];
   }
 
-  // update status (also bump updatedAt)
-  function updateTicketStatus(id, nextStatus) {
-    var next = [];
-    for (var i2 = 0; i2 < safeTickets.length; i2++) {
-      var t2 = safeTickets[i2];
-      if (t2.id === id) {
-        var updated = {
-          id: t2.id,
-          subject: t2.subject,
-          fromEmail: t2.fromEmail,
-          messages: t2.messages ? t2.messages.slice() : [],
-          status: nextStatus,
-          createdAt: t2.createdAt,
-          updatedAt: nowISO()
-        };
-        next.push(updated);
-      } else {
-        next.push(t2);
+  // ----- Update ticket status (backend) -----
+  async function updateTicketStatus(id, nextStatus) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(`${TICKETS_API_URL}/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update ticket status");
       }
+
+      // Reload from backend to keep in sync
+      await fetchTickets();
+    } catch (err) {
+      console.error("updateTicketStatus error:", err);
+      setError("Failed to update ticket status.");
+    } finally {
+      setLoading(false);
     }
-    setTickets(next);
   }
 
-  function resolve(id) { updateTicketStatus(id, "resolved"); }
+  function resolve(id) {
+    updateTicketStatus(id, "resolved");
+  }
 
-  function sendMessage() {
+  // ----- Send reply (backend) -----
+  async function sendMessage() {
     if (!active) return;
-    var trimmed = reply ? reply.trim() : "";
-    if (trimmed === "") return;
+    const trimmed = reply ? reply.trim() : "";
+    if (!trimmed) return;
 
-    var next = [];
-    for (var i3 = 0; i3 < safeTickets.length; i3++) {
-      var t3 = safeTickets[i3];
-      if (t3.id === active.id) {
-        var newMessages = t3.messages && Array.isArray(t3.messages) ? t3.messages.slice() : [];
-        newMessages.push({ id: uid(), sender: "pm", text: trimmed, at: nowISO() });
+    try {
+      setLoading(true);
+      setError("");
 
-        var updated = {
-          id: t3.id,
-          subject: t3.subject,
-          fromEmail: t3.fromEmail,
-          messages: newMessages,
-          status: t3.status,
-          createdAt: t3.createdAt,
-          updatedAt: nowISO()
-        };
-        next.push(updated);
-      } else {
-        next.push(t3);
+      const res = await fetch(`${TICKETS_API_URL}/${active.id}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderRole: "manager",
+          text: trimmed,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to send reply");
       }
+
+      setReply("");
+      // Reload tickets including updated messages
+      await fetchTickets();
+    } catch (err) {
+      console.error("sendMessage error:", err);
+      setError("Failed to send reply.");
+    } finally {
+      setLoading(false);
     }
-    setTickets(next);
-    setReply("");
   }
 
   return (
@@ -987,7 +1270,7 @@ export function SupportPanel({ tickets, setTickets }) {
               className="form-control ps-5 fs-6 py-2 shadow-sm"
               placeholder="Search tickets..."
               value={q}
-              onChange={function (e) { setQ(e.target.value); }}
+              onChange={(e) => setQ(e.target.value)}
             />
           </div>
 
@@ -995,7 +1278,7 @@ export function SupportPanel({ tickets, setTickets }) {
           <select
             className="form-select w-auto"
             value={statusFilter}
-            onChange={function (e) { setStatusFilter(e.target.value); }}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="all">All Statuses</option>
             <option value="open">Open</option>
@@ -1003,23 +1286,35 @@ export function SupportPanel({ tickets, setTickets }) {
             <option value="resolved">Resolved</option>
           </select>
 
-          <div className="text-muted small ms-auto">{filtered.length} ticket(s)</div>
+          <div className="text-muted small ms-auto">
+            {filtered.length} ticket(s)
+          </div>
         </div>
+
+        {error && (
+          <div className="alert alert-danger mt-2 py-2 small mb-0">{error}</div>
+        )}
       </div>
 
       {/* Ticket list */}
       <div className="col-12 col-xl-7">
-        {filtered.length === 0 ? (
+        {loading && filtered.length === 0 ? (
+          <div className="card border-0 shadow-sm text-center text-muted py-5">
+            Loading tickets...
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="card border-0 shadow-sm text-center text-muted py-5">
             No tickets match the current filters.
           </div>
         ) : (
-          filtered.map(function (t) {
-            var isActive = active && t.id === active.id;
+          filtered.map((t) => {
+            const isActive = active && t.id === active.id;
             return (
               <div
                 key={t.id}
-                className={"card border-0 shadow-sm mb-3 " + (isActive ? "ring-2" : "")}
+                className={
+                  "card border-0 shadow-sm mb-3 " + (isActive ? "ring-2" : "")
+                }
                 style={{ borderRadius: 14 }}
               >
                 <div className="card-body">
@@ -1027,21 +1322,23 @@ export function SupportPanel({ tickets, setTickets }) {
                     <div className="flex-grow-1">
                       <button
                         className="btn btn-link p-0 text-decoration-none text-start fw-semibold"
-                        onClick={function () { setActiveId(t.id); }}
+                        onClick={() => setActiveId(t.id)}
                       >
-                        {t.subject ? t.subject : "(no subject)"}
+                        {t.subject || "(no subject)"}
                       </button>
                       <div className="mt-1 text-muted small d-flex align-items-center gap-2">
-                        <FiMail size={14} /> {t.fromEmail ? t.fromEmail : "unknown"}
+                        <FiMail size={14} /> {t.fromEmail || "unknown"}
                       </div>
                     </div>
 
-                    {/* REPLACED Bootstrap dropdown with a reliable select */}
+                    {/* Status select */}
                     <div>
                       <select
                         className="form-select form-select-sm w-auto"
                         value={t.status}
-                        onChange={function (e) { updateTicketStatus(t.id, e.target.value); }}
+                        onChange={(e) =>
+                          updateTicketStatus(t.id, e.target.value)
+                        }
                         aria-label="Change ticket status"
                       >
                         <option value="open">Open</option>
@@ -1054,9 +1351,9 @@ export function SupportPanel({ tickets, setTickets }) {
                   {/* Preview */}
                   <div className="text-muted mt-2 small">
                     {t.messages && t.messages[0] && t.messages[0].text
-                      ? (t.messages[0].text.length > 200
-                          ? t.messages[0].text.slice(0, 200) + "…"
-                          : t.messages[0].text)
+                      ? t.messages[0].text.length > 200
+                        ? t.messages[0].text.slice(0, 200) + "…"
+                        : t.messages[0].text
                       : "No description."}
                   </div>
 
@@ -1066,23 +1363,29 @@ export function SupportPanel({ tickets, setTickets }) {
                       <FiClock size={14} />{" "}
                       {t.updatedAt
                         ? "Updated " + new Date(t.updatedAt).toLocaleString()
-                        : (t.createdAt ? new Date(t.createdAt).toLocaleString() : "-")}
+                        : t.createdAt
+                        ? new Date(t.createdAt).toLocaleString()
+                        : "-"}
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="d-flex gap-2 mt-3">
                     {t.status !== "resolved" && (
-                      <button className="btn btn-sm btn-success" onClick={function () { resolve(t.id); }}>
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={() => resolve(t.id)}
+                      >
                         Resolve
                       </button>
                     )}
                     <button
                       className="btn btn-sm btn-outline-secondary"
-                      onClick={function () {
+                      onClick={() => {
                         setActiveId(t.id);
-                        var el = document.getElementById("ticket-reply");
-                        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth" });
+                        const el = document.getElementById("ticket-reply");
+                        if (el && el.scrollIntoView)
+                          el.scrollIntoView({ behavior: "smooth" });
                       }}
                     >
                       Reply
@@ -1100,7 +1403,7 @@ export function SupportPanel({ tickets, setTickets }) {
         <div className="card shadow-sm h-100">
           <div className="card-body d-flex flex-column">
             {active ? (
-              <React.Fragment>
+              <>
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <div>
                     <h5 className="mb-0">{active.subject}</h5>
@@ -1109,22 +1412,37 @@ export function SupportPanel({ tickets, setTickets }) {
                     </div>
                   </div>
                   {active.status !== "resolved" && (
-                    <button className="btn btn-success btn-sm" onClick={function () { resolve(active.id); }}>
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => resolve(active.id)}
+                    >
                       Resolve
                     </button>
                   )}
                 </div>
 
-                <div className="border rounded p-2 mb-3 flex-grow-1" style={{ maxHeight: 280, overflow: "auto" }}>
+                <div
+                  className="border rounded p-2 mb-3 flex-grow-1"
+                  style={{ maxHeight: 280, overflow: "auto" }}
+                >
                   {active.messages && active.messages.length > 0 ? (
-                    active.messages.map(function (m) {
-                      var isPm = m && m.sender === "pm";
-                      var badgeClass = "badge text-bg-" + (isPm ? "secondary" : "info") + " me-2";
+                    active.messages.map((m) => {
+                      const isPm = m && m.sender === "pm";
+                      const badgeClass =
+                        "badge text-bg-" +
+                        (isPm ? "secondary" : "info") +
+                        " me-2";
                       return (
                         <div key={m.id} className="small mb-2">
-                          <span className={badgeClass}>{isPm ? "PM" : "User"}</span>
+                          <span className={badgeClass}>
+                            {isPm ? "PM" : "User"}
+                          </span>
                           {m && m.text ? m.text : ""}
-                          <span className="text-muted ms-2">{m && m.at ? new Date(m.at).toLocaleString() : ""}</span>
+                          <span className="text-muted ms-2">
+                            {m && m.at
+                              ? new Date(m.at).toLocaleString()
+                              : ""}
+                          </span>
                         </div>
                       );
                     })
@@ -1139,16 +1457,22 @@ export function SupportPanel({ tickets, setTickets }) {
                       className="form-control"
                       placeholder="Type a reply…"
                       value={reply}
-                      onChange={function (e) { setReply(e.target.value); }}
+                      onChange={(e) => setReply(e.target.value)}
                     />
-                    <button className="btn btn-dark" onClick={sendMessage}>
+                    <button
+                      className="btn btn-dark"
+                      onClick={sendMessage}
+                      disabled={loading}
+                    >
                       Send
                     </button>
                   </div>
                 </div>
-              </React.Fragment>
+              </>
             ) : (
-              <div className="text-muted text-center my-5">Select a ticket to view details.</div>
+              <div className="text-muted text-center my-5">
+                Select a ticket to view details.
+              </div>
             )}
           </div>
         </div>

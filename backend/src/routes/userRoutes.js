@@ -139,6 +139,11 @@ router.post("/login", async (req, res) => {
     if (!matched)
       return res.status(400).json({ msg: "Invalid username or password" });
 
+     //  mark as active & record last login time
+      user.status = "active";
+      user.lastLoginAt = new Date();
+      await user.save();
+
     let advisor = null;
     let owner = null;
 

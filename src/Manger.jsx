@@ -11,8 +11,10 @@ import {
 import NotificationsPanel from "./components/Mangercopnents/NotificationsPanel.jsx";
 import AccountPanel from "./components/Mangercopnents/AccountPanel.jsx";
 import { loadState, saveState } from "./information.js";
+const USERS_API_URL = "http://localhost:5001/api/users";
 
 export default function Manger() {
+  
   // Auth guard — only manager role can access
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("loggedUser"));
@@ -37,6 +39,27 @@ export default function Manger() {
     localStorage.removeItem("loggedUser");
     navigate("/");
   };
+    // Load users from backend (MongoDB) once
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch(USERS_API_URL);
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+
+        setState((s) => ({
+          ...s,
+          users: data, // users now come from DB
+        }));
+      } catch (err) {
+        console.error("Error loading users:", err);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  // Theme handling
   useEffect(() => {
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -117,7 +140,7 @@ export default function Manger() {
         <main className="container-fluid py-4">
           {tab === "users" && (
             <UsersPanel
-              users={filteredUsers}
+              users={state.users}
               setUsers={function (users) {
                 setState(function (s) {
                   const newState = Object.assign({}, s);
@@ -129,19 +152,21 @@ export default function Manger() {
               setQuery={setQuery}
             />
           )}
+{tab === "settings" && (
+  <SettingsPanel
+    settings={state.settings}
+    users={state.users}        
+    setSettings={function (settings) {
+      setState(function (s) {
+        const newState = Object.assign({}, s);
+        newState.settings = settings;
+        return newState;
+      });
+    }}
+  />
+)}
 
-          {tab === "settings" && (
-            <SettingsPanel
-              settings={state.settings}
-              setSettings={function (settings) {
-                setState(function (s) {
-                  const newState = Object.assign({}, s);
-                  newState.settings = settings;
-                  return newState;
-                });
-              }}
-            />
-          )}
+
 
           {tab === "analytics" && (
             <AnalyticsPanel

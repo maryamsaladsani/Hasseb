@@ -17,9 +17,6 @@ const advisorTicketRoutes = require("./src/routes/advisorRoutes/advisorTicketRou
 const ownerAdvisorRoutes = require("./src/routes/advisorRoutes/ownerAdvisorRoutes");
 const ownerRoutes = require("./src/routes/OwnerRoutes");
 
-// ⭐ Scenario routes
-const scenarioRoutes = require("./src/routes/scenarioRoutes");
-
 // ===============================
 //  CONFIG
 // ===============================
@@ -45,9 +42,6 @@ app.use("/api/advisor", advisorRoute);
 app.use("/api/advisor", advisorTicketRoutes);
 app.use("/api/link", ownerAdvisorRoutes);
 app.use("/api/owner", ownerRoutes);
-
-// ⭐ Correct mount path for scenarios
-app.use("/api/pricing-scenarios", scenarioRoutes);
 
 // ===============================
 //  START SERVER
