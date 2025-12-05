@@ -5,11 +5,6 @@ const AdvisorSchema = new mongoose.Schema(
     _id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     fullName: { type: String, required: true },
-    username: { type: String, required: true },
-
-    points: { type: Number, default: 0 },
-    level: { type: Number, default: 1 },
-
     // =====================
     // OWNERS LINKED TO ADVISOR
     // =====================

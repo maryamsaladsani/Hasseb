@@ -6,7 +6,8 @@ const Advisor = require("../models/advisorModels/advisor");
 const Owner = require("../models/Owner");
 const bcrypt = require("bcryptjs");
 const { sendWelcomeEmail } = require("../utils/email");
-const {sendPasswordChangedEmail} = require('../utils/email')
+const { sendPasswordChangedEmail } = require("../utils/email");
+
 // Password strength regex
 const strongPasswordRegex =
   /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
@@ -22,7 +23,6 @@ function generateUsername(role, fullName, year) {
       SIGNUP
 =========================== */
 router.post("/signup", async (req, res) => {
-
   try {
     const { fullName, email, password, role } = req.body;
 
@@ -50,7 +50,7 @@ router.post("/signup", async (req, res) => {
 
     await newUser.save();
 
-    // ⭐ SEND WELCOME EMAIL HERE
+    // Send welcome email
     await sendWelcomeEmail(newUser.email, newUser.fullName, newUser.username);
 
     let advisorRecord = null;
@@ -139,6 +139,11 @@ router.post("/login", async (req, res) => {
     if (!matched)
       return res.status(400).json({ msg: "Invalid username or password" });
 
+    // mark active
+    user.status = "active";
+    user.lastLoginAt = new Date();
+    await user.save();
+
     let advisor = null;
     let owner = null;
 
@@ -165,7 +170,7 @@ router.post("/login", async (req, res) => {
 });
 
 /* ===========================
-      FORGOT PASSWORD - VERIFY
+   FORGOT PASSWORD - VERIFY
 =========================== */
 router.post("/forgot-password/verify", async (req, res) => {
   try {
@@ -188,7 +193,7 @@ router.post("/forgot-password/verify", async (req, res) => {
 });
 
 /* ===========================
-      FORGOT PASSWORD - RESET
+   FORGOT PASSWORD - RESET
 =========================== */
 router.post("/forgot-password/reset", async (req, res) => {
   try {
@@ -197,7 +202,6 @@ router.post("/forgot-password/reset", async (req, res) => {
     if (!userId || !newPassword)
       return res.status(400).json({ msg: "Missing fields" });
 
-    // Strong password validation (same as signup)
     const strongPasswordRegex =
       /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
@@ -206,18 +210,15 @@ router.post("/forgot-password/reset", async (req, res) => {
         msg: "Weak password — must contain uppercase, lowercase, number, and symbol"
       });
 
-    // Find user
     const user = await User.findById(userId);
     if (!user)
       return res.status(400).json({ msg: "Invalid user" });
 
-    // Update password — hashing happens automatically in your model
     user.password = newPassword;
     await user.save();
-    
-    // ⭐ Send password changed email
+
     await sendPasswordChangedEmail(user.email, user.fullName);
-    
+
     return res.json({ msg: "Password updated successfully" });
 
   } catch (err) {
@@ -226,7 +227,6 @@ router.post("/forgot-password/reset", async (req, res) => {
   }
 });
 
-
 /* ============================================
    GET USER DETAILS (OWNER OR ADVISOR)
 ============================================ */
@@ -234,16 +234,11 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Try find user in all collections
     let owner = await Owner.findById(id);
-    if (owner) {
-      return res.json({ role: "owner", owner });
-    }
+    if (owner) return res.json({ role: "owner", owner });
 
     let advisor = await Advisor.findById(id);
-    if (advisor) {
-      return res.json({ role: "advisor", advisor });
-    }
+    if (advisor) return res.json({ role: "advisor", advisor });
 
     return res.status(404).json({ msg: "User not found" });
 
@@ -251,4 +246,32 @@ router.get("/:id", async (req, res) => {
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
+
+/* ===========================
+   FIX MANAGER PASSWORD
+=========================== */
+router.get("/fix-manager", async (req, res) => {
+  try {
+    const managerUsername = "manager.norah.202500000";
+    const newPlainPassword = "Haseeb@2027";
+
+    const user = await User.findOne({ username: managerUsername });
+    if (!user) return res.status(404).json({ msg: "Manager user not found" });
+
+    const hashed = await bcrypt.hash(newPlainPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    return res.json({
+      msg: "Manager password re-hashed successfully",
+      username: user.username,
+      role: user.role
+    });
+
+  } catch (err) {
+    console.error("Fix manager error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+});
+
 module.exports = router;

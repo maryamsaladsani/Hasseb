@@ -2,19 +2,14 @@ const mongoose = require("mongoose");
 
 const BusinessDataSchema = new mongoose.Schema(
   {
-    // 📌 ربط مباشر بصاحب البيانات
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Owner",
       required: true
     },
 
-    // اختياري: عشان تربطينه بسهولة من الـ username
-    username: { type: String },
-
     businessName: { type: String, default: "My Business" },
 
-    // منتجات
     products: [
       {
         name: String,
@@ -23,10 +18,8 @@ const BusinessDataSchema = new mongoose.Schema(
       }
     ],
 
-    // تكاليف ثابتة
     fixedCost: { type: Number, default: 0 },
 
-    // كاش فلو
     cashFlow: [
       {
         month: String,
@@ -36,10 +29,9 @@ const BusinessDataSchema = new mongoose.Schema(
       }
     ],
 
-    // سيناريوهات التسعير
     pricingScenarios: [
       {
-        scenario: String,   // مثل "Base" / "High Price" / "Low Price"
+        scenario: String,  
         price: Number,
         units: Number,
         revenue: Number,

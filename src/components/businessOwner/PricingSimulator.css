@@ -482,3 +482,37 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================= */
+/* SAVE SCENARIO BUTTON      */
+/* ========================= */
+
+.save-scenario-btn {
+    width: 100%;
+    padding: 1rem;
+    margin-top: 2rem;
+
+    background: linear-gradient(90deg, #1AC6C6 0%, #19b3b3 100%);
+    color: #fff;
+
+    border: none;
+    border-radius: 999px; /* Fully rounded */
+
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 0.5px;
+
+    box-shadow: 0 6px 16px rgba(26, 198, 198, 0.35);
+    transition: all 0.25s ease;
+}
+
+.save-scenario-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(26, 198, 198, 0.45);
+}
+
+.save-scenario-btn:active {
+    transform: scale(0.97);
+}

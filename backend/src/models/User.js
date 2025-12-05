@@ -5,7 +5,7 @@ const UserSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
-
+   
   // manager / advisor / owner
   role: { 
     type: String, 
@@ -21,8 +21,25 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Advisor",
     default: null
+  },
+  
+     status: {
+      type: String,
+      enum: ["active", "inactive", "suspended"],
+      default: "inactive",
+    },
+
+    // record the last login
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true, 
   }
-});
+);
+
 
 // Hash password before saving
 UserSchema.pre("save", async function () {
