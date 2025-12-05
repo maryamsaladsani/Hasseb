@@ -1,32 +1,21 @@
+// backend/server.js
+
 // ===============================
 //  IMPORTS
 // ===============================
-// Load environment variables from backend/.env
 require("dotenv").config({ path: __dirname + "/.env" });
 
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./src/config/db");
 
-// Core user routes
+// Core routes
 const userRoutes = require("./src/routes/userRoutes");
-
-// Business Data (Excel upload + fetch)
 const businessDataRoutes = require("./src/routes/businessDataRoutes");
-
-// Advisor system routes
 const advisorRoute = require("./src/routes/advisorRoutes/advisorRoute");
 const advisorTicketRoutes = require("./src/routes/advisorRoutes/advisorTicketRoutes");
 const ownerAdvisorRoutes = require("./src/routes/advisorRoutes/ownerAdvisorRoutes");
-
-// Owner routes
 const ownerRoutes = require("./src/routes/OwnerRoutes");
-
-//manager Routes
-const managerUserRoutes = require("./src/routes/ManagerRoutes/User");
-const ticketRoutes = require("./src/routes/ManagerRoutes/TicketRoutes");
-const assignmentRoutes = require("./src/routes/ManagerRoutes/AssignmentRoutes");
-
 
 // ===============================
 //  CONFIG
@@ -45,35 +34,14 @@ app.get("/", (req, res) => {
 });
 
 // ===============================
-//  USER ROUTES
+//  ROUTES
 // ===============================
 app.use("/api/users", userRoutes);
-
-// ===============================
-//  BUSINESS DATA ROUTES
-// ===============================
 app.use("/api/business-data", businessDataRoutes);
-
-// ===============================
-//  ADVISOR ROUTES
-// ===============================
 app.use("/api/advisor", advisorRoute);
 app.use("/api/advisor", advisorTicketRoutes);
-
-// Owner ↔ Advisor linking
 app.use("/api/link", ownerAdvisorRoutes);
-
-// ===============================
-//  OWNER ROUTES
-// ===============================
 app.use("/api/owner", ownerRoutes);
-
-// ===============================
-//  Manager ROUTES
-// ===============================
-app.use("/api/users", managerUserRoutes);
-app.use("/api/tickets", ticketRoutes);
-app.use("/api/assignments", assignmentRoutes);
 
 // ===============================
 //  START SERVER

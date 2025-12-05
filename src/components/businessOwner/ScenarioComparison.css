@@ -1,0 +1,300 @@
+/* ============================================ */
+/*           SCENARIO COMPARISON UI          */
+/* ============================================ */
+
+:root {
+    --primary: #0ac4c4;
+    --primary-dark: #0a9f9f;
+    --accent-green: #0acf83;
+    --accent-red: #e65245;
+    --text-dark: #082830;
+    --text-light: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.06);
+    --shadow-strong: 0 16px 34px rgba(0, 0, 0, 0.12);
+    --radius-card: 16px;
+}
+
+/* PAGE CONTAINER */
+
+.scenario-wrapper {
+    max-width: 1050px; /* keep consistent with rest of app */
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.2rem;
+    animation: scenarioFadeIn 0.6s ease;
+}
+
+@keyframes scenarioFadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.scenario-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 1.6rem;
+    letter-spacing: 0.4px;
+    background: linear-gradient(90deg, #0ac4c4, #12898f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* LIST WRAPPER */
+
+.scenario-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/* ============================================ */
+/*               SCENARIO CARD                  */
+/* ============================================ */
+
+.scenario-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1.4rem 1.6rem;
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(20, 116, 138, 0.13);
+    cursor: pointer;
+    transition: all 0.28s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.scenario-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-strong);
+}
+
+.scenario-card.selected {
+    background: linear-gradient(135deg, #1ac6c6, #0fb1b1);
+    color: var(--text-light);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 14px 30px rgba(26, 198, 198, 0.45);
+}
+
+.scenario-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.scenario-product {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.1rem;
+}
+
+.scenario-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+}
+
+.tag {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    border: 1px solid rgba(8, 40, 48, 0.18);
+    color: #08424d;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.scenario-card.selected .tag {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.tag--profit {
+    border-color: rgba(10, 207, 131, 0.4);
+    color: #067652;
+}
+
+.tag--strong {
+    border-color: rgba(0, 200, 200, 0.4);
+    color: #0a6b6b;
+}
+
+.scenario-card.selected .tag--profit,
+.scenario-card.selected .tag--strong {
+    color: #ffffff;
+}
+
+/* DETAILS */
+
+.scenario-details span {
+    display: block;
+    font-size: 0.96rem;
+    opacity: 0.9;
+    margin-bottom: 0.2rem;
+}
+
+/* ============================================ */
+/*                RISK METER                    */
+/* ============================================ */
+
+.risk-meter {
+    margin-top: 0.9rem;
+}
+
+.risk-meter-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-bottom: 0.2rem;
+}
+
+.risk-meter-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.6);
+    overflow: hidden;
+    position: relative;
+}
+
+.risk-meter-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.risk-meter-fill--low {
+    background: linear-gradient(90deg, #0acf83, #8be089);
+}
+
+.risk-meter-fill--medium {
+    background: linear-gradient(90deg, #ffb74d, #ff9800);
+}
+
+.risk-meter-fill--high {
+    background: linear-gradient(90deg, #e65245, #ff1744);
+}
+
+/* ============================================ */
+/*         SIDE-BY-SIDE COMPARISON GRID         */
+/* ============================================ */
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6rem;
+    margin-top: 2rem;
+}
+
+.comparison-box {
+    background: var(--card-bg);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    border: 1px solid rgba(20, 116, 138, 0.15);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    animation: scenarioFadeIn 0.5s ease;
+}
+
+.comparison-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-strong);
+}
+
+.comparison-title {
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+}
+
+.metric {
+    margin-bottom: 0.45rem;
+    font-size: 0.98rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* ============================================ */
+/*           RECOMMENDATION SECTION             */
+/* ============================================ */
+
+.recommendation-box {
+    margin-top: 2.4rem;
+    background: linear-gradient(145deg, #ffffff, #f4fbfd);
+    border-radius: 20px;
+    padding: 2rem 1.6rem;
+    border: 1px solid rgba(0, 200, 120, 0.22);
+    box-shadow: 0 14px 30px rgba(0, 200, 120, 0.18);
+    animation: scenarioFadeIn 0.6s ease;
+}
+
+.recommendation-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--accent-green);
+    margin-bottom: 1rem;
+}
+
+.recommendation-box p {
+    font-size: 1.02rem;
+    color: var(--text-dark);
+    margin-bottom: 0.7rem;
+    line-height: 1.55;
+}
+
+.recommendation-list {
+    padding-left: 1.2rem;
+    margin-top: 0.4rem;
+}
+
+.recommendation-list li {
+    margin-bottom: 0.4rem;
+    font-size: 0.98rem;
+}
+
+.recommendation-footnote {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 0.6rem;
+}
+
+/* ============================================ */
+/*                  RESPONSIVE                  */
+/* ============================================ */
+
+@media (max-width: 768px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .scenario-title {
+        font-size: 1.7rem;
+    }
+
+    .scenario-card {
+        padding: 1.2rem 1.3rem;
+    }
+
+    .comparison-box {
+        padding: 1.3rem;
+    }
+
+    .recommendation-box {
+        padding: 1.5rem 1.3rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .scenario-title {
+        font-size: 1.5rem;
+    }
+
+    .scenario-card {
+        padding: 1.05rem 1.1rem;
+    }
+}
