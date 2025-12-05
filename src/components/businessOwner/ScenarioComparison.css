@@ -19,7 +19,7 @@
 /* PAGE CONTAINER */
 
 .scenario-wrapper {
-    max-width: 1050px; /* keep consistent with rest of app */
+    max-width: 1050px; 
     width: 100%;
     margin: 0 auto;
     padding: 2rem 1.2rem;
