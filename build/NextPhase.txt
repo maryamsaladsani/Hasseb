@@ -1,0 +1,24 @@
+Norah:
+1- Connect Manager to Advisor about ticket
+2- Connect Manager to Owner about ticket
+4- Counter Usage over time: Based on (), users are active or no
+5- Assign projects to advisors, Get Assigned Owners done by manager
+
+Shoroq:
+1- Compiring Scenarios page
+2- Email while signup
+3- Forget Password
+
+Zahra:
+1- View client dashboard: Write feedback and recommendation for client
+2- Risk Analysis for Owner based on thresholds
+3- Feedback Page on thr owner side: see prev feedback from advisor
+
+Maryam:
+1- connect Profiles to backend
+2- Connect to database
+3- unify overall UI
+4- Average burn rate
+
+
+ 
