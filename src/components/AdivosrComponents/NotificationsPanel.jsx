@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { FiBell, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import "../../SharedStyles/Notifications.css";
 
 export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem("loggedUser"));
   const advisorId = user?.userId;
@@ -11,34 +14,117 @@ export default function NotificationsPanel() {
     async function load() {
       try {
         const res = await axios.get(
-          `http://localhost:5001/api/advisor/notifications/${advisorId}`
+            `http://localhost:5001/api/advisor/notifications/${advisorId}`
         );
         setNotifications(res.data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     }
     load();
   }, [advisorId]);
 
-  return (
-    <div className="container-xxl">
-      <h3 className="fw-bold mb-4">Notifications</h3>
+  const dismiss = (id) => {
+    setNotifications((list) => list.filter((n) => n._id !== id));
+  };
 
-      {notifications.length === 0 ? (
-        <div className="text-muted">No notifications yet</div>
-      ) : (
-        <ul className="list-group">
-          {notifications.map((n) => (
-            <li key={n._id} className="list-group-item">
-              <strong>{n.message}</strong>
-              <div className="text-muted small">
-                {new Date(n.createdAt).toLocaleString()}
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const getNotificationType = (message) => {
+    // Determine notification type based on message content
+    if (message.toLowerCase().includes('feedback') || message.toLowerCase().includes('success')) {
+      return 'success';
+    } else if (message.toLowerCase().includes('warning') || message.toLowerCase().includes('pending')) {
+      return 'warning';
+    } else if (message.toLowerCase().includes('error') || message.toLowerCase().includes('failed')) {
+      return 'error';
+    }
+    return 'info';
+  };
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "success":
+        return <FiCheckCircle />;
+      case "warning":
+      case "error":
+        return <FiAlertCircle />;
+      default:
+        return <FiBell />;
+    }
+  };
+
+  if (loading) {
+    return (
+        <div className="notifications-container">
+          <h1 className="notifications-title">Notifications</h1>
+          <div className="notifications-card">
+            <div className="notifications-empty">
+              <p>Loading notifications...</p>
+            </div>
+          </div>
+        </div>
+    );
+  }
+
+  return (
+      <div className="notifications-container">
+        <h1 className="notifications-title">Notifications</h1>
+
+        <div className="notifications-card">
+          {notifications.length === 0 ? (
+              <div className="notifications-empty">
+                <FiBell />
+                <p>All caught up! No new notifications.</p>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+          ) : (
+              <div className="notifications-list">
+                {notifications.map((n) => {
+                  const type = getNotificationType(n.message);
+                  return (
+                      <div key={n._id} className={`notification-item ${type}`}>
+                        <div className="notification-left">
+                          <div className="notification-icon">
+                            {getIcon(type)}
+                          </div>
+                          <div className="notification-content">
+                            <h6 className="notification-title">Notification</h6>
+                            <p className="notification-message">{n.message}</p>
+                            <span className="notification-date">{formatDate(n.createdAt)}</span>
+                          </div>
+                        </div>
+                        <button
+                            className="notification-close"
+                            aria-label="Dismiss notification"
+                            onClick={() => dismiss(n._id)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                  );
+                })}
+              </div>
+          )}
+        </div>
+      </div>
   );
 }
