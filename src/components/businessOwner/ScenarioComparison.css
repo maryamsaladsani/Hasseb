@@ -304,3 +304,110 @@
         padding: 1.15rem 1.25rem;
     }
 }
+
+/* ============================================ */
+/*                  DARK THEME                  */
+/* ============================================ */
+
+body[data-theme="dark"] .scenario-wrapper {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .scenario-title {
+    /* Fallback */
+    color: #1AC6C6;
+
+    /* Gradient for supported browsers */
+    background: linear-gradient(90deg, #1AC6C6, #14748A);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body[data-theme="dark"] .scenario-card {
+    background: rgba(10, 53, 64, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-color: #14748A;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .scenario-card:hover {
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .scenario-card.selected {
+    background: linear-gradient(135deg, #1AC6C6, #14748A);
+}
+
+body[data-theme="dark"] .scenario-product {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .scenario-details span {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .tag {
+    background: rgba(20, 116, 138, 0.3);
+    border-color: #14748A;
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .tag--profit {
+    border-color: rgba(10, 207, 131, 0.5);
+    color: #0ACF83;
+}
+
+body[data-theme="dark"] .tag--strong {
+    border-color: rgba(26, 198, 198, 0.5);
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .risk-meter-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .risk-meter-bar {
+    background: rgba(20, 116, 138, 0.3);
+}
+
+body[data-theme="dark"] .comparison-grid {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .comparison-box {
+    background: #0a3540;
+    border-color: #14748A;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .comparison-box:hover {
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .comparison-title {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .metric {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .recommendation-box {
+    background: #0a3540;
+    border-color: #0ACF83;
+    box-shadow: 0 14px 30px rgba(10, 207, 131, 0.2);
+}
+
+body[data-theme="dark"] .recommendation-box p {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .recommendation-list li {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .recommendation-footnote {
+    color: #9ca3af;
+}

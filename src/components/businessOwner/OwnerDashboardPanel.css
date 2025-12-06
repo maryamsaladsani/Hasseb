@@ -208,3 +208,78 @@
         text-align: center;
     }
 }
+/* ================================
+DARK THEME
+================================ */
+
+body[data-theme="dark"] .dashboard-container {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .dashboard-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .dashboard-subtitle {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .health-score-card {
+    background: #0a3540;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .health-score-desc {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .section-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .section-card h3 {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .insight-box {
+    background: #0a3540;
+    border-color: #14748A;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="dark"] .insight-box h4 {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .insight-number {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .bep-item,
+body[data-theme="dark"] .pricing-item {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .bep-warning {
+    background: rgba(255, 87, 87, 0.15);
+    border-color: #FF5757;
+}
+
+body[data-theme="dark"] .recs-list li {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .share-btn {
+    background: linear-gradient(135deg, rgba(255, 184, 77, 0.2) 0%, rgba(255, 184, 77, 0.3) 100%);
+    color: #FFB84D;
+    border: 1px solid #FFB84D;
+}
+
+body[data-theme="dark"] .share-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 184, 77, 0.3) 0%, rgba(255, 184, 77, 0.4) 100%);
+}

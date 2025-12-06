@@ -320,3 +320,112 @@
         font-size: 1.1rem;
     }
 }
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .account-container {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .card-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .profile-card {
+    background: #0a3540;
+}
+
+body[data-theme="dark"] .profile-name {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .profile-username {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .profile-avatar {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .avatar-upload-btn {
+    background: rgba(20, 116, 138, 0.3);
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .avatar-upload-btn:hover {
+    background: #1AC6C6;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .info-item {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .info-item:hover {
+    background: rgba(26, 198, 198, 0.1);
+    border-color: #1AC6C6;
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .info-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .info-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-label {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-helper {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .theme-select {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-select:focus {
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .theme-select:hover {
+    border-color: #1AC6C6;
+}
+
+body[data-theme="dark"] .theme-select option {
+    background: #0a3540;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-not-found {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .account-not-found svg {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .account-not-found p {
+    color: #9ca3af;
+}
