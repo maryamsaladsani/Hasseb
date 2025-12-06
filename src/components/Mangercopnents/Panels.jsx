@@ -1106,14 +1106,16 @@ export function AnalyticsPanel({ analytics, users, refresh }) {
 
 
 /*  SUPPORT  */
-export function SupportPanel({ tickets, setTickets }) {
-  const safeTickets = Array.isArray(tickets) ? tickets : [];
+export function SupportPanel() {
+  const [tickets, setTickets] = useState([]);
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [reply, setReply] = useState("");
   const [activeId, setActiveId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const safeTickets = Array.isArray(tickets) ? tickets : [];
 
   // ----- Load tickets from backend -----
   async function fetchTickets() {
@@ -1123,22 +1125,25 @@ export function SupportPanel({ tickets, setTickets }) {
 
       const res = await fetch(TICKETS_API_URL);
       if (!res.ok) {
-        throw new Error("Failed to fetch tickets");
+        throw new Error(`Failed to fetch tickets (status ${res.status})`);
       }
 
-      const data = await res.json(); // backend array
+      const data = await res.json();
+      const rawTickets = Array.isArray(data) ? data : data?.tickets || [];
 
-      // Normalize into shape SupportPanel expects
-      const normalized = (data || []).map((t) => ({
+      // Shape returned by TicketRoutes.mapTicket
+      const normalized = rawTickets.map((t) => ({
         id: t.id,
         subject: t.subject,
         fromEmail: t.fromEmail || "",
         fromName: t.fromName || "",
+        fromRole: t.fromRole || "",
         status: t.status || "open",
         createdAt: t.createdAt,
         updatedAt: t.updatedAt,
         messages: (t.messages || []).map((m, idx) => ({
-          id: m._id || idx, // we just need a stable key
+          id: m._id || idx,
+          senderRole: m.senderRole,
           sender: m.senderRole === "manager" ? "pm" : "user",
           text: m.text,
           at: m.at,
@@ -1147,7 +1152,7 @@ export function SupportPanel({ tickets, setTickets }) {
 
       setTickets(normalized);
 
-      // If no active ticket yet, pick first
+      // If nothing is selected yet, select the first ticket
       if (!activeId && normalized.length > 0) {
         setActiveId(normalized[0].id);
       }
@@ -1159,22 +1164,18 @@ export function SupportPanel({ tickets, setTickets }) {
     }
   }
 
-  // Load tickets on first mount
+  // Load once on mount
   useEffect(() => {
     fetchTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep activeId valid if tickets change
-  useEffect(
-    function () {
-      const hasActive = safeTickets.some((t) => t.id === activeId);
-      if (!hasActive) {
-        setActiveId(safeTickets.length > 0 ? safeTickets[0].id : null);
-      }
-    },
-    [safeTickets, activeId]
-  );
+  // Keep activeId valid when tickets list changes
+  useEffect(() => {
+    const hasActive = safeTickets.some((t) => t.id === activeId);
+    if (!hasActive) {
+      setActiveId(safeTickets.length > 0 ? safeTickets[0].id : null);
+    }
+  }, [safeTickets, activeId]);
 
   // ----- Filter tickets -----
   const term = q ? q.trim().toLowerCase() : "";
@@ -1188,7 +1189,9 @@ export function SupportPanel({ tickets, setTickets }) {
       const email = (t.fromEmail || "").toLowerCase();
       const msgHit =
         t.messages &&
-        t.messages.some((m) => (m.text || "").toLowerCase().includes(term));
+        t.messages.some((m) =>
+          (m.text || "").toLowerCase().includes(term)
+        );
 
       matchesQ = subj.includes(term) || email.includes(term) || msgHit;
     }
@@ -1219,7 +1222,6 @@ export function SupportPanel({ tickets, setTickets }) {
         throw new Error("Failed to update ticket status");
       }
 
-      // Reload from backend to keep in sync
       await fetchTickets();
     } catch (err) {
       console.error("updateTicketStatus error:", err);
@@ -1253,26 +1255,30 @@ export function SupportPanel({ tickets, setTickets }) {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to send reply");
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to send reply");
       }
 
       setReply("");
-      // Reload tickets including updated messages
       await fetchTickets();
     } catch (err) {
       console.error("sendMessage error:", err);
-      setError("Failed to send reply.");
+      setError(err.message || "Failed to send reply.");
     } finally {
       setLoading(false);
     }
   }
 
+  // ----- Render -----
   return (
     <div className="row g-3">
       <div className="col-12">
         {/* Filters & Search */}
         <div className="p-3 bg-light rounded shadow-sm d-flex flex-wrap align-items-center gap-2">
-          <div className="flex-grow-1 position-relative" style={{ minWidth: 300 }}>
+          <div
+            className="flex-grow-1 position-relative"
+            style={{ minWidth: 300 }}
+          >
             <FiSearch
               size={18}
               className="position-absolute text-muted"
@@ -1304,7 +1310,9 @@ export function SupportPanel({ tickets, setTickets }) {
         </div>
 
         {error && (
-          <div className="alert alert-danger mt-2 py-2 small mb-0">{error}</div>
+          <div className="alert alert-danger mt-2 py-2 small mb-0">
+            {error}
+          </div>
         )}
       </div>
 
@@ -1360,7 +1368,7 @@ export function SupportPanel({ tickets, setTickets }) {
                     </div>
                   </div>
 
-                  {/* Preview */}
+                  {/* Preview of first message */}
                   <div className="text-muted mt-2 small">
                     {t.messages && t.messages[0] && t.messages[0].text
                       ? t.messages[0].text.length > 200
@@ -1396,8 +1404,9 @@ export function SupportPanel({ tickets, setTickets }) {
                       onClick={() => {
                         setActiveId(t.id);
                         const el = document.getElementById("ticket-reply");
-                        if (el && el.scrollIntoView)
+                        if (el && el.scrollIntoView) {
                           el.scrollIntoView({ behavior: "smooth" });
+                        }
                       }}
                     >
                       Reply
@@ -1439,7 +1448,7 @@ export function SupportPanel({ tickets, setTickets }) {
                 >
                   {active.messages && active.messages.length > 0 ? (
                     active.messages.map((m) => {
-                      const isPm = m && m.sender === "pm";
+                      const isPm = m && m.senderRole === "manager";
                       const badgeClass =
                         "badge text-bg-" +
                         (isPm ? "secondary" : "info") +

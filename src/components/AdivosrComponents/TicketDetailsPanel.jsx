@@ -1,153 +1,277 @@
-import React, { useState } from "react";
-import { FiArrowLeft, FiSend, FiAlertCircle } from "react-icons/fi";
-import "../../SharedStyles/SharedTicketDetails.css"
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  FiTag,
+  FiAlertCircle,
+  FiClock,
+  FiCheckCircle,
+  FiSend,
+  FiMessageCircle,
+} from "react-icons/fi";
+import "../../SharedStyles/SharedSupport.css";
 
-export default function TicketDetailsPanel({ ticket, setTab }) {
-    const user = JSON.parse(localStorage.getItem("loggedUser"));
-    const role = user?.role || "advisor";
+const TICKETS_API_URL = "http://localhost:5001/api/tickets";
 
-    const [reply, setReply] = useState("");
-    const [sending, setSending] = useState(false);
-    const [error, setError] = useState("");
+export default function SupportPanel2({
+  advisorId,          // optional: can still be passed from parent
+  setSelectedTicket,
+  setTab,
+}) {
+  // Read current user from localStorage
+  const storedUser = JSON.parse(localStorage.getItem("loggedUser"));
 
-    if (!ticket) {
-        return (
-            <div className="ticket-not-found">
-                <FiAlertCircle size={48} />
-                <p>No ticket selected. Please select a ticket from the support page.</p>
-            </div>
-        );
+  // This is the id we will actually use everywhere
+  const effectiveAdvisorId =
+    advisorId || storedUser?._id || storedUser?.id || null;
+
+  const [tickets, setTickets] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // ----- Load tickets -----
+  async function fetchTickets() {
+    try {
+      setError("");
+
+      if (!effectiveAdvisorId) {
+        // no id -> nothing to fetch
+        return;
+      }
+
+      const res = await axios.get(TICKETS_API_URL, {
+        params: { advisorId: effectiveAdvisorId },
+      });
+
+      const raw = res.data || [];
+
+      // Normalize so every ticket has `id`
+      const normalized = raw.map((t) => ({
+        ...t,
+        id: t.id || t._id,
+      }));
+
+      setTickets(normalized);
+    } catch (err) {
+      console.error("fetchTickets error:", err.response?.data || err);
+      setError(err.response?.data?.message || "Failed to load tickets.");
+    }
+  }
+
+  useEffect(() => {
+    fetchTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveAdvisorId]);
+
+  // ----- Create ticket -----
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!effectiveAdvisorId) {
+      setError("Advisor ID is missing – cannot create ticket.");
+      return;
     }
 
-    async function sendReply() {
-        if (!reply.trim()) return;
-
-        try {
-            setSending(true);
-            setError("");
-
-            const res = await fetch(
-                `http://localhost:5001/api/tickets/${ticket.id}/reply`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        senderRole: role,
-                        text: reply.trim(),
-                    }),
-                }
-            );
-
-            if (!res.ok) {
-                const errBody = await res.json().catch(() => ({}));
-                throw new Error(errBody.message || "Failed to send reply");
-            }
-
-            setReply("");
-            alert("Reply sent to manager.");
-        } catch (err) {
-            console.error("sendReply error:", err);
-            setError(err.message || "Failed to send reply.");
-        } finally {
-            setSending(false);
-        }
+    if (!title.trim() || !description.trim()) {
+      setError("Please fill in both title and description.");
+      return;
     }
 
-    function getStatusClass(status) {
-        if (status === "resolved") return "status-resolved";
-        if (status === "inprogress" || status === "in-progress") return "status-progress";
-        return "status-open";
+    try {
+      setLoading(true);
+      setError("");
+
+      // Adjust field names here if your backend expects different keys
+      await axios.post(TICKETS_API_URL, {
+        advisorId: effectiveAdvisorId,
+        title: title.trim(),
+        message: description.trim(), // or description / text depending on backend
+        priority,
+      });
+
+      setTitle("");
+      setDescription("");
+      setPriority("medium");
+      await fetchTickets();
+    } catch (err) {
+      console.error("createTicket error:", err.response?.data || err);
+      setError(
+        err.response?.data?.message || "Server error while creating ticket."
+      );
+    } finally {
+      setLoading(false);
     }
+  }
 
-    function getStatusLabel(status) {
-        if (status === "resolved") return "Resolved";
-        if (status === "inprogress" || status === "in-progress") return "In Progress";
-        return "Open";
-    }
+  // ----- Stats -----
+  const total = tickets.length;
+  const openCount = tickets.filter((t) => t.status === "open").length;
+  const inProgressCount = tickets.filter(
+    (t) => t.status === "inprogress" || t.status === "in-progress"
+  ).length;
+  const resolvedCount = tickets.filter((t) => t.status === "resolved").length;
 
-    return (
-        <div className="ticket-details-container">
-            <button className="back-btn" onClick={() => setTab("support")}>
-                <FiArrowLeft size={20} />
-                Back to Tickets
-            </button>
+  // ----- Helpers -----
+  function getStatusClass(status) {
+    if (status === "resolved") return "status-resolved";
+    if (status === "inprogress" || status === "in-progress")
+      return "status-progress";
+    return "status-open";
+  }
 
-            <div className="ticket-details-card">
-                <div className="ticket-header">
-                    <h1 className="ticket-subject">{ticket.subject || ticket.title}</h1>
-                    <span className={`ticket-status ${getStatusClass(ticket.status)}`}>
-            {getStatusLabel(ticket.status)}
-          </span>
-                </div>
+  function getStatusLabel(status) {
+    if (status === "resolved") return "Resolved";
+    if (status === "inprogress" || status === "in-progress") return "In Progress";
+    return "Open";
+  }
 
-                <div className="ticket-meta">
-          <span>
-            Created: {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : "-"}
-          </span>
-                    {ticket.updatedAt && (
-                        <span>
-              Updated: {new Date(ticket.updatedAt).toLocaleString()}
-            </span>
-                    )}
-                </div>
+  // ----- Render -----
+  return (
+    <div className="support-container">
+      <h1 className="support-title">Support &amp; Tickets</h1>
 
-                <div className="divider"></div>
-
-                <h3 className="conversation-title">Conversation</h3>
-
-                <div className="messages-container">
-                    {ticket.messages && ticket.messages.length > 0 ? (
-                        ticket.messages.map((m, index) => {
-                            const isAdvisor = m.senderRole === "advisor";
-                            const isManager = m.senderRole === "manager";
-
-                            return (
-                                <div
-                                    key={index}
-                                    className={`message ${isAdvisor ? "message-advisor" : "message-manager"}`}
-                                >
-                                    <div className="message-bubble">
-                                        <div className="message-sender">
-                                            {isManager ? "Manager" : isAdvisor ? "You" : m.senderRole}
-                                        </div>
-                                        <div className="message-text">{m.text}</div>
-                                        <div className="message-time">
-                                            {m.at ? new Date(m.at).toLocaleString() : ""}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div className="no-messages">No messages yet for this ticket.</div>
-                    )}
-                </div>
-
-                {error && (
-                    <div className="reply-error">
-                        <FiAlertCircle size={18} />
-                        {error}
-                    </div>
-                )}
-
-                <div className="reply-section">
-                    <input
-                        className="reply-input"
-                        placeholder="Type a reply to the manager…"
-                        value={reply}
-                        onChange={(e) => setReply(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && !sending && reply.trim() && sendReply()}
-                    />
-                    <button
-                        className="reply-btn"
-                        onClick={sendReply}
-                        disabled={sending || !reply.trim()}
-                    >
-                        <FiSend size={18} />
-                        {sending ? "Sending..." : "Send"}
-                    </button>
-                </div>
-            </div>
+      {error && (
+        <div className="support-error">
+          <FiAlertCircle size={20} />
+          <span>{error}</span>
         </div>
-    );
+      )}
+
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon-wrapper stat-icon-blue">
+            <FiTag size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Tickets</div>
+            <div className="stat-value">{total}</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon-wrapper stat-icon-yellow">
+            <FiAlertCircle size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Open</div>
+            <div className="stat-value">{openCount}</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon-wrapper stat-icon-orange">
+            <FiClock size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">In Progress</div>
+            <div className="stat-value">{inProgressCount}</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon-wrapper stat-icon-green">
+            <FiCheckCircle size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Resolved</div>
+            <div className="stat-value">{resolvedCount}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="two-column-grid">
+        {/* Create ticket */}
+        <div className="support-card">
+          <h2 className="card-title">Create New Ticket</h2>
+          <form onSubmit={handleSubmit} className="ticket-form">
+            <input
+              className="ticket-input"
+              placeholder="Ticket Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <div className="form-row">
+              <label className="form-label">Priority</label>
+              <select
+                className="ticket-select"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <textarea
+              className="ticket-textarea"
+              rows={4}
+              placeholder="Describe your issue…"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <button type="submit" className="submit-btn" disabled={loading}>
+              <FiSend size={18} />
+              {loading ? "Sending…" : "Submit Ticket"}
+            </button>
+          </form>
+
+          {!effectiveAdvisorId && (
+            <p className="small text-muted mt-2">
+              (No advisor ID found in props or localStorage. Make sure you save
+              the logged user with <code>_id</code> or <code>id</code>.)
+            </p>
+          )}
+        </div>
+
+        {/* Ticket list */}
+        <div className="tickets-section">
+          <h2 className="section-title">Your Tickets</h2>
+          {tickets.length === 0 ? (
+            <div className="empty-state">No tickets yet.</div>
+          ) : (
+            <div className="tickets-list">
+              {tickets.map((t) => (
+                <div
+                  key={t.id}
+                  className="ticket-item"
+                  onClick={() => {
+                    if (setSelectedTicket && setTab) {
+                      setSelectedTicket(t);
+                      setTab("ticketDetails");
+                    }
+                  }}
+                >
+                  <div className="ticket-item-left">
+                    <div className="ticket-icon">
+                      <FiMessageCircle size={20} />
+                    </div>
+                    <div className="ticket-info">
+                      <div className="ticket-title">
+                        {t.title || t.subject || "(no title)"}
+                      </div>
+                      <div className="ticket-date">
+                        {t.createdAt
+                          ? new Date(t.createdAt).toLocaleString()
+                          : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    className={`ticket-status ${getStatusClass(t.status)}`}
+                  >
+                    {getStatusLabel(t.status)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -45,8 +45,7 @@ const SupportTicketSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Avoid OverwriteModelError on hot reload
+// This model writes to the `supporttickets` collection
 module.exports =
   mongoose.models.SupportTicket ||
   mongoose.model("SupportTicket", SupportTicketSchema);
-
