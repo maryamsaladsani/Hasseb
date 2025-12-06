@@ -14,6 +14,8 @@ const businessDataRoutes = require("./src/routes/businessDataRoutes");
 const advisorRoute = require("./src/routes/advisorRoutes/advisorRoute");
 const ownerAdvisorRoutes = require("./src/routes/advisorRoutes/ownerAdvisorRoutes");
 const ownerRoutes = require("./src/routes/OwnerRoutes");
+const feedbackRoutes = require("./src/routes/feedbackRoutes");
+
 
 // Pricing Scenarios (THE CORRECT ONE)
 const pricingScenarioRoutes = require("./src/routes/pricingScenarioRoutes");
@@ -22,10 +24,7 @@ const pricingScenarioRoutes = require("./src/routes/pricingScenarioRoutes");
 const managerUserRoutes = require("./src/routes/ManagerRoutes/User");
 const ticketRoutes = require("./src/routes/ManagerRoutes/TicketRoutes");
 const assignmentRoutes = require("./src/routes/ManagerRoutes/AssignmentRoutes");
-<<<<<<< HEAD
-=======
 const notificationRoutes = require("./src/routes/NotificationRoutes");
->>>>>>> 400905bcb967bcce479503ec61168c1664a136af
 
 // ===============================
 //  CONFIG
@@ -70,6 +69,7 @@ app.use("/api/business-data", require("./src/routes/businessDataOwnerRoute"));
 // serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/feedback", feedbackRoutes);
 // ===============================
 //  START SERVER
 // ===============================

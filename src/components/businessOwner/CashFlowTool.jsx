@@ -415,7 +415,7 @@ export default function CashFlowTool({ baseData, onUpdate }) {
           {/* Chart Section */}
           <div className="chart-section">
             <h3 className="chart-title">Cash Flow Timeline</h3>
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer width="100%" height={500}>
               <LineChart
                 data={result.data}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}

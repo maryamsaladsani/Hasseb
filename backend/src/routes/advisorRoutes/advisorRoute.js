@@ -286,5 +286,17 @@ router.post("/feedback/file", upload.single("file"), async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+// GET ALL FEEDBACK FOR ADVISOR
+router.get("/feedback/:advisorId", async (req, res) => {
+    try {
+        const list = await Feedback.find({ advisorId: req.params.advisorId })
+            .sort({ createdAt: -1 });
+
+        res.json({ success: true, feedback: list });
+    } catch (err) {
+        res.status(500).json({ success: false, msg: "Server error" });
+    }
+});
+
 
 module.exports = router;

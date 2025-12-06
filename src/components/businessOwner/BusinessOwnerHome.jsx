@@ -10,6 +10,7 @@ import OwnerDashboardPanel from "./OwnerDashboardPanel.jsx";
 import ScenarioComparison from "./ScenarioComparison.jsx";
 import BusinessOwnerSupport from "./BusinessOwnerSupport.jsx";
 import BusinessOwnerTicketDetails from "./BusinessOwnerTicketDetails.jsx";
+import OwnerFeedbackPanel from "./OwnerFeedbackPanel.jsx";
 
 import AccountPanel from "./AccountPanel.jsx";
 import NotificationsPanel from "./NotificationsPanel.jsx";
@@ -167,6 +168,9 @@ export default function OwnerHome() {
                             setTab={setActiveTool}
                         />
                     )}
+                    {activeTool === "feedback" && (
+                        <OwnerFeedbackPanel ownerId={JSON.parse(localStorage.getItem("loggedUser"))?.ownerId} />
+                    )}                    
                 </div>
             </main>
         </div>

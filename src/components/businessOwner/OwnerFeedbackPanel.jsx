@@ -1,60 +1,64 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "./OwnerFeedbackPanel.css";
 
-export default function OwnerFeedbackPanel() {
-  const [feedback, setFeedback] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function OwnerFeedbackPanel({ ownerId }) {
+    const [feedbackList, setFeedbackList] = useState([]);
 
-  useEffect(() => {
-    fetchFeedback();
-  }, []);
+    useEffect(() => {
+        if (!ownerId) return;
 
-  const fetchFeedback = async () => {
-    try {
-      const user = JSON.parse(localStorage.getItem("loggedUser"));
-      if (!user) return;
+        axios
+            .get(`http://localhost:5001/api/feedback/owner/${ownerId}`)
+            .then((res) => {
+                if (res.data.success) {
+                    setFeedbackList(res.data.feedback || []);
+                }
+            })
+            .catch((err) => console.error("Feedback fetch error:", err));
+    }, [ownerId]);
 
-      const ownerId = user.userId;
+    return (
+        <div className="fb-page">
+            <div className="fb-card">
 
-      const res = await fetch(
-        `http://localhost:5001/api/advisor/feedback/owner/${ownerId}`
-      );
+                {/* HEADER LIKE BEP */}
+                <div className="fb-header">
+                    <div className="fb-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" stroke="white" fill="none" strokeWidth="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
 
-      const data = await res.json();
-      setFeedback(data);
-    } catch (err) {
-      console.error("Error loading feedback:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+                    <h2 className="fb-title">Advisor Feedback</h2>
+                </div>
 
+                {/* NO FEEDBACK */}
+                {feedbackList.length === 0 && (
+                    <div className="fb-empty">
+                        No feedback has been sent yet.
+                    </div>
+                )}
 
-  if (loading) return <div className="p-4">Loading feedback…</div>;
+                {/* FEEDBACK CARDS */}
+                <div className="fb-list">
+                    {feedbackList.map((fb) => (
+                        <div key={fb._id} className="fb-item">
+                            <div className="fb-item-header">
+                                <span className="fb-from">From Advisor</span>
+                                <span className="fb-date">
+                                    {new Date(fb.createdAt).toLocaleDateString()}
+                                </span>
+                            </div>
 
-  return (
-    <div className="container-xxl">
-      <div className="card-neo p-4">
-        <h3 className="mb-3">Advisor Feedback</h3>
-        <p className="text-muted mb-4">
-          Here you can review recommendations and insights from your advisor.
-        </p>
+                            <div className="fb-content">
+                                {fb.content}
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
-        {feedback.length === 0 && (
-          <div className="text-muted">No feedback yet.</div>
-        )}
-
-        {/* FEEDBACK LIST */}
-        <div className="d-flex flex-column gap-3">
-          {feedback.map((item) => (
-            <div className="feedback-item card-neo p-3" key={item._id}>
-              <div className="fw-bold">{item.content}</div>
-              <div className="small text-muted mt-1">
-                {new Date(item.createdAt).toLocaleString()}
-              </div>
             </div>
-          ))}
         </div>
-      </div>
-    </div>
-  );
+    );
 }

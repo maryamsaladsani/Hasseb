@@ -4,11 +4,7 @@ import axios from "axios";
 import { FiBell, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import "../../SharedStyles/Notifications.css";
 
-export default function NotificationsPanel({
-  setTab,     
-  prevTab     
-}) 
-{
+export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,9 +31,6 @@ export default function NotificationsPanel({
   const dismiss = (id) => {
     setNotifications((list) => list.filter((n) => n._id !== id));
   };
-
-
-
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -91,7 +84,6 @@ export default function NotificationsPanel({
   return (
     <div className="notifications-container">
       <h1 className="notifications-title">Notifications</h1>
-      <button className="back-btn" onClick={() => setTab(prevTab)}>← Back</button>
 
       <div className="notifications-card">
         {notifications.length === 0 ? (

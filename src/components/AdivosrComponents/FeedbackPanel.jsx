@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FiEye, FiTrash2, FiDownload, FiArrowLeft, FiEdit2 } from "react-icons/fi";
 
 export default function FeedbackPanel({
   feedback = [],
-  setFeedback,
-  fetchFeedback,
-  setTab,
-  advisorId,
   owners = [],
-  prevTab
+  advisorId,
+  setFeedback // ← تمت إضافتها هنا
 }) {
   const [items, setItems] = useState([]);
   const [ownerId, setOwnerId] = useState("");
@@ -20,29 +16,44 @@ export default function FeedbackPanel({
   const [editText, setEditText] = useState("");
   const [showEdit, setShowEdit] = useState(false);
 
-  // load feedback list
   useEffect(() => {
-    setItems(feedback);
-  }, [feedback]);
+    fetchFeedback();
+  }, []);
 
-  // ADD FEEDBACK
+  const fetchFeedback = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5001/api/advisor/feedback/${advisorId}`
+      );
+      setItems(res.data.feedback || []);
+      if (setFeedback) setFeedback(res.data.feedback || []);
+    } catch (err) {
+      console.error("Error loading feedback", err);
+    }
+  };
+
   const addFeedback = async () => {
     if (!ownerId || !content.trim()) return;
 
     setSending(true);
     try {
-      const res = await axios.post("http://localhost:5001/api/advisor/feedback", {
-        advisorId,
-        ownerId,
-        content,
-      });
+      const res = await axios.post(
+        "http://localhost:5001/api/advisor/feedback",
+        {
+          advisorId,
+          ownerId,
+          content
+        }
+      );
 
       const fb = res.data?.feedback || res.data;
-
-      setItems((prev) => [fb, ...prev]);
-      if (setFeedback) setFeedback((prev) => [fb, ...prev]);
+      if (fb) {
+        setItems(prev => [fb, ...prev]);
+        if (setFeedback) setFeedback(prev => [fb, ...prev]);
+      }
 
       setContent("");
+      setOwnerId("");
     } catch (err) {
       console.error("Error adding feedback", err);
     } finally {
@@ -50,7 +61,6 @@ export default function FeedbackPanel({
     }
   };
 
-  // EDIT
   const startEdit = (item) => {
     setActive(item._id);
     setEditText(item.content);
@@ -66,14 +76,15 @@ export default function FeedbackPanel({
         { advisorId, content: editText }
       );
 
-      const updated = res.data?.feedback || res.data;
+      const updated = res.data.feedback || res.data;
 
-      setItems((prev) =>
-        prev.map((it) => (it._id === active ? updated : it))
+      setItems(prev =>
+        prev.map(it => (it._id === active ? updated : it))
       );
+
       if (setFeedback) {
-        setFeedback((prev) =>
-          prev.map((it) => (it._id === active ? updated : it))
+        setFeedback(prev =>
+          prev.map(it => (it._id === active ? updated : it))
         );
       }
 
@@ -85,13 +96,17 @@ export default function FeedbackPanel({
     }
   };
 
-  // DELETE FEEDBACK
   const deleteFeedback = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/api/advisor/feedback/${id}`);
-      setItems((prev) => prev.filter((it) => it._id !== id));
+      await axios.delete(
+        `http://localhost:5001/api/advisor/feedback/${id}`,
+        { data: { advisorId } }
+      );
+
+      setItems(prev => prev.filter(it => it._id !== id));
+
       if (setFeedback) {
-        setFeedback((prev) => prev.filter((it) => it._id !== id));
+        setFeedback(prev => prev.filter(it => it._id !== id));
       }
     } catch (err) {
       console.error("Error deleting feedback", err);
@@ -99,26 +114,20 @@ export default function FeedbackPanel({
   };
 
   const getOwnerName = (id) => {
-    const owner = owners.find((o) => o._id === id);
-    return owner?.name || owner?.username || "Owner";
+    const owner = owners.find(o => o._id === id);
+    return owner?.fullName || owner?.username || "Owner";
   };
 
   return (
     <div className="support-container">
       <h1 className="support-title">Feedback</h1>
 
-      {/* BACK BUTTON */}
-      <button className="back-btn" onClick={() => setTab(prevTab)}>
-        <FiArrowLeft /> Back
-      </button>
-
       <div className="two-column-grid">
-        {/* LEFT SIDE — FORM */}
+        {/* FORM */}
         <div className="support-card">
           <h2 className="card-title">Create Feedback</h2>
 
           <div className="ticket-form">
-            {/* SELECT OWNER */}
             <div className="form-row">
               <label className="form-label">Owner</label>
               <select
@@ -127,15 +136,14 @@ export default function FeedbackPanel({
                 onChange={(e) => setOwnerId(e.target.value)}
               >
                 <option value="">Select owner</option>
-                {owners.map((o) => (
+                {owners.map(o => (
                   <option key={o._id} value={o._id}>
-                    {o.name || o.username}
+                    {o.fullName || o.username}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* FEEDBACK INPUT */}
             <div className="form-row">
               <label className="form-label">Feedback</label>
               <textarea
@@ -157,111 +165,72 @@ export default function FeedbackPanel({
           </div>
         </div>
 
-        {/* RIGHT SIDE — LIST */}
+        {/* LIST */}
         <div className="tickets-section">
-          <div
-            className="d-flex justify-content-between align-items-center"
-            style={{ marginBottom: "0.75rem" }}
-          >
+          <div className="d-flex justify-content-between align-items-center"
+            style={{ marginBottom: "0.75rem" }}>
             <h2 className="section-title">All Feedback</h2>
-            <button
-              className="submit-btn"
-              style={{ padding: "0.4rem 1.2rem" }}
-              onClick={fetchFeedback}
-            >
+            <button className="submit-btn" onClick={fetchFeedback}>
               Refresh
             </button>
           </div>
 
-          {items.length === 0 && (
+          {items.length === 0 ? (
             <div className="empty-state">No feedback yet.</div>
-          )}
-
-          {items.length > 0 && (
+          ) : (
             <div className="tickets-list">
-              {items.map((fb) => {
+              {items.map(fb => {
                 const isEditing = showEdit && active === fb._id;
-
                 return (
                   <div key={fb._id} className="ticket-item">
-                    {/* LEFT */}
                     <div className="ticket-item-left">
                       <div className="ticket-icon">💬</div>
-
                       <div className="ticket-info">
                         <div className="ticket-title">
                           Feedback for: {getOwnerName(fb.ownerId || fb.owner)}
                         </div>
-
                         <div className="ticket-date">
                           {new Date(fb.createdAt).toLocaleString()}
                         </div>
 
-                        {!isEditing && (
-                          <p style={{ marginTop: "0.35rem", fontSize: "0.9rem" }}>
-                            {fb.content}
-                          </p>
-                        )}
-
-                        {isEditing && (
+                        {!isEditing ? (
+                          <p style={{ marginTop: ".35rem" }}>{fb.content}</p>
+                        ) : (
                           <textarea
                             className="ticket-textarea"
                             rows={3}
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            style={{ marginTop: "0.5rem" }}
                           />
                         )}
                       </div>
                     </div>
 
-                    {/* RIGHT SIDE — ACTIONS */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.4rem",
-                      }}
-                    >
+                    <div style={{ display: "flex", flexDirection: "column", gap: ".4rem" }}>
                       {!isEditing ? (
                         <>
                           <button
                             className="submit-btn"
-                            style={{ padding: "0.35rem 1rem" }}
                             onClick={() => startEdit(fb)}
                           >
-                            <FiEdit2 /> Edit
+                            Edit
                           </button>
-
                           <button
                             className="submit-btn"
-                            style={{
-                              padding: "0.35rem 1rem",
-                              background: "#FF5757",
-                            }}
+                            style={{ background: "#FF5757" }}
                             onClick={() => deleteFeedback(fb._id)}
                           >
-                            <FiTrash2 /> Delete
+                            Delete
                           </button>
                         </>
                       ) : (
                         <>
-                          <button
-                            className="submit-btn"
-                            style={{ padding: "0.35rem 1rem" }}
-                            onClick={saveEdit}
-                          >
+                          <button className="submit-btn" onClick={saveEdit}>
                             Save
                           </button>
-
                           <button
                             className="submit-btn"
-                            style={{
-                              padding: "0.35rem 1rem",
-                              background: "#e5e7eb",
-                              color: "#082830",
-                              boxShadow: "none",
-                            }}
+                            style={{ background: "#e5e7eb", color: "#082830" }}
                             onClick={() => {
                               setShowEdit(false);
                               setActive(null);

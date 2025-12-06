@@ -230,21 +230,25 @@
 /*   MAIN CONTENT HORIZONTAL */
 /* ========================= */
 .cashflow-main-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;  
+    gap: 2rem;
 }
+
+
 
 /* ========================= */
 /*      CHART SECTION        */
 /* ========================= */
 .chart-section {
     background: #ffffff;
-    padding: 1.5rem;
+    padding: 2rem;                
     border-radius: 16px;
     border: 1px solid rgba(20, 116, 138, 0.1);
-    min-height: 500px;
+    min-height: 550px;            
+    width: 100%;                   
 }
+
 
 .chart-title {
     font-size: 1.25rem;

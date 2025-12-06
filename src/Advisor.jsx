@@ -1,203 +1,119 @@
-// src/Advisor.jsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { Header, Sidebar } from "./components/AdivosrComponents/AdvisorLayout";
 
-import { Header, Sidebar } from "./components/AdivosrComponents/AdvisorLayout.jsx";
+import DashboardAdvisorPanel from "./components/AdivosrComponents/DashboardAdvisorPanel";
+import AnalyzerPanel from "./components/AdivosrComponents/AnalyzerPanel";
+import NotificationsPanel from "./components/AdivosrComponents/NotificationsPanel";
+import AccountPanel from "./components/AdivosrComponents/AccountPanel";
+import SupportPanel from "./components/AdivosrComponents/SupportPanel2";
+import RecommendationsPanel from "./components/AdivosrComponents/RecommendationsPanel";
+import FeedbackPanel from "./components/AdivosrComponents/FeedbackPanel";
+import RiskDetailsPanel from "./components/AdivosrComponents/RiskDetailsPanel";
 
-import DashboardAdvisorPanel from "./components/AdivosrComponents/DashboardAdvisorPanel.jsx";
-import FeedbackPanel from "./components/AdivosrComponents/FeedbackPanel.jsx";
-import AnalyzerPanel from "./components/AdivosrComponents/AnalyzerPanel.jsx";
-import BreakEvenSimulationPanel from "./components/AdivosrComponents/BreakEvenSimulationPanel.jsx";
-import RiskDetailsPanel from "./components/AdivosrComponents/RiskDetailsPanel.jsx";
-import SupportPanel2 from "./components/AdivosrComponents/SupportPanel2.jsx";
-import TicketDetailsPanel from "./components/AdivosrComponents/TicketDetailsPanel.jsx";
-import NotificationsPanel from "./components/AdivosrComponents/NotificationsPanel.jsx";
-import AccountPanel from "./components/AdivosrComponents/AccountPanel.jsx";
-import "./components/AdivosrComponents/index.css";
 export default function Advisor() {
-  const [tab, setTab] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [selectedClient, setSelectedClient] = useState(null);
-  const [selectedRisk, setSelectedRisk] = useState(null);
-  const [selectedTicket, setSelectedTicket] = useState(null);
-
-  const [data, setData] = useState(null);
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  /* ================================
-        THEME SETTINGS
-  ================================= */
-  const [settings, setSettings] = useState({
-    themeOption: "system",
-  });
-
   const user = JSON.parse(localStorage.getItem("loggedUser"));
   const advisorId = user?.userId;
 
-  /* ================================
-        LOGOUT HANDLER
-  ================================= */
-  const handleLogout = () => {
-    localStorage.removeItem("loggedUser");
-    window.location.href = "/";
-  };
+  const [tab, setTab] = useState("dashboard");
+  const [owners, setOwners] = useState([]);
+  const [feedback, setFeedback] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  /* ================================
-        FETCH DASHBOARD DATA
-  ================================= */
-  const fetchDashboard = async () => {
+  useEffect(() => {
+    loadAdvisorData();
+  }, []);
+
+  const loadAdvisorData = async () => {
     try {
-      const res = await axios.get(
+      // Fetch owners
+      const res = await fetch(
         `http://localhost:5001/api/advisor/dashboard/${advisorId}`
       );
+      const data = await res.json();
+      setOwners(data.owners || []);
 
-      setData(res.data);
-      setTickets(res.data.tickets);
-    } catch (err) {
-      console.error("Dashboard fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (advisorId) fetchDashboard();
-    else setLoading(false);
-  }, [advisorId]);
-
-  /* ================================
-        FETCH TICKETS ONLY
-  ================================= */
-  const fetchTickets = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5001/api/advisor/tickets/${advisorId}`
+      // Fetch feedback
+      const fb = await fetch(
+        `http://localhost:5001/api/advisor/feedback/${advisorId}`
       );
-      setTickets(res.data);
+      const fbData = await fb.json();
+      setFeedback(fbData.feedback || []);
     } catch (err) {
-      console.error("Ticket fetch error:", err);
+      console.error("Error loading advisor data:", err);
     }
   };
 
-  /* ================================
-        GUARD — MUST BE ADVISOR
-  ================================= */
-  useEffect(() => {
-    if (!user || user.role !== "advisor") {
-      window.location.href = "/";
+
+  const renderTab = () => {
+    switch (tab) {
+      case "dashboard":
+        return (
+          <DashboardAdvisorPanel
+            advisorId={advisorId}
+            owners={owners}
+            feedback={feedback}
+            setTab={setTab}
+          />
+        );
+
+      case "analyzer":
+        return (
+          <AnalyzerPanel 
+            owners={owners} 
+            advisorId={advisorId}
+            setTab={setTab}
+          />
+        );
+
+      case "notifications":
+        return <NotificationsPanel advisorId={advisorId} />;
+
+      case "support":
+        return <SupportPanel advisorId={advisorId} owners={owners} />;
+
+      case "recommendations":
+        return (
+          <RecommendationsPanel
+            advisorId={advisorId}
+            owners={owners}
+          />
+        );
+
+      case "feedback":
+        return (
+          <FeedbackPanel
+            advisorId={advisorId}
+            owners={owners}
+            feedback={feedback}
+            setFeedback={setFeedback}
+          />
+        );
+
+
+      case "risk":
+        return <RiskDetailsPanel owners={owners} />;
+
+      case "account":
+        return <AccountPanel advisorId={advisorId} />;
+
+      default:
+        return <DashboardAdvisorPanel advisorId={advisorId} setTab={setTab} />;
     }
-  }, [user]);
-
-  if (loading) return <div className="p-5 fs-4">Loading...</div>;
-
-  if (!data) {
-    return (
-      <div className="p-5 fs-4 text-danger">
-        Failed to load data — please check backend connection.
-      </div>
-    );
-  }
-
-  const { advisor, owners, feedback, activity, alerts, filteredRisk } = data;
+  };
 
   return (
-    <div className="d-flex" style={{ minHeight: "100vh" }}>
+    <div className="advisor-layout">
 
-      {/* SIDEBAR */}
       <Sidebar
         tab={tab}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        onLogout={handleLogout}
-        setTab={(id) => {
-          setTab(id);
-          setSidebarOpen(false);
-        }}
+        setTab={setTab}
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
       />
 
-      <div className="flex-grow-1 d-flex flex-column">
-        
-        {/* PASS THEME TO HEADER */}
-        <Header
-          onOpenMenu={() => setSidebarOpen(true)}
-          theme={settings.themeOption}
-        />
-
-        <main className="container-fluid py-4">
-
-          {/* Dashboard */}
-          {tab === "dashboard" && (
-            <DashboardAdvisorPanel
-              advisor={advisor}
-              owners={owners}
-              tickets={tickets}
-              activity={activity}
-              alerts={alerts}
-              setTab={setTab}
-              setSelectedClient={setSelectedClient}
-              setSelectedRisk={setSelectedRisk}
-              riskAlerts={filteredRisk}
-            />
-          )}
-
-          {/* Feedback */}
-          {tab === "feedback" && (
-            <FeedbackPanel
-              feedback={feedback}
-              owners={owners}
-              advisorId={advisor?._id}
-            />
-          )}
-
-          {/* Analyzer */}
-          {tab === "analyzer" && <AnalyzerPanel owners={owners} />}
-
-          {/* Break-even Simulation */}
-          {tab === "simulation_details" && (
-            <BreakEvenSimulationPanel
-              client={selectedClient}
-              setTab={setTab}
-            />
-          )}
-
-          {/* Risk Details */}
-          {tab === "risk-details" && (
-            <RiskDetailsPanel
-              risk={selectedRisk}
-              setTab={setTab}
-              setSelectedClient={setSelectedClient}
-            />
-          )}
-
-          {/* Support */}
-          {tab === "support" && (
-            <SupportPanel2
-              tickets={tickets}
-              fetchTickets={fetchTickets}
-              setSelectedTicket={setSelectedTicket}
-              setTab={setTab}
-            />
-          )}
-
-          {/* Ticket Details */}
-         {tab === "ticketDetails" && (
-        <TicketDetailsPanel ticket={selectedTicket} setTab={setTab} />
-      )}
-
-          {/* Notifications */}
-          {tab === "notifications" && <NotificationsPanel />}
-
-          {/* ACCOUNT — PASS SETTINGS */}
-          {tab === "account" && (
-            <AccountPanel
-              settings={settings}
-              setSettings={setSettings}
-            />
-          )}
-
-        </main>
+      <div className="advisor-main">
+        <Header onOpenMenu={() => setMenuOpen(true)} />
+        {renderTab()}
       </div>
     </div>
   );

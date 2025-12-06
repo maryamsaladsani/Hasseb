@@ -169,7 +169,7 @@ export default function PricingSimulator({ baseData, onUpdate }) {
         const user = JSON.parse(localStorage.getItem("loggedUser"));
 
         const scenario = {
-            username: user.username,
+            ownerId: user.ownerId,
             productId: selectedProduct._id || selectedProduct.id,
             productName: selectedProduct.name,
             newPrice: sliderValue,
@@ -197,6 +197,7 @@ export default function PricingSimulator({ baseData, onUpdate }) {
             alert("Failed to save scenario.");
         }
     }
+
 
     const minPrice = selectedProduct
         ? Math.floor(Number(selectedProduct.variableCostPerUnit))

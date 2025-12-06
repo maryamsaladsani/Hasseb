@@ -100,6 +100,18 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                 </svg>
             ),
         },
+
+        /* 🌟🌟 NEW — FEEDBACK PANEL 🌟🌟 */
+        {
+            id: "feedback",
+            name: "Feedback",
+            icon: (
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7A8.38 8.38 0 0 1 8.7 19L3 21l2-5.7A8.38 8.38 0 0 1 3.5 11.5a8.5 8.5 0 0 1 8.5-8.5h.5a8.5 8.5 0 0 1 8.5 8.5z" />
+                </svg>
+            ),
+        },
+
         {
             id: "insights",
             name: "Dashboards & Insights",
@@ -111,33 +123,18 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                 </svg>
             ),
         },
-        
     ];
 
     return (
         <>
-            {/* BACKDROP */}
-            <div
-                className={`pm-backdrop ${isOpen ? "show" : ""}`}
-                onClick={onClose}
-                aria-hidden="true"
-            />
+            <div className={`pm-backdrop ${isOpen ? "show" : ""}`} onClick={onClose} />
 
-            {/* SIDEBAR */}
-            <aside
-                className={`sidebar-neo pm-slide ${isOpen ? "is-open" : ""}`}
-                role="navigation"
-            >
-                {/* BRAND/LOGO */}
+            <aside className={`sidebar-neo pm-slide ${isOpen ? "is-open" : ""}`}>
+
                 <div className="sidebar-neo__brand">
-                    <img
-                        src="/assets/HaseebLogo.png"
-                        alt="Haseeb Logo"
-                        className="sidebar-logo-img"
-                    />
+                    <img src="/assets/HaseebLogo.png" alt="Haseeb Logo" className="sidebar-logo-img" />
                 </div>
 
-                {/* NAVIGATION */}
                 <nav className="sidebar-neo__nav">
                     {tools.map((tool) => {
                         const active = tab === tool.id;
@@ -158,9 +155,7 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                     })}
                 </nav>
 
-                {/* BOTTOM SECTION */}
                 <div className="sidebar-neo__bottom">
-                    {/* Help & Support */}
                     <button
                         className="sidebar-neo__help-text"
                         onClick={() => {
@@ -171,8 +166,6 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                         For Help & Support
                     </button>
 
-
-                    {/* Dock */}
                     <div className="sidebar-neo__dock">
                         <button
                             className="sidebar-neo__dock-btn"
@@ -183,6 +176,7 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                         >
                             <FiUser size={20} />
                         </button>
+
                         <button
                             className="sidebar-neo__dock-btn"
                             onClick={() => {
@@ -194,14 +188,13 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
                         </button>
                     </div>
 
-                    {/* Logout */}
                     <button className="sidebar-neo__logout" onClick={onLogout}>
                         <span className="sidebar-neo__icon">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                          </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
                         </span>
                         <span>Logout</span>
                     </button>

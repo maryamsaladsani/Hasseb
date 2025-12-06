@@ -1,0 +1,127 @@
+/* ========================= */
+/*         PAGE LAYOUT       */
+/* ========================= */
+.fb-page {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 30px;
+}
+
+/* ========================= */
+/*           CARD            */
+/* ========================= */
+.fb-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.12);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    width: 100%;
+    max-width: 600px;
+}
+
+/* ========================= */
+/*          HEADER           */
+/* ========================= */
+.fb-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.fb-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fb-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #082830;
+    margin: 0;
+}
+
+/* ========================= */
+/*       EMPTY STATE         */
+/* ========================= */
+.fb-empty {
+    text-align: center;
+    padding: 1rem;
+    color: #14748A;
+    font-size: 0.95rem;
+}
+
+/* ========================= */
+/*      FEEDBACK CARDS       */
+/* ========================= */
+.fb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.fb-item {
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: 14px;
+    border: 1px solid rgba(20, 116, 138, 0.15);
+    box-shadow: 0 4px 16px rgba(8, 40, 48, 0.10);
+    transition: all 0.2s ease;
+}
+
+.fb-item:hover {
+    transform: translateY(-3px);
+}
+
+.fb-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: #14748A;
+}
+
+.fb-from {
+    font-weight: 600;
+}
+
+.fb-content {
+    font-size: 1rem;
+    color: #082830;
+    line-height: 1.5;
+}
+
+/* ========================= */
+/*      DARK THEME           */
+/* ========================= */
+
+body[data-theme="dark"] .fb-card {
+    background: #082830;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .fb-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .fb-item {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .fb-content {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .fb-item-header {
+    color: #9ca3af;
+}
