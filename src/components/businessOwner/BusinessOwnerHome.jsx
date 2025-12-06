@@ -8,6 +8,8 @@ import PricingSimulator from "./PricingSimulator";
 import CashFlowTool from "./CashFlowTool";
 import OwnerDashboardPanel from "./OwnerDashboardPanel.jsx";
 import ScenarioComparison from "./ScenarioComparison.jsx";
+import BusinessOwnerSupport from "./BusinessOwnerSupport.jsx";
+import BusinessOwnerTicketDetails from "./BusinessOwnerTicketDetails.jsx";
 import AccountPanel from "./AccountPanel.jsx";
 import NotificationsPanel from "./NotificationsPanel.jsx";
 
@@ -23,6 +25,7 @@ export default function OwnerHome() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [uploadedData, setUploadedData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedTicket, setSelectedTicket] = useState(null);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -117,14 +120,17 @@ export default function OwnerHome() {
                         <ScenarioComparison username={username} />
                     )}
                     {activeTool === "support" && (
-                        <div style={{
-                            padding: "2rem",
-                            background: "#fff",
-                            borderRadius: "16px"
-                        }}>
-                            <h2>Help & Support</h2>
-                            <p>Support content goes here...</p>
-                        </div>
+                        <BusinessOwnerSupport
+                            username={username}
+                            setSelectedTicket={setSelectedTicket}
+                            setTab={setActiveTool}
+                        />
+                    )}
+                    {activeTool === "ticketDetails" && (
+                        <BusinessOwnerTicketDetails
+                            ticket={selectedTicket}
+                            setTab={setActiveTool}
+                        />
                     )}
                 </div>
             </main>

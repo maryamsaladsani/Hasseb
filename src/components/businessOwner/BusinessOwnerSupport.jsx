@@ -8,7 +8,7 @@ import {
     FiSend,
     FiMessageCircle,
 } from "react-icons/fi";
-import "../shared/SharedSupport.css"; // Import shared styles
+import "../../SharedStyles/SharedSupport.css"; // Import shared styles
 
 const TICKETS_API_URL = "http://localhost:5001/api/tickets";
 
@@ -87,7 +87,7 @@ export default function BusinessOwnerSupport({ businessOwnerId, setSelectedTicke
     }
 
     return (
-        <div className="support-container">
+        <div className="support-container" style={{ padding: "1rem" }}>
             <h1 className="support-title">Support & Tickets</h1>
 
             {error && (

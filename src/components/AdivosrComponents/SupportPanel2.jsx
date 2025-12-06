@@ -1,196 +1,226 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  FiTag,
+  FiAlertCircle,
+  FiClock,
+  FiCheckCircle,
+  FiSend,
+  FiMessageCircle,
+} from "react-icons/fi";
+import "../../SharedStyles/SharedSupport.css"; // Import shared styles
+
+const TICKETS_API_URL = "http://localhost:5001/api/tickets";
 
 export default function SupportPanel2({
-  tickets = [],
-  setSelectedTicket,
-  setTab,
-  fetchTickets,
-}) {
-  const user = JSON.parse(localStorage.getItem("loggedUser"));
-  const advisorId = user?.userId;
-
-  // FORM STATES
+                                        advisorId,
+                                        setSelectedTicket,
+                                        setTab,
+                                      }) {
+  const [tickets, setTickets] = useState([]);
   const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
+  const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  /* ==========================================================
-        CREATE TICKET (No Refresh)
-  ========================================================== */
-  const createTicket = async () => {
-    if (!title.trim() || !message.trim()) {
-      alert("Please fill all fields");
+  async function fetchTickets() {
+    try {
+      setError("");
+      const res = await axios.get(TICKETS_API_URL, {
+        params: { advisorId },
+      });
+      setTickets(res.data || []);
+    } catch (err) {
+      console.error("fetchTickets error:", err);
+      setError("Failed to load tickets.");
+    }
+  }
+
+  useEffect(() => {
+    if (advisorId) fetchTickets();
+  }, [advisorId]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!title.trim() || !description.trim()) {
+      setError("Please fill in both title and description.");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5001/api/advisor/tickets", {
+      setLoading(true);
+      setError("");
+
+      await axios.post(TICKETS_API_URL, {
         advisorId,
-        title,
-        message,
+        title: title.trim(),
+        message: description.trim(),
         priority,
       });
 
-      alert("Ticket created successfully!");
-
-      // Reset form
       setTitle("");
-      setMessage("");
+      setDescription("");
       setPriority("medium");
-
-      if (fetchTickets) fetchTickets();
+      await fetchTickets();
     } catch (err) {
-      console.error("Ticket creation error:", err.response?.data || err);
-      alert("Error creating ticket");
+      console.error("createTicket error:", err);
+      setError("Server error while creating ticket.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
+
+  const total = tickets.length;
+  const openCount = tickets.filter((t) => t.status === "open").length;
+  const inProgressCount = tickets.filter(
+      (t) => t.status === "inprogress" || t.status === "in-progress"
+  ).length;
+  const resolvedCount = tickets.filter((t) => t.status === "resolved").length;
+
+  function getStatusClass(status) {
+    if (status === "resolved") return "status-resolved";
+    if (status === "inprogress" || status === "in-progress") return "status-progress";
+    return "status-open";
+  }
+
+  function getStatusLabel(status) {
+    if (status === "resolved") return "Resolved";
+    if (status === "inprogress" || status === "in-progress") return "In Progress";
+    return "Open";
+  }
 
   return (
-    <div className="container-xxl">
-      <h3 className="fw-bold mb-4">Support & Tickets</h3>
+      <div className="support-container">
+        <h1 className="support-title">Support & Tickets</h1>
 
-      {/* ==========================================================
-            TICKET STATS CARDS (Top Section)
-      ========================================================== */}
-      <div className="row g-3 mb-4">
-
-        {/* Total Tickets */}
-        <div className="col-md-3">
-          <div className="p-3 rounded-3 border shadow-sm d-flex align-items-center gap-3">
-            <div className="bg-primary bg-opacity-10 p-3 rounded-circle">
-              🎟️
+        {error && (
+            <div className="support-error">
+              <FiAlertCircle size={20} />
+              <span>{error}</span>
             </div>
-            <div>
-              <div className="text-muted small">Total Tickets</div>
-              <div className="fw-bold fs-5">{tickets.length}</div>
+        )}
+
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon-wrapper stat-icon-blue">
+              <FiTag size={24} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Total Tickets</div>
+              <div className="stat-value">{total}</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper stat-icon-yellow">
+              <FiAlertCircle size={24} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Open</div>
+              <div className="stat-value">{openCount}</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper stat-icon-orange">
+              <FiClock size={24} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">In Progress</div>
+              <div className="stat-value">{inProgressCount}</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper stat-icon-green">
+              <FiCheckCircle size={24} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Resolved</div>
+              <div className="stat-value">{resolvedCount}</div>
             </div>
           </div>
         </div>
 
-        {/* Open */}
-        <div className="col-md-3">
-          <div className="p-3 rounded-3 border shadow-sm d-flex align-items-center gap-3">
-            <div className="bg-warning bg-opacity-25 p-3 rounded-circle">⏱️</div>
-            <div>
-              <div className="text-muted small">Open</div>
-              <div className="fw-bold fs-5">
-                {tickets.filter((t) => t.status === "open").length}
+        <div className="two-column-grid">
+          <div className="support-card">
+            <h2 className="card-title">Create New Ticket</h2>
+            <form onSubmit={handleSubmit} className="ticket-form">
+              <input
+                  className="ticket-input"
+                  placeholder="Ticket Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+              />
+
+              <div className="form-row">
+                <label className="form-label">Priority</label>
+                <select
+                    className="ticket-select"
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
               </div>
-            </div>
+
+              <textarea
+                  className="ticket-textarea"
+                  rows={4}
+                  placeholder="Describe your issue…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+              />
+
+              <button type="submit" className="submit-btn" disabled={loading}>
+                <FiSend size={18} />
+                {loading ? "Sending…" : "Submit Ticket"}
+              </button>
+            </form>
           </div>
-        </div>
 
-        {/* In Progress */}
-        <div className="col-md-3">
-          <div
-            className="p-3 rounded-3 border shadow-sm d-flex align-items-center gap-3"
-            style={{ background: "#fff5e9" }}
-          >
-            <div className="p-3 rounded-circle">📈</div>
-            <div>
-              <div className="text-muted small">In Progress</div>
-              <div className="fw-bold fs-5">
-                {tickets.filter((t) => t.status === "in-progress").length}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Resolved */}
-        <div className="col-md-3">
-          <div className="p-3 rounded-3 border shadow-sm d-flex align-items-center gap-3">
-            <div className="bg-success bg-opacity-25 p-3 rounded-circle">
-              ✅
-            </div>
-            <div>
-              <div className="text-muted small">Resolved</div>
-              <div className="fw-bold fs-5">
-                {tickets.filter((t) => t.status === "resolved").length}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==========================================================
-            CREATE NEW TICKET FORM
-      ========================================================== */}
-      <div className="card p-4 mb-4 shadow-sm">
-        <h5 className="fw-bold mb-3">Create New Ticket</h5>
-
-        <input
-          className="form-control mb-3"
-          placeholder="Ticket Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <label className="fw-semibold mb-1">Priority</label>
-        <select
-          className="form-control mb-3"
-          value={priority}
-          onChange={(e) => setPriority(e.target.value)}
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-
-        <textarea
-          className="form-control mb-3"
-          placeholder="Describe your issue..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={4}
-        />
-
-        <button className="btn btn-primary w-100" onClick={createTicket}>
-          Submit Ticket
-        </button>
-      </div>
-
-      {/* ==========================================================
-            TICKET LIST
-      ========================================================== */}
-      <h4 className="fw-bold mb-3">Your Tickets</h4>
-
-      {tickets.length === 0 ? (
-        <div className="text-muted">No tickets yet</div>
-      ) : (
-        <ul className="list-group">
-          {tickets.map((t) => (
-            <li
-              key={t._id}
-              className="list-group-item d-flex justify-content-between align-items-center"
-              onClick={() => {
-                setSelectedTicket(t);
-                setTab("ticket-details");
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <div>
-                <strong>{t.title}</strong>
-                <div className="small text-muted">
-                  Priority: {t.priority?.toUpperCase()}
+          <div className="tickets-section">
+            <h2 className="section-title">Your Tickets</h2>
+            {tickets.length === 0 ? (
+                <div className="empty-state">No tickets yet.</div>
+            ) : (
+                <div className="tickets-list">
+                  {tickets.map((t) => (
+                      <div
+                          key={t._id || t.id}
+                          className="ticket-item"
+                          onClick={() => {
+                            if (setSelectedTicket && setTab) {
+                              setSelectedTicket(t);
+                              setTab("ticketDetails");
+                            }
+                          }}
+                      >
+                        <div className="ticket-item-left">
+                          <div className="ticket-icon">
+                            <FiMessageCircle size={20} />
+                          </div>
+                          <div className="ticket-info">
+                            <div className="ticket-title">{t.title}</div>
+                            <div className="ticket-date">
+                              {t.createdAt
+                                  ? new Date(t.createdAt).toLocaleString()
+                                  : ""}
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`ticket-status ${getStatusClass(t.status)}`}>
+                    {getStatusLabel(t.status)}
+                  </span>
+                      </div>
+                  ))}
                 </div>
-              </div>
-
-              <span
-                className={`badge px-3 py-2 text-capitalize ${
-                  t.status === "resolved"
-                    ? "bg-success"
-                    : t.status === "in-progress"
-                    ? "bg-warning text-dark"
-                    : "bg-secondary"
-                }`}
-              >
-                {t.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+            )}
+          </div>
+        </div>
+      </div>
   );
 }

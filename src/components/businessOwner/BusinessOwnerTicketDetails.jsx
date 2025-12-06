@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiArrowLeft, FiSend, FiAlertCircle } from "react-icons/fi";
-import "../shared/SharedTicketDetails.css"; // Import shared styles
+import "../../SharedStyles/SharedTicketDetails.css"; // Import shared styles
 
 export default function BusinessOwnerTicketDetails({ ticket, setTab }) {
     const user = JSON.parse(localStorage.getItem("loggedUser"));

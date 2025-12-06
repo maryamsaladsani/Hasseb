@@ -370,6 +370,7 @@ button.sidebar-neo__logout {
     z-index: 1000;
 }
 
+
 /* Main content area */
 .owner-main {
     padding-top: calc(72px + -1rem); /* Increased padding */
@@ -403,6 +404,37 @@ button.sidebar-neo__logout {
         top: 72px;
         height: calc(100vh - 72px);
     }
+}
+/* ========================= */
+/*      LOGOUT BUTTON        */
+/* ========================= */
+.sidebar-neo__logout {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: #ff4757;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.sidebar-neo__logout:hover {
+    color: #ff4757;
+    background: transparent !important;
+    transform: none !important;
+}
+
+.sidebar-neo__logout .sidebar-neo__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ================================
