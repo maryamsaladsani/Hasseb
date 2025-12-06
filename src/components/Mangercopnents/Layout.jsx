@@ -56,7 +56,7 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
             <div className="offcanvas-header sidebar-neo__brand">
                 <div className="d-flex align-items-center gap-2">
                     <img
-                        src="/assets/Haseeb.png"
+                        src="/assets/HaseebLogo.png"
                         alt="Haseeb Logo"
                         className="sidebar-logo-img"
                     />

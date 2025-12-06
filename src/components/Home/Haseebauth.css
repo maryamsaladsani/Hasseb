@@ -671,7 +671,7 @@
 }
 
 /* High contrast mode support */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
     .role-card {
         border-width: 3px;
     }
