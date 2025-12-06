@@ -83,8 +83,12 @@ Make sure you have the following installed:
    ```bash
    npm install lucide-react
    ```
-
 7. **Start the development server**
+   ```bash
+   npm install multer
+   ```
+
+8. **Start the development server**
    ```bash
    npm start
    ```
