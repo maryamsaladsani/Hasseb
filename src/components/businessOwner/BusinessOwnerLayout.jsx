@@ -101,7 +101,6 @@ export function Sidebar({ tab, setTab, isOpen, onClose, onLogout }) {
             ),
         },
 
-        /* 🌟🌟 NEW — FEEDBACK PANEL 🌟🌟 */
         {
             id: "feedback",
             name: "Feedback",

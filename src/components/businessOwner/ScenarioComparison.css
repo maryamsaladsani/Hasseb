@@ -412,12 +412,12 @@ body[data-theme="dark"] .recommendation-footnote {
     color: #9ca3af;
 }
 .scenario-recommendation-card {
-    background: #F5F7FA;        /* يناسب الأبيض والأزرق */
-    border: 1px solid #D3D8DE;  /* ناعم وشيك */
+    background: #F5F7FA;       
+    border: 1px solid #D3D8DE; 
     border-radius: 14px;
     padding: 14px 18px;
     margin-top: 12px;
-    color: #333;                /* وضوح عالي */
+    color: #333;               
     box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
@@ -435,7 +435,7 @@ body[data-theme="dark"] .recommendation-footnote {
 }
 
 .rec-item {
-    background: #E8ECF1;      /* حيادي وجميل */
+    background: #E8ECF1;      
     padding: 10px 12px;
     border-radius: 10px;
     margin-bottom: 8px;

@@ -140,8 +140,6 @@ export default function BreakEvenCalculator({ baseData, onUpdate }) {
       onUpdate(summary);
     }
   }
-
-  // ⭐ SAVE SCENARIO API CALL
     async function saveScenario() {
         if (!result || result.error || !selectedProduct) return;
 
@@ -331,8 +329,6 @@ export default function BreakEvenCalculator({ baseData, onUpdate }) {
                     </span>
                   </div>
                 </div>
-
-                {/* ⭐ SAVE SCENARIO BUTTON ADDED HERE */}
                 {mode === "whatIf" && (
                     <button
                         onClick={saveScenario}

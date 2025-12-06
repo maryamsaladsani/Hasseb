@@ -14,8 +14,6 @@ export default function DashboardAdvisorPanel({
 
   const [supportTickets, setSupportTickets] = useState([]);
   const [recommendationCount, setRecommendationCount] = useState(0);
-
-  // ⭐ NEW: REAL notifications (instead of props)
   const [notificationList, setNotificationList] = useState([]);
 
   useEffect(() => {
@@ -23,7 +21,7 @@ export default function DashboardAdvisorPanel({
     fetchOwners();
     fetchSupportTickets();
     fetchRecommendationCount();
-    fetchNotifications(); // ⭐ important
+    fetchNotifications(); 
   }, [advisorId]);
 
   // ======== OWNERS ========
@@ -165,7 +163,6 @@ export default function DashboardAdvisorPanel({
   // ======== COUNTS ========
   const openTickets = supportTickets.filter((t) => t.status === "open").length;
 
-  // ⭐ now using real notifications, not props
   const unreadNotifications = notificationList.filter((n) => !n.read).length;
 
   const feedbackCount = feedback.length;

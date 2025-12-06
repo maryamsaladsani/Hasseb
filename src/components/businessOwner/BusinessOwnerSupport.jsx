@@ -25,7 +25,7 @@ export default function BusinessOwnerSupport({ setSelectedTicket, setTab }) {
   const [tickets, setTickets] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium"); // UI only for now
+  const [priority, setPriority] = useState("medium"); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

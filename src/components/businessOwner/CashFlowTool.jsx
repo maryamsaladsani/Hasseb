@@ -22,8 +22,6 @@ function processCashFlowData(cashFlowData, dangerZone) {
   let runningBalance = 0;
 
   const processedData = cashFlowData.map((entry, index) => {
-    // 👇 نحاول نستخدم cashIn / cashOut إذا موجودة،
-    // وإذا مو موجودة نرجع لـ netCashFlow فقط من الشيت
     const hasCashColumns =
       entry.cashIn != null || entry.cashOut != null || entry.CashIn != null || entry.CashOut != null;
 
@@ -47,9 +45,6 @@ function processCashFlowData(cashFlowData, dangerZone) {
         cashOut = Math.abs(netCashFlow);
       }
     }
-
-    // 👇 تشغيل الرصيد:
-    // إذا أول صف وعندنا Running Balance من الشيت نبدأ به
     if (index === 0) {
       if (entry.runningBalance != null || entry.RunningBalance != null) {
         runningBalance =
@@ -58,7 +53,6 @@ function processCashFlowData(cashFlowData, dangerZone) {
         runningBalance =
           Number(entry.openingBalance ?? entry.OpeningBalance) || 0;
       } else {
-        // ما عندنا بداية واضحة → نبدأ من أول حركة
         runningBalance = netCashFlow;
       }
     } else {

@@ -5,7 +5,7 @@ export default function FeedbackPanel({
   feedback = [],
   owners = [],
   advisorId,
-  setFeedback // ← تمت إضافتها هنا
+  setFeedback
 }) {
   const [items, setItems] = useState([]);
   const [ownerId, setOwnerId] = useState("");

@@ -13,21 +13,17 @@ router.post("/link", async (req, res) => {
       return res.status(400).json({ msg: "Missing IDs" });
     }
 
-    // 1) تأكيد المستشار
     const advisor = await Advisor.findById(advisorId);
     if (!advisor) return res.status(404).json({ msg: "Advisor not found" });
 
-    // 2) تأكيد المالك
     const owner = await Owner.findById(ownerId);
     if (!owner) return res.status(404).json({ msg: "Owner not found" });
 
-    // 3) إضافة المالك داخل قائمة advisor.owners إذا غير موجود
     if (!advisor.owners.includes(ownerId)) {
       advisor.owners.push(ownerId);
       await advisor.save();
     }
 
-    // 4) إضافة advisorId داخل owner.advisor
     owner.advisor = advisorId;
     await owner.save();
 

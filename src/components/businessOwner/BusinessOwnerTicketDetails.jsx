@@ -15,7 +15,7 @@ export default function BusinessOwnerTicketDetails({ ticket, setTab }) {
     console.error("Failed to parse loggedUser", e);
   }
 
-  const role = loggedUser?.role || "owner"; // backend expects "owner"
+  const role = loggedUser?.role || "owner"; 
 
   const [currentTicket, setCurrentTicket] = useState(ticket || null);
   const [reply, setReply] = useState("");
@@ -49,7 +49,7 @@ export default function BusinessOwnerTicketDetails({ ticket, setTab }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            senderRole: role, // "owner"
+            senderRole: role, 
             text: reply.trim(),
           }),
         }
