@@ -182,12 +182,9 @@ export default function Advisor() {
           )}
 
           {/* Ticket Details */}
-          {tab === "ticket-details" && (
-            <TicketDetailsPanel
-              ticket={selectedTicket}
-              setTab={setTab}
-            />
-          )}
+         {tab === "ticketDetails" && (
+        <TicketDetailsPanel ticket={selectedTicket} setTab={setTab} />
+      )}
 
           {/* Notifications */}
           {tab === "notifications" && <NotificationsPanel />}

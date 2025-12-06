@@ -80,16 +80,30 @@ router.post("/", async (req, res) => {
  */
 router.get("/", async (req, res) => {
   try {
-    const { role, userId } = req.query;
+    const { role, userId, username } = req.query;
 
     let filter = {};
-    if (role && userId) {
-      filter = { fromUser: userId };
+
+    // If role + userId/username are provided → only that user's tickets
+    if (role && (userId || username)) {
+      let userObjectId = userId;
+
+      // If username is provided, look up the user's _id first
+      if (!userObjectId && username) {
+        const user = await User.findOne({ username });
+        if (!user) {
+          return res.status(404).json({ msg: "User not found for username." });
+        }
+        userObjectId = user._id.toString();
+      }
+
+      filter = { fromUser: userObjectId };
     }
+    // Else: no role/user filter → manager sees ALL tickets
 
     const tickets = await Ticket.find(filter)
       .sort({ updatedAt: -1 })
-      .populate("fromUser", "fullName email");
+      .populate("fromUser", "fullName email username");
 
     return res.json(tickets.map(mapTicket));
   } catch (err) {
@@ -99,7 +113,6 @@ router.get("/", async (req, res) => {
       .json({ msg: "Failed to load tickets", error: err.message });
   }
 });
-
 /**
  * PUT /api/tickets/:id/status
  * body: { status: "open" | "inprogress" | "resolved" }

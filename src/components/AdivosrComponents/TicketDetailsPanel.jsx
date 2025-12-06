@@ -1,275 +1,181 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import {
-  FiTag,
-  FiAlertCircle,
-  FiClock,
-  FiCheckCircle,
-  FiSend,
-  FiMessageCircle,
-} from "react-icons/fi";
+// src/components/support/TicketDetailsPanel.jsx
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiSend, FiAlertCircle } from "react-icons/fi";
 import "../../SharedStyles/SharedSupport.css";
 
-const TICKETS_API_URL = "http://localhost:5001/api/tickets";
+const API_BASE = "http://localhost:5001/api";
 
-export default function SupportPanel2({
-  advisorId,          // optional: can still be passed from parent
-  setSelectedTicket,
-  setTab,
-}) {
-  // Read current user from localStorage
-  const storedUser = JSON.parse(localStorage.getItem("loggedUser"));
+export default function TicketDetailsPanel({ ticket, setTab }) {
+  // Read logged user (saved on login by HaseebAuth)
+  let loggedUser = null;
+  try {
+    const raw = localStorage.getItem("loggedUser");
+    loggedUser = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    console.error("Failed to parse loggedUser", e);
+  }
 
-  // This is the id we will actually use everywhere
-  const effectiveAdvisorId =
-    advisorId || storedUser?._id || storedUser?.id || null;
+  const role = loggedUser?.role || "advisor"; // "advisor" in this screen
 
-  const [tickets, setTickets] = useState([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
-  const [loading, setLoading] = useState(false);
+  const [currentTicket, setCurrentTicket] = useState(ticket || null);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
-  // ----- Load tickets -----
-  async function fetchTickets() {
+  // If parent changes the selected ticket, keep in sync
+  useEffect(() => {
+    setCurrentTicket(ticket || null);
+  }, [ticket]);
+
+  async function sendReply() {
+    if (!currentTicket || !reply.trim()) return;
+
     try {
+      setSending(true);
       setError("");
 
-      if (!effectiveAdvisorId) {
-        // no id -> nothing to fetch
-        return;
+      const res = await fetch(
+        `${API_BASE}/tickets/${currentTicket.id}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            senderRole: role,          // "advisor"
+            text: reply.trim(),
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to send reply");
       }
 
-      const res = await axios.get(TICKETS_API_URL, {
-        params: { advisorId: effectiveAdvisorId },
-      });
-
-      const raw = res.data || [];
-
-      // Normalize so every ticket has `id`
-      const normalized = raw.map((t) => ({
-        ...t,
-        id: t.id || t._id,
-      }));
-
-      setTickets(normalized);
+      const updated = await res.json();
+      // backend returns updated ticket (mapTicket), including messages
+      setCurrentTicket(updated);
+      setReply("");
     } catch (err) {
-      console.error("fetchTickets error:", err.response?.data || err);
-      setError(err.response?.data?.message || "Failed to load tickets.");
-    }
-  }
-
-  useEffect(() => {
-    fetchTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectiveAdvisorId]);
-
-  // ----- Create ticket -----
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (!effectiveAdvisorId) {
-      setError("Advisor ID is missing – cannot create ticket.");
-      return;
-    }
-
-    if (!title.trim() || !description.trim()) {
-      setError("Please fill in both title and description.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-
-      // Adjust field names here if your backend expects different keys
-      await axios.post(TICKETS_API_URL, {
-        advisorId: effectiveAdvisorId,
-        title: title.trim(),
-        message: description.trim(), // or description / text depending on backend
-        priority,
-      });
-
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
-      await fetchTickets();
-    } catch (err) {
-      console.error("createTicket error:", err.response?.data || err);
-      setError(
-        err.response?.data?.message || "Server error while creating ticket."
-      );
+      console.error("sendReply error:", err);
+      setError(err.message || "Failed to send reply.");
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   }
 
-  // ----- Stats -----
-  const total = tickets.length;
-  const openCount = tickets.filter((t) => t.status === "open").length;
-  const inProgressCount = tickets.filter(
-    (t) => t.status === "inprogress" || t.status === "in-progress"
-  ).length;
-  const resolvedCount = tickets.filter((t) => t.status === "resolved").length;
-
-  // ----- Helpers -----
-  function getStatusClass(status) {
-    if (status === "resolved") return "status-resolved";
-    if (status === "inprogress" || status === "in-progress")
-      return "status-progress";
-    return "status-open";
+  function roleLabel(senderRole) {
+    if (senderRole === "manager") return "Manager";
+    if (senderRole === "advisor") return "You";
+    if (senderRole === "owner") return "Owner";
+    return senderRole;
   }
 
-  function getStatusLabel(status) {
-    if (status === "resolved") return "Resolved";
-    if (status === "inprogress" || status === "in-progress") return "In Progress";
-    return "Open";
-  }
-
-  // ----- Render -----
-  return (
-    <div className="support-container">
-      <h1 className="support-title">Support &amp; Tickets</h1>
-
-      {error && (
-        <div className="support-error">
-          <FiAlertCircle size={20} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon-wrapper stat-icon-blue">
-            <FiTag size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-label">Total Tickets</div>
-            <div className="stat-value">{total}</div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon-wrapper stat-icon-yellow">
-            <FiAlertCircle size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-label">Open</div>
-            <div className="stat-value">{openCount}</div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon-wrapper stat-icon-orange">
-            <FiClock size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-label">In Progress</div>
-            <div className="stat-value">{inProgressCount}</div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon-wrapper stat-icon-green">
-            <FiCheckCircle size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-label">Resolved</div>
-            <div className="stat-value">{resolvedCount}</div>
-          </div>
-        </div>
+  if (!currentTicket) {
+    return (
+      <div className="ticket-details-container">
+        <p>No ticket selected.</p>
+        <button className="back-btn" onClick={() => setTab("support")}>
+          <FiArrowLeft size={18} /> Back
+        </button>
       </div>
+    );
+  }
 
-      <div className="two-column-grid">
-        {/* Create ticket */}
-        <div className="support-card">
-          <h2 className="card-title">Create New Ticket</h2>
-          <form onSubmit={handleSubmit} className="ticket-form">
-            <input
-              className="ticket-input"
-              placeholder="Ticket Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+  return (
+    <div className="ticket-details-container">
+      <button className="back-btn" onClick={() => setTab("support")}>
+        <FiArrowLeft size={20} />
+        Back to Tickets
+      </button>
 
-            <div className="form-row">
-              <label className="form-label">Priority</label>
-              <select
-                className="ticket-select"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
+      <div className="ticket-details-card">
+        <div className="ticket-header">
+          <h1 className="ticket-subject">{currentTicket.subject}</h1>
+          <span className={`ticket-status status-${currentTicket.status}`}>
+            {currentTicket.status === "resolved"
+              ? "Resolved"
+              : currentTicket.status === "inprogress"
+              ? "In Progress"
+              : "Open"}
+          </span>
+        </div>
 
-            <textarea
-              className="ticket-textarea"
-              rows={4}
-              placeholder="Describe your issue…"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-
-            <button type="submit" className="submit-btn" disabled={loading}>
-              <FiSend size={18} />
-              {loading ? "Sending…" : "Submit Ticket"}
-            </button>
-          </form>
-
-          {!effectiveAdvisorId && (
-            <p className="small text-muted mt-2">
-              (No advisor ID found in props or localStorage. Make sure you save
-              the logged user with <code>_id</code> or <code>id</code>.)
-            </p>
+        <div className="ticket-meta">
+          <span>
+            Created:{" "}
+            {currentTicket.createdAt
+              ? new Date(currentTicket.createdAt).toLocaleString()
+              : "-"}
+          </span>
+          {currentTicket.updatedAt && (
+            <span>
+              Updated: {new Date(currentTicket.updatedAt).toLocaleString()}
+            </span>
           )}
         </div>
 
-        {/* Ticket list */}
-        <div className="tickets-section">
-          <h2 className="section-title">Your Tickets</h2>
-          {tickets.length === 0 ? (
-            <div className="empty-state">No tickets yet.</div>
-          ) : (
-            <div className="tickets-list">
-              {tickets.map((t) => (
-                <div
-                  key={t.id}
-                  className="ticket-item"
-                  onClick={() => {
-                    if (setSelectedTicket && setTab) {
-                      setSelectedTicket(t);
-                      setTab("ticketDetails");
-                    }
-                  }}
-                >
-                  <div className="ticket-item-left">
-                    <div className="ticket-icon">
-                      <FiMessageCircle size={20} />
-                    </div>
-                    <div className="ticket-info">
-                      <div className="ticket-title">
-                        {t.title || t.subject || "(no title)"}
-                      </div>
-                      <div className="ticket-date">
-                        {t.createdAt
-                          ? new Date(t.createdAt).toLocaleString()
-                          : ""}
-                      </div>
-                    </div>
+        <div className="divider" />
+
+        <h3 className="conversation-title">Conversation</h3>
+
+        <div className="messages-container">
+          {currentTicket.messages && currentTicket.messages.length > 0 ? (
+            currentTicket.messages.map((m) => (
+              <div
+                key={m._id}
+                className={
+                  "message " +
+                  (m.senderRole === "advisor"
+                    ? "message-advisor"
+                    : "message-manager")
+                }
+              >
+                <div className="message-bubble">
+                  <div className="message-sender">
+                    {roleLabel(m.senderRole)}
                   </div>
-                  <span
-                    className={`ticket-status ${getStatusClass(t.status)}`}
-                  >
-                    {getStatusLabel(t.status)}
-                  </span>
+                  <div className="message-text">{m.text}</div>
+                  <div className="message-time">
+                    {m.at ? new Date(m.at).toLocaleString() : ""}
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))
+          ) : (
+            <div className="no-messages">
+              No messages yet for this ticket.
             </div>
           )}
+        </div>
+
+        {error && (
+          <div className="reply-error">
+            <FiAlertCircle size={18} />
+            {error}
+          </div>
+        )}
+
+        <div className="reply-section">
+          <input
+            className="reply-input"
+            placeholder="Type a reply…"
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !sending && reply.trim()) {
+                e.preventDefault();
+                sendReply();
+              }
+            }}
+          />
+          <button
+            className="reply-btn"
+            onClick={sendReply}
+            disabled={sending || !reply.trim()}
+          >
+            <FiSend size={18} />
+            {sending ? "Sending…" : "Send"}
+          </button>
         </div>
       </div>
     </div>
