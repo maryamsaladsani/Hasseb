@@ -1,0 +1,431 @@
+/* ========================= */
+/*   ACCOUNT SETTINGS PAGE   */
+/* ========================= */
+
+.account-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+}
+
+/* ========================= */
+/*          TITLE            */
+/* ========================= */
+.account-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #082830;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+/* ========================= */
+/*       ACCOUNT CARD        */
+/* ========================= */
+.account-card {
+    background: #ffffff;
+    padding: 1.75rem;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    margin-bottom: 1.25rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #082830;
+    margin-bottom: 1.25rem;
+}
+
+/* ========================= */
+/*      PROFILE SECTION      */
+/* ========================= */
+.profile-card {
+    background: linear-gradient(135deg, #f6fbfb 0%, #ffffff 100%);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-image-section {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    position: relative;
+    overflow: visible; /* Changed from hidden to visible */
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.15);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%; /* Added to maintain circular shape */
+}
+
+.avatar-initials {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    border-radius: 50%; /* Added to maintain circular shape */
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: -2px; /* Moved slightly up from edge */
+    right: -2px; /* Moved slightly in from edge */
+    width: 32px;
+    height: 32px;
+    background: #D2E5E5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #14748A;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10; /* Ensures button appears on top */
+}
+
+.avatar-upload-btn:hover {
+    transform: scale(1.1);
+}
+
+.profile-info-preview {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #082830;
+    margin: 0 0 0.375rem;
+}
+
+.profile-username {
+    font-size: 0.95rem;
+    color: #14748A;
+    margin: 0;
+}
+
+/* ========================= */
+/*    INFORMATION GRID       */
+/* ========================= */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #f6fbfb;
+    border-radius: 12px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    transition: all 0.2s ease;
+}
+
+.info-item:hover {
+    background: #ffffff;
+    border-color: #1AC6C6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.15);
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #14748A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.info-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #082830;
+    word-break: break-word;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    background: linear-gradient(135deg, #0ACF83 0%, #09b574 100%);
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ========================= */
+/*      THEME SECTION        */
+/* ========================= */
+.theme-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.theme-description {
+    flex: 1;
+}
+
+.theme-label {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #082830;
+    margin: 0 0 0.5rem;
+}
+
+.theme-helper {
+    font-size: 0.9rem;
+    color: #14748A;
+    margin: 0;
+}
+
+.theme-selector {
+    flex-shrink: 0;
+}
+
+.theme-select {
+    padding: 0.875rem 1.25rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(20, 116, 138, 0.2);
+    background: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #082830;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 180px;
+}
+
+.theme-select:focus {
+    outline: none;
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.1);
+}
+
+.theme-select:hover {
+    border-color: #1AC6C6;
+}
+
+/* ========================= */
+/*      NOT FOUND STATE      */
+/* ========================= */
+.account-not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 4rem 2rem;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 116, 138, 0.1);
+    box-shadow: 0 8px 24px rgba(8, 40, 48, 0.12);
+    color: #14748A;
+    text-align: center;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.account-not-found svg {
+    color: #1AC6C6;
+}
+
+.account-not-found p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* ========================= */
+/*    RESPONSIVE DESIGN      */
+/* ========================= */
+@media (max-width: 768px) {
+    .account-container {
+        padding: 1.5rem;
+    }
+
+    .account-title {
+        font-size: 1.75rem;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+    }
+
+    .avatar-initials {
+        font-size: 1.75rem;
+    }
+
+    .profile-name {
+        font-size: 1.35rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .theme-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-card {
+        padding: 1.25rem;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+}
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .account-container {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .card-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .profile-card {
+    background: #0a3540;
+}
+
+body[data-theme="dark"] .profile-name {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .profile-username {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .profile-avatar {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .avatar-upload-btn {
+    background: rgba(20, 116, 138, 0.3);
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .avatar-upload-btn:hover {
+    background: #1AC6C6;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .info-item {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .info-item:hover {
+    background: rgba(26, 198, 198, 0.1);
+    border-color: #1AC6C6;
+    box-shadow: 0 4px 12px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .info-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .info-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-label {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-helper {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .theme-select {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .theme-select:focus {
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .theme-select:hover {
+    border-color: #1AC6C6;
+}
+
+body[data-theme="dark"] .theme-select option {
+    background: #0a3540;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .account-not-found {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .account-not-found svg {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .account-not-found p {
+    color: #9ca3af;
+}

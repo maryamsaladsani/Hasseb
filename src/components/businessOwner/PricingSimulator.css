@@ -516,3 +516,122 @@
 .save-scenario-btn:active {
     transform: scale(0.97);
 }
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .pricing-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .pricing-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .pricing-label {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .pricing-select {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .pricing-select:focus {
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .pricing-empty-state {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .pricing-toggle {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .pricing-toggle-btn {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .pricing-helper-text {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .projections-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .projections-grid {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .projection-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .projection-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .comparison-title {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .pricing-optimal-card {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .optimal-header h3 {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .optimal-price-display {
+    background: #082830;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .optimal-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .comparison-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .comparison-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .optimal-note {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .slider-label-min,
+body[data-theme="dark"] .slider-label-max {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .result-card {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .result-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .result-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .pricing-error {
+    background: rgba(255, 87, 87, 0.15);
+    border-color: #FF5757;
+}

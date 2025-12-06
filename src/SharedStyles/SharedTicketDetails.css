@@ -392,3 +392,117 @@
         padding: 0.875rem 1rem;
     }
 }
+
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .ticket-details-container {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .back-btn {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .back-btn:hover {
+    background: rgba(26, 198, 198, 0.1);
+    border-color: #1AC6C6;
+}
+
+body[data-theme="dark"] .ticket-details-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .ticket-subject {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .status-open {
+    background: rgba(255, 152, 0, 0.15);
+    color: #FF9800;
+}
+
+body[data-theme="dark"] .status-progress {
+    background: rgba(255, 193, 7, 0.15);
+    color: #FFC107;
+}
+
+body[data-theme="dark"] .status-resolved {
+    background: rgba(10, 207, 131, 0.15);
+    color: #0ACF83;
+}
+
+body[data-theme="dark"] .ticket-meta {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .divider {
+    background: linear-gradient(to right, transparent, rgba(26, 198, 198, 0.2), transparent);
+}
+
+body[data-theme="dark"] .conversation-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .messages-container {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .messages-container::-webkit-scrollbar-track {
+    background: rgba(20, 116, 138, 0.1);
+}
+
+body[data-theme="dark"] .messages-container::-webkit-scrollbar-thumb {
+    background: rgba(26, 198, 198, 0.3);
+}
+
+body[data-theme="dark"] .messages-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(26, 198, 198, 0.5);
+}
+
+body[data-theme="dark"] .no-messages {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .message-manager .message-bubble {
+    background: #082830;
+    color: #ffffff;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .reply-error {
+    background: rgba(255, 87, 87, 0.15);
+    border-color: #FF5757;
+}
+
+body[data-theme="dark"] .reply-input {
+    background: #0a3540;
+    border-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .reply-input:focus {
+    border-color: #1AC6C6;
+    box-shadow: 0 0 0 3px rgba(26, 198, 198, 0.2);
+}
+
+body[data-theme="dark"] .ticket-not-found {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .ticket-not-found svg {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .ticket-not-found p {
+    color: #9ca3af;
+}

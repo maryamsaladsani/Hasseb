@@ -61,8 +61,8 @@ export function Sidebar({ tab, setTab, isOpen, onClose }) {
       console.error("Logout error:", err);
     }
 
-    // Redirect to login page (React Route)
-    window.location.href = "/"; // ← عدّليها إذا مسارك غير
+    // Redirect to login page
+    window.location.href = "/";
   };
 
   return (

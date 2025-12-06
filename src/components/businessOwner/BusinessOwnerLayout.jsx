@@ -1,11 +1,25 @@
-import React from "react";
-import { FiUser, FiBell } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiUser, FiBell, FiMoon, FiSun } from "react-icons/fi";
 import "../../SharedStyles/Layout.css";
 
 /* ============================
         HEADER
 =============================== */
 export function Header({ onOpenMenu }) {
+    const [theme, setTheme] = useState(() => {
+        return localStorage.getItem("themeOption") || "light";
+    });
+
+    useEffect(() => {
+        document.body.setAttribute("data-theme", theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem("themeOption", newTheme);
+    };
+
     return (
         <nav className="navbar shadow-sm sticky-top">
             <div className="container-fluid">
@@ -15,6 +29,16 @@ export function Header({ onOpenMenu }) {
                     onClick={onOpenMenu}
                 >
                     ☰
+                </button>
+
+                <button
+                    className="btn btn-outline-secondary"
+                    type="button"
+                    onClick={toggleTheme}
+                    style={{ marginLeft: "auto" }}
+                    title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                >
+                    {theme === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
                 </button>
             </div>
         </nav>

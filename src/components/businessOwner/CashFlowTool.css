@@ -502,3 +502,122 @@
         width: 260px;
     }
 }
+
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .cashflow-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .cashflow-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .cashflow-empty-state {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .cashflow-label {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .danger-zone-section {
+    background: rgba(255, 184, 77, 0.1);
+    border-color: #FFB84D;
+}
+
+body[data-theme="dark"] .danger-zone-hint {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .warning-banner-cashflow {
+    background: rgba(255, 87, 87, 0.1);
+    border-color: #FF5757;
+}
+
+body[data-theme="dark"] .warning-title-cashflow {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .warning-text-cashflow {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .summary-card {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .summary-label {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .summary-value {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .chart-section {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .chart-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .table-section {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .table-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .table-wrapper {
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .cashflow-table td {
+    border-bottom-color: #14748A;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .cashflow-table tbody tr:hover {
+    background: rgba(26, 198, 198, 0.05);
+}
+
+body[data-theme="dark"] .row-danger {
+    background: rgba(255, 87, 87, 0.15) !important;
+}
+
+body[data-theme="dark"] .row-warning {
+    background: rgba(255, 184, 77, 0.15) !important;
+}
+
+body[data-theme="dark"] .info-icon {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .info-icon:hover {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .tooltip-text {
+    background: #1AC6C6;
+    color: #082830;
+}
+
+body[data-theme="dark"] .tooltip-text::after {
+    border-color: #1AC6C6 transparent transparent transparent;
+}
+
+body[data-theme="dark"] .summary-card.tooltip-wrapper .tooltip-text::after {
+    border-color: transparent transparent #1AC6C6 transparent;
+}
+
+

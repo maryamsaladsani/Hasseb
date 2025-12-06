@@ -1,38 +1,130 @@
-import React from "react";
-import { FiBell } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { FiBell, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import "../../SharedStyles/Notifications.css";
 
 export default function NotificationsPanel() {
-  const [items, setItems] = React.useState([
-    { id: "n1", title: "Feedback Update:", message: "You have feedback", tone: "success" },
-    { id: "n2", title: "Feedback Update:", message: "You have feedback", tone: "success" },
-    { id: "n3", title: "Upload Update:",   message: "Data has uploaded", tone: "info" },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const dismiss = (id) => setItems((list) => list.filter((n) => n.id !== id));
+  const user = JSON.parse(localStorage.getItem("loggedUser"));
+  const ownerId = user?.userId;
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await axios.get(
+            `http://localhost:5001/api/users/notifications/${ownerId}`
+        );
+        setNotifications(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [ownerId]);
+
+  const dismiss = (id) => {
+    setNotifications((list) => list.filter((n) => n._id !== id));
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) {
+      return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
+  const getNotificationType = (message) => {
+    // Determine notification type based on message content
+    if (message.toLowerCase().includes('feedback') || message.toLowerCase().includes('success')) {
+      return 'success';
+    } else if (message.toLowerCase().includes('warning') || message.toLowerCase().includes('pending')) {
+      return 'warning';
+    } else if (message.toLowerCase().includes('error') || message.toLowerCase().includes('failed')) {
+      return 'error';
+    }
+    return 'info';
+  };
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "success":
+        return <FiCheckCircle />;
+      case "warning":
+      case "error":
+        return <FiAlertCircle />;
+      default:
+        return <FiBell />;
+    }
+  };
+
+  if (loading) {
+    return (
+        <div className="notifications-container">
+          <h1 className="notifications-title">Notifications</h1>
+          <div className="notifications-card">
+            <div className="notifications-empty">
+              <p>Loading notifications...</p>
+            </div>
+          </div>
+        </div>
+    );
+  }
 
   return (
-    <div className="container-xxl">
-      <div className="notif__wrap card-neo p-4">
-        <h5 className="mb-4">Notifications</h5>
+      <div className="notifications-container">
+        <h1 className="notifications-title">Notifications</h1>
 
-        <div className="d-flex flex-column gap-3">
-          {items.map((n) => (
-            <div key={n.id} className={`notif__item ${n.tone}`}>
-              <div className="notif__left">
-                <span className="notif__icon"><FiBell /></span>
-                <div className="notif__text">
-                  <div className="notif__title">{n.title}</div>
-                  <div className="notif__msg">{n.message}</div>
-                </div>
+        <div className="notifications-card">
+          {notifications.length === 0 ? (
+              <div className="notifications-empty">
+                <FiBell />
+                <p>All caught up! No new notifications.</p>
               </div>
-              <button className="notif__close" aria-label="Dismiss" onClick={() => dismiss(n.id)}>
-                ×
-              </button>
-            </div>
-          ))}
-          {items.length === 0 && <div className="text-muted">All caught up</div>}
+          ) : (
+              <div className="notifications-list">
+                {notifications.map((n) => {
+                  const type = getNotificationType(n.message);
+                  return (
+                      <div key={n._id} className={`notification-item ${type}`}>
+                        <div className="notification-left">
+                          <div className="notification-icon">
+                            {getIcon(type)}
+                          </div>
+                          <div className="notification-content">
+                            <h6 className="notification-title">Notification</h6>
+                            <p className="notification-message">{n.message}</p>
+                            <span className="notification-date">{formatDate(n.createdAt)}</span>
+                          </div>
+                        </div>
+                        <button
+                            className="notification-close"
+                            aria-label="Dismiss notification"
+                            onClick={() => dismiss(n._id)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                  );
+                })}
+              </div>
+          )}
         </div>
       </div>
-    </div>
   );
 }

@@ -584,3 +584,131 @@
         padding: 1rem;
     }
 }
+
+/* ========================= */
+/*       DARK THEME          */
+/* ========================= */
+
+body[data-theme="dark"] .upload-card {
+    background: #082830;
+    border-color: #14748A;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="dark"] .upload-card:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+body[data-theme="dark"] .upload-card h2 {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .upload-card p {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .download-section-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .download-section-desc {
+    color: #9ca3af !important;
+}
+
+body[data-theme="dark"] .upload-subtitle {
+    color: #9ca3af !important;
+}
+
+body[data-theme="dark"] .file-drop-zone {
+    background: #0a3540;
+    border-color: #14748A;
+}
+
+body[data-theme="dark"] .file-drop-zone.is-dragging {
+    background: rgba(26, 198, 198, 0.1);
+    border-color: #1AC6C6;
+}
+
+body[data-theme="dark"] .drop-zone-title {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .drop-zone-subtitle {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .cloud-icon-wrap {
+    background: rgba(20, 116, 138, 0.3);
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .cloud-icon-wrap:hover {
+    background: #1AC6C6;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .browse-btn {
+    border-color: #1AC6C6;
+    color: #1AC6C6;
+    background: transparent;
+}
+
+body[data-theme="dark"] .browse-btn:hover {
+    background: #1AC6C6;
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .uploaded-file {
+    background: rgba(20, 116, 138, 0.2);
+}
+
+body[data-theme="dark"] .file-name {
+    color: #ffffff;
+}
+
+body[data-theme="dark"] .file-size {
+    color: #9ca3af;
+}
+
+body[data-theme="dark"] .progress-message {
+    background: rgba(26, 198, 198, 0.1);
+    border-color: #1AC6C6;
+}
+
+body[data-theme="dark"] .progress-text {
+    color: #1AC6C6;
+}
+
+body[data-theme="dark"] .error-message {
+    background: rgba(255, 87, 87, 0.1);
+    border-color: #FF5757;
+}
+
+body[data-theme="dark"] .error-title {
+    color: #FF5757;
+}
+
+body[data-theme="dark"] .error-description {
+    color: #ff8787;
+}
+
+body[data-theme="dark"] .success-message {
+    background: rgba(10, 207, 131, 0.1);
+    border-color: #0ACF83;
+}
+
+body[data-theme="dark"] .success-text {
+    color: #0ACF83;
+}
+
+body[data-theme="dark"] .upload-error-message {
+    background: rgba(255, 87, 87, 0.1);
+    border-color: #FF5757;
+    color: #ff8787;
+}
+
+body[data-theme="dark"] .upload-success-message {
+    background: rgba(10, 207, 131, 0.1);
+    border-color: #0ACF83;
+    color: #0ACF83;
+}
