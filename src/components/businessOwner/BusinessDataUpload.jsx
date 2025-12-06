@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Download, CheckCircle, X, Loader, AlertCircle } from "lucide-react";
 import { parseExcelFile } from "../../utils/excelParser";
@@ -165,21 +166,18 @@ export default function BusinessDataUpload({ onUploadSuccess }) {
 
     return (
         <>
-            {/* Header */}
-            <div className="upload-header">
-                <h1>Import Your Business Data</h1>
-                <p>Structure your business data using Haseeb's standardized Excel template for accurate financial analysis.</p>
-            </div>
-
-            {/* Download Template Card */}
+            {/* Download Template Card with Header Inside */}
             <div className="upload-card">
                 <div className="card-content-center">
-                    <div className="icon-wrapper download-icon">
-                        <Download className="card-icon" />
+                    <div className="header-with-icon">
+                        <div className="icon-wrapper download-icon">
+                            <Download className="card-icon" />
+                        </div>
+                        <h2>Import Your Business Data</h2>
                     </div>
 
-                    <h2>Download Haseeb Template</h2>
-                    <p>Pre-formatted Excel workbook with three sheets: Cash Flow, Cost-Volume-Profit, and Pricing Analysis.</p>
+
+                    <p className="download-section-desc">Organize your business data with Haseeb’s Excel template: Cash Flow, CVP, and Pricing.</p>
 
                     <button
                         onClick={() => {

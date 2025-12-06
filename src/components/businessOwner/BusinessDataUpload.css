@@ -1,4 +1,3 @@
-
 /* ========================= */
 /*      MAIN CONTAINER       */
 /* ========================= */
@@ -9,32 +8,7 @@
     flex-direction: column;
     align-items: center;
     margin: 0 auto;
-}
-
-/* ========================= */
-/*       HEADER TEXT         */
-/* ========================= */
-.upload-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    width: 100%;
-    padding-top: 1rem; /* Add extra space at top */
-}
-
-.upload-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #082830;
-    margin-bottom: 1rem;
-    letter-spacing: -0.5px;
-}
-
-.upload-header p {
-    font-size: 1.1rem;
-    color: #14748A;
-    max-width: 650px;
-    margin: 0 auto;
-    line-height: 1.6;
+    padding-top: 2rem; /* Add padding since header is now inside card */
 }
 
 /* ========================= */
@@ -66,9 +40,10 @@
 
 .upload-card h2 {
     color: #082830;
-    margin-bottom: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 600;
+    margin-bottom: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .upload-card p {
@@ -79,17 +54,41 @@
 }
 
 /* ========================= */
+/*   DOWNLOAD SECTION TITLES */
+/* ========================= */
+.download-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #082830;
+    margin: 2rem 0 0.5rem;
+}
+
+.download-section-desc {
+    font-size: 0.9rem !important;
+    color: #14748A !important;
+    margin-bottom: 1.5rem !important;
+}
+
+/* ========================= */
 /*       ICON WRAPPER        */
 /* ========================= */
-.icon-wrapper {
-    width: 72px;
-    height: 72px;
-    border-radius: 18px;
+.header-with-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
     margin-bottom: 1.5rem;
 }
+
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;}
 
 .download-icon {
     background: linear-gradient(135deg, #1AC6C6 0%, #14748A 100%);
@@ -97,7 +96,7 @@
 }
 
 .card-icon {
-    width: 36px;
+    width: 24px;
     height: 36px;
     color: #ffffff;
 }
@@ -535,16 +534,26 @@
 /*      RESPONSIVE DESIGN    */
 /* ========================= */
 @media (max-width: 768px) {
-    .upload-header h1 {
-        font-size: 2rem;
-    }
-
-    .upload-header p {
-        font-size: 1rem;
-    }
-
     .upload-card {
         padding: 2rem 1.5rem;
+    }
+
+    .header-with-icon {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .icon-wrapper {
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-card h2 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .download-section-title {
+        font-size: 1.15rem;
     }
 
     .cloud-icon-wrap {
@@ -558,14 +567,15 @@
 }
 
 @media (max-width: 480px) {
-    .upload-header h1 {
-        font-size: 1.75rem;
-    }
-
     .upload-card h2 {
         font-size: 1.25rem;
     }
+
+    .download-section-title {
+        font-size: 1.1rem;
+    }
 }
+
 @media (max-width: 768px) {
     .upload-error-message,
     .upload-success-message {
