@@ -21,7 +21,7 @@ export default function ScenarioComparison({ username }) {
                 setScenarios(data.scenarios || []);
             } catch (err) {
                 console.error("Error fetching scenarios:", err);
-                setError("Could not load scenarios.");
+                setError("There is no avaliable scenarios.");
             } finally {
                 setLoading(false);
             }

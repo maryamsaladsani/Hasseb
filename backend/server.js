@@ -1,5 +1,3 @@
-// backend/server.js
-
 // ===============================
 //  IMPORTS
 // ===============================
@@ -16,9 +14,7 @@ const advisorRoute = require("./src/routes/advisorRoutes/advisorRoute");
 const advisorTicketRoutes = require("./src/routes/advisorRoutes/advisorTicketRoutes");
 const ownerAdvisorRoutes = require("./src/routes/advisorRoutes/ownerAdvisorRoutes");
 const ownerRoutes = require("./src/routes/OwnerRoutes");
-
-// ⭐ Scenario routes
-const scenarioRoutes = require("./src/routes/scenarioRoutes");
+const scenarioRoutes = require("./src/routes/scenarioRoutes");   // ⭐ ADD THIS
 
 // ===============================
 //  CONFIG
@@ -45,9 +41,7 @@ app.use("/api/advisor", advisorRoute);
 app.use("/api/advisor", advisorTicketRoutes);
 app.use("/api/link", ownerAdvisorRoutes);
 app.use("/api/owner", ownerRoutes);
-
-// ⭐ Correct mount path for scenarios
-app.use("/api/pricing-scenarios", scenarioRoutes);
+app.use("/api/pricing-scenarios", scenarioRoutes);    
 
 // ===============================
 //  START SERVER

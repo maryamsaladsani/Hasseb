@@ -1,5 +1,5 @@
 /* ============================================ */
-/*           SCENARIO COMPARISON UI          */
+/*           SCENARIO COMPARISON UI            */
 /* ============================================ */
 
 :root {
@@ -19,7 +19,7 @@
 /* PAGE CONTAINER */
 
 .scenario-wrapper {
-    max-width: 1050px; /* keep consistent with rest of app */
+    max-width: 1050px;
     width: 100%;
     margin: 0 auto;
     padding: 2rem 1.2rem;
@@ -31,13 +31,19 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* FIXED GRADIENT TITLE */
 .scenario-title {
     font-size: 2rem;
     font-weight: 800;
-    color: var(--text-dark);
     margin-bottom: 1.6rem;
     letter-spacing: 0.4px;
+
+    /* Fallback for Firefox */
+    color: #0ac4c4;
+
+    /* Gradient text for Chrome/Safari/Edge */
     background: linear-gradient(90deg, #0ac4c4, #12898f);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -158,7 +164,6 @@
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.6);
     overflow: hidden;
-    position: relative;
 }
 
 .risk-meter-fill {
@@ -226,7 +231,7 @@
 .recommendation-box {
     margin-top: 2.4rem;
     background: linear-gradient(145deg, #ffffff, #f4fbfd);
-    border-radius: 20px;
+    border-radius: var(--radius-card); /* FIXED */
     padding: 2rem 1.6rem;
     border: 1px solid rgba(0, 200, 120, 0.22);
     box-shadow: 0 14px 30px rgba(0, 200, 120, 0.18);
@@ -294,7 +299,8 @@
         font-size: 1.5rem;
     }
 
+    /* Smoother spacing on small devices */
     .scenario-card {
-        padding: 1.05rem 1.1rem;
+        padding: 1.15rem 1.25rem;
     }
 }
