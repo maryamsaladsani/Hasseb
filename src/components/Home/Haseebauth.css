@@ -91,15 +91,16 @@
     position: relative;
     z-index: 1;
     padding: 0 1.5rem;
+    min-height: calc(100vh - 4rem); /* ADD THIS */
 }
 
 @media (min-width: 1024px) {
     .auth-content {
         grid-template-columns: 1fr 1fr;
         gap: 3rem;
+        align-items: stretch; /* ADD THIS */
     }
 }
-
 /* ================================
    Branding Section (Left)
    ================================ */
@@ -107,13 +108,15 @@
     display: none;
     background: linear-gradient(135deg, var(--color-primary) 0%, #14748A 100%);
     border-radius: 24px;
-    padding: 3rem;
+    padding: 5.75rem;
     color: white;
     box-shadow: 0 20px 60px rgba(26, 198, 198, 0.3);
     position: relative;
     overflow: hidden;
     align-items: center;
-
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
 }
 
 .auth-branding::before {
@@ -223,6 +226,26 @@
     padding: 3rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(26, 198, 198, 0.1);
+    max-height: calc(100vh - 4rem); /* ADD THIS */
+    overflow-y: auto; /* ADD THIS */
+}
+
+.auth-form-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.auth-form-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.auth-form-container::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 10px;
+}
+
+.auth-form-container::-webkit-scrollbar-thumb:hover {
+    background: #14748A;
 }
 
 .auth-form-wrapper {
