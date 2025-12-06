@@ -119,13 +119,13 @@ body {
 /* ================================
    Layout & Container
    ================================ */
+
 .haseeb-homepage {
     min-height: 100vh;
-    background: linear-gradient(135deg, #E6F9F9 0%, #F0F9F9 50%, #E6F9F9 100%);
+    background: #FFFFFF;
     position: relative;
-    padding-top: 5rem; /* Account for fixed header */
+    padding-top: 5rem;
 }
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
