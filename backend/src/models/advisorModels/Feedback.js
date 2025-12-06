@@ -1,24 +1,27 @@
 const mongoose = require("mongoose");
 
-const FeedbackSchema = new mongoose.Schema({
-  advisorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Advisor",
-    required: true
+const feedbackSchema = new mongoose.Schema(
+  {
+    advisorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",        // or "Advisor" if you have that model
+      required: true,
+    },
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",        // or "Owner"
+      required: true,
+    },
+    content: {
+      type: String,
+      default: "",
+    },
+    fileUrl: {
+      type: String,
+      default: null,
+    },
   },
-  ownerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Owner",
-    required: true
-  },
-  content: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("Feedback", FeedbackSchema);
+module.exports = mongoose.model("Feedback", feedbackSchema);

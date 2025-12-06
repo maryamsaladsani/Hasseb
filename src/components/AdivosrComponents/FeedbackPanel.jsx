@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  FiEye,
-  FiTrash2,
-  FiDownload,
-  FiArrowLeft,
-  FiEdit2,
-} from "react-icons/fi";
+import { FiEye, FiTrash2, FiDownload, FiArrowLeft, FiEdit2 } from "react-icons/fi";
 
 export default function FeedbackPanel({ feedback = [], owners = [], advisorId }) {
   const [items, setItems] = useState([]);
@@ -17,13 +11,18 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
   const [editText, setEditText] = useState("");
   const [showEdit, setShowEdit] = useState(false);
 
-  // Load feedback from props
+  // Load initial feedback list
   useEffect(() => {
     setItems(feedback);
   }, [feedback]);
 
+  // All feedback items for the currently selected owner
+  const ownerItems = ownerId
+    ? items.filter((i) => i.ownerId === ownerId)
+    : [];
+
   /* -------------------------------------
-        ADD FEEDBACK
+        ADD FEEDBACK (advisor comment)
   ------------------------------------- */
   const addFeedback = async () => {
     if (!ownerId?.trim()) {
@@ -42,9 +41,9 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
         content,
       });
 
+      // add new feedback to list
       setItems([res.data, ...items]);
       setContent("");
-      setOwnerId("");
     } catch (err) {
       console.error("Add feedback error:", err);
       alert("Error adding feedback");
@@ -57,7 +56,6 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
   const deleteOne = async (id) => {
     try {
       await axios.delete(`http://localhost:5001/api/advisor/feedback/${id}`);
-
       setItems(items.filter((i) => i._id !== id));
       setActive(null);
     } catch (err) {
@@ -86,7 +84,7 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
   };
 
   /* -------------------------------------
-        EXPORT ALL
+        EXPORT ALL (unchanged)
   ------------------------------------- */
   const exportAll = () => {
     const blob = new Blob([JSON.stringify(items, null, 2)], {
@@ -102,7 +100,7 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
   };
 
   /* -------------------------------------
-        VIEW MODE
+        DETAIL VIEW (unchanged except file link)
   ------------------------------------- */
   if (active) {
     const owner = owners.find((o) => o._id === active.ownerId);
@@ -121,12 +119,23 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
           </p>
 
           {owner && (
-            <p className="fw-semibold">
-              For: {owner.fullName}
+            <p className="fw-semibold">For: {owner.fullName}</p>
+          )}
+
+          {/* file link if owner shared a file */}
+          {active.fileUrl && (
+            <p>
+              <a
+                href={`http://localhost:5001${active.fileUrl}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                📎 Open attached file
+              </a>
             </p>
           )}
 
-          <p>{active.content}</p>
+          <p>{active.content || <i>No feedback yet.</i>}</p>
 
           <div className="d-flex gap-3 mt-4">
             <button
@@ -145,7 +154,7 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
           </div>
         </div>
 
-        {/* Edit Modal */}
+        {/* Edit Modal (unchanged) */}
         {showEdit && (
           <>
             <div className="modal-backdrop fade show" />
@@ -154,7 +163,10 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
                 <div className="modal-content">
                   <div className="modal-header">
                     <h6>Edit Feedback</h6>
-                    <button className="btn-close" onClick={() => setShowEdit(false)} />
+                    <button
+                      className="btn-close"
+                      onClick={() => setShowEdit(false)}
+                    />
                   </div>
 
                   <div className="modal-body">
@@ -227,38 +239,62 @@ export default function FeedbackPanel({ feedback = [], owners = [], advisorId })
         </button>
       </div>
 
-      {/* LIST */}
-      <div className="d-flex flex-column gap-3">
-        {items.map((fb) => {
-          const owner = owners.find((o) => o._id === fb.ownerId);
-
-          return (
-            <div key={fb._id} className="card-neo p-3 d-flex justify-content-between">
-              <div>
-                {/* التاريخ */}
-                <div className="text-muted small">
-                  {new Date(fb.createdAt).toLocaleString()}
-                </div>
-
-                {/* الفيدباك لمين */}
-                {owner && (
-                  <div className="fw-semibold small">
-                    Feedback for: {owner.fullName}
-                  </div>
-                )}
-
-                {/* نص الفيدباك */}
-                <div>{fb.content}</div>
-              </div>
-
-              <button className="btn btn-outline-dark" onClick={() => setActive(fb)}>
-                <FiEye /> View
-              </button>
+      {/* LIST: FILES + COMMENTS FOR SELECTED OWNER */}
+      {ownerId && (
+        <div className="d-flex flex-column gap-3">
+          {ownerItems.length === 0 ? (
+            <div className="text-muted">
+              This owner hasn’t shared any files yet.
             </div>
-          );
-        })}
-      </div>
+          ) : (
+            ownerItems.map((fb) => {
+              const owner = owners.find((o) => o._id === fb.ownerId);
+
+              return (
+                <div
+                  key={fb._id}
+                  className="card-neo p-3 d-flex justify-content-between"
+                >
+                  <div>
+                    <div className="text-muted small">
+                      {new Date(fb.createdAt).toLocaleString()}
+                    </div>
+
+                    {owner && (
+                      <div className="fw-semibold small">
+                        Feedback for: {owner.fullName}
+                      </div>
+                    )}
+
+                    {/* show file if the owner shared one */}
+                    {fb.fileUrl && (
+                      <a
+                        href={`http://localhost:5001${fb.fileUrl}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="small d-block mb-1"
+                      >
+                        📎 Open attached file
+                      </a>
+                    )}
+
+                    <div>{fb.content || <i>No comment yet.</i>}</div>
+                  </div>
+
+                  <button
+                    className="btn btn-outline-dark"
+                    onClick={() => setActive(fb)}
+                  >
+                    <FiEye /> View
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
 

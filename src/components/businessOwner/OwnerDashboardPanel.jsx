@@ -8,6 +8,8 @@ export default function Dashboard({ baseData }) {
     const [shareLoading, setShareLoading] = useState(false);
     const [shareError, setShareError] = useState("");
     const [shareSuccess, setShareSuccess] = useState("");
+    const [shareFile, setShareFile] = useState(null); 
+
 
     if (!baseData) return <div>Loading…</div>;
 
@@ -53,59 +55,103 @@ export default function Dashboard({ baseData }) {
     // -------------------------
     // SHARE (mock)
     // -------------------------
- async function handleShareWithAdvisor() {
-    try {
-      setShareLoading(true);
-      setShareError("");
-      setShareSuccess("");
+async function handleShareWithAdvisor() {
+  // DEBUG: Show that the button works
+  console.log("DEBUG: Share button clicked");
+  alert("Share button clicked!"); // <--- TEMP
 
-      // 1) Get logged-in owner from localStorage
-      const logged = JSON.parse(localStorage.getItem("loggedUser") || "null");
+  try {
+    setShareLoading(true);
+    setShareError("");
+    setShareSuccess("");
 
-      if (!logged || !logged.userId) {
-        setShareError("Cannot find logged in owner information.");
-        return;
-      }
+    // Add more debug logs
+    console.log("DEBUG: Starting share process...");
 
-      // 2) Build a useful summary message from current insights
-      const subject = "Simulation shared for advisor feedback";
-      const topRecs = recommendations.slice(0, 3).join(" | ");
-      const message = `
-Owner has shared a new simulation.
+    // 1) Get logged-in owner from localStorage
+    const logged = JSON.parse(localStorage.getItem("loggedUser") || "null");
+    console.log("DEBUG: logged user =", logged);
 
-Health score: ${healthScore}/100
-Real burn rate: ${cashInsights.realBurnRate} SAR/month
-
-Top recommendations:
-${topRecs || "No recommendations generated."}
-      `.trim();
-
-      // 3) Call backend
-      const res = await fetch(TICKETS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fromUserId: logged.userId,
-          fromRole: "owner",
-          subject,
-          message,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to share with advisor.");
-      }
-
-      setShareSuccess("Shared with advisor successfully!");
-    } catch (err) {
-      console.error("handleShareWithAdvisor error:", err);
-      setShareError(err.message || "Failed to share with advisor.");
-    } finally {
-      setShareLoading(false);
+    if (!logged || !logged.userId) {
+      setShareError("Cannot find logged in owner information.");
+      return;
     }
-  }
 
+    const ownerId = logged.userId;
+
+    // 2) Check selected file
+    console.log("DEBUG: selected file =", shareFile);
+
+    if (!shareFile) {
+      setShareError("Please choose a file to share with your advisor.");
+      return;
+    }
+
+    // 3) Request advisor assignment
+    console.log("DEBUG: Fetching advisor for owner", ownerId);
+    const assignmentRes = await fetch(
+      `http://localhost:5001/api/assignments/owner/${ownerId}`
+    );
+
+    console.log("DEBUG: assignment response status =", assignmentRes.status);
+
+    if (!assignmentRes.ok) {
+      const err = await assignmentRes.json().catch(() => ({}));
+      throw new Error(err.message || "No advisor assigned to this owner.");
+    }
+
+    const assignment = await assignmentRes.json();
+    console.log("DEBUG: assignment result =", assignment);
+
+    const advisorId = assignment.advisorId;
+
+    // 4) Creating FormData
+    console.log("DEBUG: Building FormData with:", {
+      ownerId,
+      advisorId,
+      shareFile,
+    });
+
+    const fd = new FormData();
+    fd.append("file", shareFile);
+    fd.append("ownerId", ownerId);
+    fd.append("advisorId", advisorId);
+
+    // 5) Upload to backend
+    console.log("DEBUG: Uploading file...");
+    const uploadRes = await fetch(
+      "http://localhost:5001/api/advisor/feedback/file",
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+
+    console.log("DEBUG: upload status =", uploadRes.status);
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to share file with advisor.");
+    }
+
+    setShareSuccess("File shared with advisor successfully!");
+    setShareFile(null);
+
+    // DEBUG SUCCESS MESSAGE
+    alert("Upload finished successfully!"); // <--- TEMP
+  } catch (err) {
+    console.error("handleShareWithAdvisor error:", err);
+    setShareError(err.message || "Failed to share with advisor.");
+    alert("Error happened: " + err.message); // <--- TEMP
+  } finally {
+    setShareLoading(false);
+  }
+}
+
+
+  // -------------------------
+  // RENDER
+  // -------------------------
   return (
     <div className="dashboard-container">
       {/* HEADER */}
@@ -201,19 +247,35 @@ ${topRecs || "No recommendations generated."}
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="dashboard-actions">
-        <button className="export-btn" onClick={handleExportCSV}>
-          Export CSV
-        </button>
+  <div className="dashboard-actions">
+  <input
+    type="file"
+    className="form-control mb-2"
+    onChange={(e) => {
+      const file = e.target.files?.[0] || null;
+      console.log("selected file:", file);       // debug
+      setShareFile(file);
+    }}
+  />
 
-        <button
-          className="share-btn btn btn-warning"
-          onClick={handleShareWithAdvisor}
-          disabled={shareLoading}
-        >
-          {shareLoading ? "Sharing…" : "Share with Advisor"}
-        </button>
-      </div>
+  <button
+    type="button"                               // ⬅ ADD THIS
+    className="export-btn"
+    onClick={handleExportCSV}
+  >
+    Export CSV
+  </button>
+
+  <button
+    type="button"                               // ⬅ AND THIS
+    className="share-btn btn btn-warning"
+    onClick={handleShareWithAdvisor}
+    disabled={shareLoading}
+  >
+    {shareLoading ? "Sharing…" : "Share with Advisor"}
+  </button>
+</div>
+
     </div>
   );
 }

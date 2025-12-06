@@ -1,13 +1,21 @@
-// backend/src/routes/advisorRoute.js
+// backend/src/routes/advisorRoutes/advisorRoute.js
+
 const express = require("express");
+const path = require("path");
+const multer = require("multer");
+
 const router = express.Router();
 
+// MODELS
 const Advisor = require("../../models/advisorModels/advisor");
 const Owner = require("../../models/Owner");
 const Ticket = require("../../models/advisorModels/Ticket");
 const Feedback = require("../../models/advisorModels/Feedback");
 const Recommendation = require("../../models/advisorModels/Recommendation");
 const Notification = require("../../models/advisorModels/Notification");
+const Assignment = require("../../models/Assignment"); // advisor <-> owner links
+
+// RISK ENGINE
 const { evaluateOwnerRisk } = require("../../utils/riskEngine");
 
 /* ======================================================
@@ -18,7 +26,7 @@ router.get("/ping", (req, res) => {
 });
 
 /* ======================================================
-   GET DASHBOARD DATA (NOW WITH RISK + AUTO-NOTIFS)
+   GET DASHBOARD DATA (advisorId in params)
 ====================================================== */
 router.get("/dashboard/:advisorId", async (req, res) => {
   try {
@@ -27,17 +35,21 @@ router.get("/dashboard/:advisorId", async (req, res) => {
     const advisor = await Advisor.findById(advisorId);
     if (!advisor) return res.status(404).json({ msg: "Advisor not found" });
 
-    const owners = await Owner.find({ advisor: advisorId });
+    // 1) owners = all owners assigned to this advisor (via Assignment)
+    const assignments = await Assignment.find({ advisorId }).populate("ownerId");
+    const owners = assignments.map((a) => a.ownerId).filter(Boolean);
+
+    // 2) tickets and feedback for this advisor
     const tickets = await Ticket.find({ advisorId }).sort({ createdAt: -1 });
     const feedback = await Feedback.find({ advisorId }).sort({ createdAt: -1 });
 
-    /* ---------- RANK ---------- */
+    // 3) Rank among all advisors (by points)
     const allAdvisors = await Advisor.find();
     const sorted = allAdvisors.sort((a, b) => b.points - a.points);
     const rank =
       sorted.findIndex((a) => a._id.toString() === advisorId) + 1;
 
-    /* ---------- ACTIVITY MOCK ---------- */
+    // 4) Mock activity chart
     const activity = [
       { day: "Sat", valueA: 450, valueB: 320 },
       { day: "Sun", valueA: 300, valueB: 150 },
@@ -48,7 +60,6 @@ router.get("/dashboard/:advisorId", async (req, res) => {
       { day: "Fri", valueA: 260, valueB: 210 },
     ];
 
-    /* ---------- STATIC DASHBOARD ALERTS ---------- */
     const alerts = [
       {
         name: "Norah",
@@ -66,16 +77,10 @@ router.get("/dashboard/:advisorId", async (req, res) => {
       },
     ];
 
-    /* ======================================================
-       ⭐ 1) RUN RISK ENGINE FOR EACH OWNER
-    ======================================================= */
+    // 5) Run risk engine for each owner
     const rawRiskData = owners.map((o) => evaluateOwnerRisk(o));
 
-    /* ======================================================
-       ⭐ 2) FILTER ALERTS BASED ON NUMBER OF OWNERS
-          - If <= 3 owners → return ALL alerts
-          - If > 3 owners → return ONLY High → else Medium → else Info
-    ======================================================= */
+    // 6) Filter risk alerts depending on number of owners
     let filteredRisk = [];
 
     if (owners.length <= 3) {
@@ -113,9 +118,7 @@ router.get("/dashboard/:advisorId", async (req, res) => {
       });
     }
 
-    /* ======================================================
-       ⭐ 3) AUTO-NOTIFICATIONS FOR HIGH RISK OWNERS
-    ======================================================= */
+    // 7) Auto-create notifications for high-risk owners (once per 24h per owner)
     for (const r of rawRiskData) {
       if (r.level === "High") {
         const exists = await Notification.findOne({
@@ -134,9 +137,7 @@ router.get("/dashboard/:advisorId", async (req, res) => {
       }
     }
 
-    /* ======================================================
-       ⭐ RETURN EVERYTHING
-    ======================================================= */
+    // 8) Return everything
     return res.json({
       advisor: {
         ...advisor.toObject(),
@@ -147,8 +148,8 @@ router.get("/dashboard/:advisorId", async (req, res) => {
       owners,
       tickets,
       feedback,
-      riskData: rawRiskData, // كامل
-      filteredRisk, // اللي نعرضه في الواجهة
+      riskData: rawRiskData,
+      filteredRisk,
     });
   } catch (err) {
     console.error("Dashboard error:", err);
@@ -157,14 +158,17 @@ router.get("/dashboard/:advisorId", async (req, res) => {
 });
 
 /* ======================================================
-   ADD FEEDBACK
+   FEEDBACK (TEXT) – advisor adds / manages comments
 ====================================================== */
+
+// POST /api/advisor/feedback
 router.post("/feedback", async (req, res) => {
   try {
     const { advisorId, ownerId, content } = req.body;
 
-    if (!advisorId || !ownerId || !content)
+    if (!advisorId || !ownerId || !content) {
       return res.status(400).json({ msg: "Missing fields" });
+    }
 
     const owner = await Owner.findById(ownerId);
     if (!owner) return res.status(404).json({ msg: "Owner not found" });
@@ -176,22 +180,30 @@ router.post("/feedback", async (req, res) => {
       content,
     });
 
-    return res.json(fb);
+    console.log("Created text feedback:", fb._id);
+    return res.status(201).json(fb);
   } catch (err) {
     console.error("Feedback error:", err);
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
 
-/* ======================================================
-   GET FEEDBACK FOR ADVISOR
-====================================================== */
-router.get("/feedback/:advisorId", async (req, res) => {
+// GET /api/advisor/feedback?advisorId=XXX
+router.get("/feedback", async (req, res) => {
   try {
-    const list = await Feedback.find({ advisorId: req.params.advisorId }).sort({
-      createdAt: -1,
-    });
+    const { advisorId } = req.query;
+    if (!advisorId) {
+      return res.status(400).json({ msg: "advisorId is required" });
+    }
 
+    const list = await Feedback.find({ advisorId }).sort({ createdAt: -1 });
+
+    console.log(
+      "GET /api/advisor/feedback advisorId=",
+      advisorId,
+      "count=",
+      list.length
+    );
     return res.json(list);
   } catch (err) {
     console.error("Feedback fetch error:", err);
@@ -199,9 +211,7 @@ router.get("/feedback/:advisorId", async (req, res) => {
   }
 });
 
-/* ======================================================
-   DELETE FEEDBACK
-====================================================== */
+// DELETE /api/advisor/feedback/:id
 router.delete("/feedback/:id", async (req, res) => {
   try {
     const deleted = await Feedback.findByIdAndDelete(req.params.id);
@@ -212,14 +222,12 @@ router.delete("/feedback/:id", async (req, res) => {
 
     return res.json({ msg: "Feedback deleted", deleted });
   } catch (err) {
-    console.error("Delete error:", err);
+    console.error("Delete feedback error:", err);
     res.status(500).json({ msg: "Server error" });
   }
 });
 
-/* ======================================================
-   UPDATE FEEDBACK
-====================================================== */
+// PUT /api/advisor/feedback/:id
 router.put("/feedback/:id", async (req, res) => {
   try {
     const { content } = req.body;
@@ -236,14 +244,16 @@ router.put("/feedback/:id", async (req, res) => {
 
     return res.json(updated);
   } catch (err) {
-    console.error("Update error:", err);
+    console.error("Update feedback error:", err);
     res.status(500).json({ msg: "Server error" });
   }
 });
 
 /* ======================================================
-   SAVE SUGGESTION
+   SUGGESTIONS (advisor → owner)
 ====================================================== */
+
+// POST /api/advisor/suggestions
 router.post("/suggestions", async (req, res) => {
   try {
     const { advisorId, ownerId, suggestion } = req.body;
@@ -268,9 +278,7 @@ router.post("/suggestions", async (req, res) => {
   }
 });
 
-/* ======================================================
-   GET SUGGESTIONS
-====================================================== */
+// GET /api/advisor/suggestions/:ownerId
 router.get("/suggestions/:ownerId", async (req, res) => {
   try {
     const list = await Recommendation.find({
@@ -285,14 +293,17 @@ router.get("/suggestions/:ownerId", async (req, res) => {
 });
 
 /* ======================================================
-   CREATE NOTIFICATION
+   NOTIFICATIONS
 ====================================================== */
+
+// POST /api/advisor/notifications
 router.post("/notifications", async (req, res) => {
   try {
     const { advisorId, title, message } = req.body;
 
-    if (!advisorId || !title || !message)
+    if (!advisorId || !title || !message) {
       return res.status(400).json({ msg: "Missing fields" });
+    }
 
     const notif = await Notification.create({
       advisorId,
@@ -307,9 +318,7 @@ router.post("/notifications", async (req, res) => {
   }
 });
 
-/* ======================================================
-   GET NOTIFICATIONS FOR ADVISOR
-====================================================== */
+// GET /api/advisor/notifications/:advisorId
 router.get("/notifications/:advisorId", async (req, res) => {
   try {
     const list = await Notification.find({
@@ -323,9 +332,7 @@ router.get("/notifications/:advisorId", async (req, res) => {
   }
 });
 
-/* ======================================================
-   MARK NOTIFICATION AS READ
-====================================================== */
+// PUT /api/advisor/notifications/read/:id
 router.put("/notifications/read/:id", async (req, res) => {
   try {
     const updated = await Notification.findByIdAndUpdate(
@@ -346,8 +353,10 @@ router.put("/notifications/read/:id", async (req, res) => {
 });
 
 /* ======================================================
-   TEST RISK FOR ONE OWNER
+   RISK TEST (for one owner)
 ====================================================== */
+
+// GET /api/advisor/risk-test/:ownerId
 router.get("/risk-test/:ownerId", async (req, res) => {
   try {
     const owner = await Owner.findById(req.params.ownerId);
@@ -359,6 +368,57 @@ router.get("/risk-test/:ownerId", async (req, res) => {
   } catch (err) {
     console.error("Risk test error:", err);
     res.status(500).json({ msg: "Server error" });
+  }
+});
+
+/* ======================================================
+   FILE UPLOAD – OWNER SHARES FILE WITH ADVISOR
+====================================================== */
+
+// Multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "..", "..", "uploads", "feedback"));
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+// POST /api/advisor/feedback/file
+router.post("/feedback/file", upload.single("file"), async (req, res) => {
+  try {
+    console.log("UPLOAD /feedback/file BODY:", req.body);
+    console.log("UPLOAD /feedback/file FILE:", req.file);
+
+    const { advisorId, ownerId } = req.body;
+
+    if (!advisorId || !ownerId) {
+      return res
+        .status(400)
+        .json({ message: "advisorId and ownerId are required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const fileUrl = `/uploads/feedback/${req.file.filename}`;
+
+    const fb = await Feedback.create({
+      advisorId,
+      ownerId,
+      fileUrl,
+      content: "",
+    });
+
+    console.log("Created file feedback:", fb._id, "fileUrl:", fileUrl);
+    res.status(201).json(fb);
+  } catch (err) {
+    console.error("POST /api/advisor/feedback/file error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

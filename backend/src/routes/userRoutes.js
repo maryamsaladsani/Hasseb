@@ -266,3 +266,47 @@ router.get("/fix-manager", async (req, res) => {
 });
 
 module.exports = router;
+/* ===========================
+      GET CURRENT USER (ME)
+   =========================== */
+router.get("/me", async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ msg: "Missing userId in query" });
+    }
+
+    // Find user by _id from DB
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // If you want advisor/owner IDs like in login response:
+    let advisor = null;
+    let owner = null;
+
+    if (user.role === "advisor") {
+      advisor = await Advisor.findById(user._id);
+    }
+
+    if (user.role === "owner") {
+      owner = await Owner.findById(user._id);
+    }
+
+    // Return same shape as /login response
+    return res.json({
+      fullName: user.fullName,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      userId: user._id,
+      advisorId: advisor ? advisor._id : null,
+      ownerId: owner ? owner._id : null,
+    });
+  } catch (err) {
+    console.error("/me error:", err);
+    return res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
