@@ -14,7 +14,6 @@ import "../../SharedStyles/SharedSupport.css";
 const API_BASE = "http://localhost:5001/api";
 
 export default function SupportPanel2({ setSelectedTicket, setTab }) {
-  // --- 1) Read logged user from localStorage ---
   let loggedUser = null;
   try {
     const raw = localStorage.getItem("loggedUser");
@@ -23,10 +22,8 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
     console.error("Failed to parse loggedUser from localStorage", e);
   }
 
-  const userId = loggedUser?.userId || null; // from login response
-  const role = loggedUser?.role || null;     // "advisor" | "owner" | "manager"
-
-  console.log("SupportPanel2 loggedUser:", loggedUser);
+  const userId = loggedUser?.userId || null;
+  const role = loggedUser?.role || null;
 
   const [tickets, setTickets] = useState([]);
   const [subject, setSubject] = useState("");
@@ -34,17 +31,13 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // --- 2) Load tickets for this advisor ---
   async function fetchTickets() {
-    if (!userId || !role) {
-      // no user info -> nothing to fetch
-      return;
-    }
+    if (!userId || !role) return;
 
     try {
       setError("");
       const res = await axios.get(`${API_BASE}/tickets`, {
-        params: { role, userId }, // matches your backend
+        params: { role, userId },
       });
       setTickets(res.data || []);
     } catch (err) {
@@ -55,10 +48,8 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
 
   useEffect(() => {
     fetchTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, role]);
 
-  // --- 3) Create a new ticket ---
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -77,9 +68,9 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
       setError("");
 
       await axios.post(`${API_BASE}/tickets`, {
-        fromUserId: userId,       // <-- required by backend
-        fromRole: role,           // "advisor"
-        subject: subject.trim(),  // Ticket.subject
+        fromUserId: userId,
+        fromRole: role,
+        subject: subject.trim(),
         message: description.trim(),
       });
 
@@ -95,12 +86,9 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
     }
   }
 
-  // --- 4) Stats (optional) ---
   const total = tickets.length;
   const openCount = tickets.filter((t) => t.status === "open").length;
-  const inProgressCount = tickets.filter(
-    (t) => t.status === "inprogress"
-  ).length;
+  const inProgressCount = tickets.filter((t) => t.status === "inprogress").length;
   const resolvedCount = tickets.filter((t) => t.status === "resolved").length;
 
   function getStatusClass(status) {
@@ -115,10 +103,9 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
     return "Open";
   }
 
-  // --- 5) Render ---
   return (
     <div className="support-container">
-      <h1 className="support-title">Support &amp; Tickets</h1>
+      <h1 className="support-title">Support & Tickets</h1>
 
       {error && (
         <div className="support-error">
@@ -181,17 +168,7 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
               onChange={(e) => setSubject(e.target.value)}
             />
 
-            <div className="form-row">
-              <label className="form-label">Priority (UI only)</label>
-              <select
-                className="ticket-select"
-                disabled
-                value="medium"
-                onChange={() => {}}
-              >
-                <option value="medium">Medium</option>
-              </select>
-            </div>
+            {/* Removed Priority Completely */}
 
             <textarea
               className="ticket-textarea"
@@ -208,7 +185,7 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
           </form>
         </div>
 
-        {/* Ticket list */}
+        {/* Ticket List */}
         <div className="tickets-section">
           <h2 className="section-title">Your Tickets</h2>
           {tickets.length === 0 ? (
@@ -239,6 +216,7 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
                       </div>
                     </div>
                   </div>
+
                   <span
                     className={`ticket-status ${getStatusClass(t.status)}`}
                   >
@@ -251,7 +229,6 @@ export default function SupportPanel2({ setSelectedTicket, setTab }) {
         </div>
       </div>
 
-      {/* Optional: if userId/role missing, hint to log in */}
       {!userId || !role ? (
         <p style={{ marginTop: 12, fontSize: 12, color: "#777" }}>
           No logged-in user found. Please log in again.

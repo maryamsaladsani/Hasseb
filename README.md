@@ -243,12 +243,16 @@ backend/
 │   │   └── db.js
 │   ├── models/
 │   │   ├── advisorModels/
-│   │   │   └── ...
+│   │   │   ├── Feedback.js
+│   │   │   ├── Notification.js
+│   │   │   ├── Recommendation.js
+│   │   │   └── SharedSimulation.js
 │   │   ├── Assignment.js
 │   │   ├── BusinessData.js
 │   │   ├── Notification.js
 │   │   ├── Owner.js
 │   │   ├── Scenario.js
+│   │   ├── SharedBusinessData.js
 │   │   ├── SupportTicket.js
 │   │   ├── Ticket.js
 │   │   └── User.js

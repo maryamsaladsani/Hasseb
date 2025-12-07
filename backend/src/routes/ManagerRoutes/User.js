@@ -1,373 +1,152 @@
-// src/routes/ManagerRoutes/User.js
 const express = require("express");
 const router = express.Router();
-
 const User = require("../../models/User");
-const { sendWelcomeEmail } = require("../../utils/email");
 
-function generateUsername(role, fullName) {
-  const year = new Date().getFullYear();
-
-  const clean = fullName
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, ".")
-    .replace(/[^a-z.]/g, "");
-
-  const random = Math.floor(10000 + Math.random() * 90000); 
-
-  return `${role}.${clean}.${year}${random}`;
-}
-
-/* =======================================================
-   List all users for the manager dashboard
-======================================================= */
+/* =====================================================
+   1) GET ALL USERS  (Manager dashboard)
+===================================================== */
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const users = await User.find().lean();
 
-    const mapped = users.map((u) => ({
-      id: u._id.toString(),
+    const formatted = users.map((u) => ({
+      id: u._id,
       name: u.fullName,
       email: u.email,
       role: u.role,
-      status: u.status || "inactive", // whatever is stored in DB
-      createdAt:
-        u.createdAt ||
-        new Date(u.joinedYear || new Date().getFullYear(), 0, 1),
-      lastLoginAt: u.lastLoginAt || null,
+      status: u.status,
+      createdAt: u.createdAt,
+      lastLoginAt: u.lastLoginAt,
     }));
 
-    res.json(mapped);
+    res.json(formatted);
   } catch (err) {
-    console.error("GET /api/users error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
 
-/* =======================================================
-   Create a new user from the manager panel
-======================================================= */
+/* =====================================================
+   2) GET ONLY OWNERS + ADVISORS
+===================================================== */
+router.get("/owners-advisors", async (req, res) => {
+  try {
+    const users = await User.find({
+      role: { $in: ["owner", "advisor"] },
+    }).lean();
+
+    const formatted = users.map((u) => ({
+      id: u._id,
+      name: u.fullName,
+      email: u.email,
+      role: u.role,
+      status: u.status,
+      createdAt: u.createdAt,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
+
+/* =====================================================
+   3) CREATE USER (Manager adds new user)
+===================================================== */
 router.post("/", async (req, res) => {
   try {
     const { name, email, role, status } = req.body;
 
-    if (!name || !email || !role) {
-      return res
-        .status(400)
-        .json({ message: "Name, email and role are required." });
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(409).json({ message: "Email already exists" });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // 1) Email must be unique across all users
-    const existingEmail = await User.findOne({ email: normalizedEmail });
-    if (existingEmail) {
-      return res
-        .status(409)
-        .json({ message: "Email already belongs to another user." });
-    }
-
-    // 2) Auto-generate a unique username
-    let username;
-    let tries = 0;
-    do {
-      username = generateUsername(role, name);
-      const existingUsername = await User.findOne({ username });
-      if (!existingUsername) break;
-      tries++;
-    } while (tries < 5);
-
-    if (tries === 5) {
-      return res
-        .status(500)
-        .json({ message: "Could not generate a unique username. Try again." });
-    }
-
-    // 3) Temporary password (will be hashed by pre-save hook)
-    const tempPassword = "TempPass123!";
+    const username = `${email.split("@")[0]}.${Date.now()}`;
 
     const user = await User.create({
       fullName: name,
-      email: normalizedEmail,
-      role,
+      email,
       username,
-      password: tempPassword,
-      status: status || "inactive",
-      joinedYear: new Date().getFullYear(),
+      role,
+      status,
+      password: "Temp@1234",
     });
 
-    // 4) Send welcome email (uses your existing email.js)
-    try {
-      await sendWelcomeEmail(user.email, user.fullName, user.username);
-    } catch (emailErr) {
-      console.error("Failed to send welcome email:", emailErr);
-      // user is created, so we still return 201
-    }
-
-    return res.status(201).json({
-      id: user._id.toString(),
+    res.json({
+      id: user._id,
       name: user.fullName,
       email: user.email,
       role: user.role,
-      status: user.status || "inactive",
+      status: user.status,
       createdAt: user.createdAt,
     });
   } catch (err) {
-    console.error("POST /api/users error:", err);
-
-    // 5) Handle unique index errors clearly
-    if (err.code === 11000 && err.keyPattern) {
-      if (err.keyPattern.email) {
-        return res
-          .status(409)
-          .json({ message: "Email already belongs to another user." });
-      }
-      if (err.keyPattern.username) {
-        return res
-          .status(409)
-          .json({ message: "Generated username already exists. Try again." });
-      }
-    }
-
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
-
-
-// list owners + advisors + each owner's current advisor
-router.get("/owners-advisors", async (req, res) => {
-  try {
-    const owners = await User.find({ role: "owner" })
-      .select("_id fullName email advisorId")
-      .lean();
-
-    const advisors = await User.find({ role: "advisor" })
-      .select("_id fullName email")
-      .lean();
-
-    // map advisorId -> name
-    const advisorMap = {};
-    advisors.forEach((a) => {
-      advisorMap[a._id.toString()] = a.fullName;
-    });
-
-    const ownersWithAdvisor = owners.map((o) => ({
-      id: o._id.toString(),
-      fullName: o.fullName,
-      email: o.email,
-      advisorId: o.advisorId ? o.advisorId.toString() : null,
-      advisorName: o.advisorId
-        ? advisorMap[o.advisorId.toString()] || "Unknown"
-        : null,
-    }));
-
-    res.json({
-      owners: ownersWithAdvisor,
-      advisors: advisors.map((a) => ({
-        id: a._id.toString(),
-        fullName: a.fullName,
-        email: a.email,
-      })),
-    });
-  } catch (err) {
-    console.error("GET /api/users/owners-advisors error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// assign (or unassign) advisor for an owner
-router.put("/:ownerId/assign-advisor", async (req, res) => {
-  try {
-    const { ownerId } = req.params;
-    const { advisorId } = req.body; // can be null to unassign
-
-    const owner = await User.findById(ownerId);
-    if (!owner || owner.role !== "owner") {
-      return res.status(404).json({ message: "Owner not found." });
-    }
-
-    if (advisorId) {
-      const advisor = await User.findById(advisorId);
-      if (!advisor || advisor.role !== "advisor") {
-        return res.status(400).json({ message: "Invalid advisor." });
-      }
-      owner.advisorId = advisor._id;
-    } else {
-      // unassign
-      owner.advisorId = null;
-    }
-
-    await owner.save();
-
-    return res.json({
-      id: owner._id.toString(),
-      advisorId: owner.advisorId ? owner.advisorId.toString() : null,
-    });
-  } catch (err) {
-    console.error("PUT /api/users/:ownerId/assign-advisor error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-// ... existing code above ...
-
-// list owners + advisors + each owner's current advisor
-router.get("/owners-advisors", async (req, res) => {
-  try {
-    const owners = await User.find({ role: "owner" })
-      .select("_id fullName email advisorId")
-      .lean();
-
-    const advisors = await User.find({ role: "advisor" })
-      .select("_id fullName email")
-      .lean();
-
-    const advisorMap = {};
-    advisors.forEach((a) => {
-      advisorMap[a._id.toString()] = a.fullName;
-    });
-
-    const ownersWithAdvisor = owners.map((o) => ({
-      id: o._id.toString(),
-      fullName: o.fullName,
-      email: o.email,
-      advisorId: o.advisorId ? o.advisorId.toString() : null,
-      advisorName: o.advisorId
-        ? advisorMap[o.advisorId.toString()] || "Unknown"
-        : null,
-    }));
-
-    res.json({
-      owners: ownersWithAdvisor,
-      advisors: advisors.map((a) => ({
-        id: a._id.toString(),
-        fullName: a.fullName,
-        email: a.email,
-      })),
-    });
-  } catch (err) {
-    console.error("GET /api/users/owners-advisors error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-/* =======================================================
-   Fetch a single user (used by AccountPanel)
-======================================================= */
-router.get("/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    return res.json({
-      id: user._id.toString(),
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
-      status: user.status || "inactive",
-      createdAt: user.createdAt,
-    });
-  } catch (err) {
-    console.error("GET /api/users/:id error:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-});
-
-// assign (or unassign) advisor for an owner
-router.put("/:ownerId/assign-advisor", async (req, res) => {
-
-});
-
-
-/* =======================================================
-   Edit an existing user (name, email, role, status)
-======================================================= */
+/* =====================================================
+   4) UPDATE USER
+===================================================== */
 router.put("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
     const { name, email, role, status } = req.body;
 
-    if (!name || !email) {
-      return res.status(400).json({ message: "Name and email are required." });
-    }
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        fullName: name,
+        email,
+        role,
+        status,
+      },
+      { new: true }
+    );
 
-    // 1) Load the user we are editing
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // 2) Only check duplicate if email changed
-    const normalizedEmail = email.toLowerCase().trim();
-    const oldEmail = (user.email || "").toLowerCase();
-
-    if (normalizedEmail !== oldEmail) {
-      const existing = await User.findOne({ email: normalizedEmail });
-      if (existing) {
-        return res
-          .status(409)
-          .json({ message: "Email already belongs to another user." });
-      }
-    }
-
-    // 3) Apply changes
-    user.fullName = name;
-    user.email = normalizedEmail;
-    if (role) user.role = role;
-    if (typeof status === "string") user.status = status;
-
-    // 4) Save, catching any unique-index error
-    try {
-      await user.save();
-      console.log("UPDATED USER STATUS:", user._id.toString(), user.status);
-    } catch (err) {
-      if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-        return res
-          .status(409)
-          .json({ message: "Email already belongs to another user." });
-      }
-      throw err;
-    }
-
-    // 5) Return updated user
-    return res.json({
-      id: user._id.toString(),
-      name: user.fullName,
-      email: user.email,
-      role: user.role,
-      status: user.status || "inactive",
-      createdAt:
-        user.createdAt ||
-        new Date(user.joinedYear || new Date().getFullYear(), 0, 1),
+    res.json({
+      id: updated._id,
+      name: updated.fullName,
+      email: updated.email,
+      role: updated.role,
+      status: updated.status,
+      createdAt: updated.createdAt,
     });
   } catch (err) {
-    console.error("PUT /api/users/:id error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: err.message });
   }
 });
 
-/* =======================================================
-   Delete a user
-======================================================= */
+/* =====================================================
+   5) DELETE USER
+===================================================== */
 router.delete("/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    await User.deleteOne({ _id: id });
-
-    return res.json({ message: "User deleted", id });
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
   } catch (err) {
-    console.error("DELETE /api/users/:id error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* =====================================================
+   6) GET SINGLE USER (THIS MUST BE LAST)
+===================================================== */
+router.get("/:id", async (req, res) => {
+  try {
+    const u = await User.findById(req.params.id);
+
+    if (!u) return res.status(404).json({ msg: "User not found" });
+
+    res.json({
+      id: u._id,
+      name: u.fullName,
+      email: u.email,
+      role: u.role,
+      status: u.status,
+      createdAt: u.createdAt,
+    });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
 

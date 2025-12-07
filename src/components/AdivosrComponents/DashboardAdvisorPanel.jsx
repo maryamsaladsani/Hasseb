@@ -28,9 +28,10 @@ export default function DashboardAdvisorPanel({
   const fetchOwners = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5001/api/advisor/dashboard/${advisorId}`
+        `http://localhost:5001/api/advisor/owners/${advisorId}`
       );
       setOwners(res.data.owners || []);
+
     } catch (err) {
       console.error("Dashboard load error:", err);
     }
@@ -84,16 +85,31 @@ export default function DashboardAdvisorPanel({
     setRisk(null);
 
     try {
+      // 🔥 Get shared business data
       const res = await axios.get(
-        `http://localhost:5001/api/business-data/owner/${owner._id}`
+        `http://localhost:5001/api/advisor/shared-business/${owner._id}`
       );
-      const data = res.data?.data || null;
+
+      // ❗ Backend returns: sharedBusiness
+      const data = res.data?.sharedBusiness || null;
+
+      if (!data) {
+        setOwnerData(null);
+        return;
+      }
+
+      // Save shared data as ownerData
       setOwnerData(data);
-      if (data) calculateRisk(data);
+
+      // Recalculate risk
+      calculateRisk(data);
+
     } catch (e) {
-      console.error("Owner business data error:", e);
+      console.error("Owner shared business data error:", e);
     }
   };
+
+
 
   // ======== RISK ANALYSIS ========
   const calculateRisk = (data) => {
@@ -284,8 +300,9 @@ export default function DashboardAdvisorPanel({
 
               {!ownerData ? (
                 <p className="empty-state">
-                  This owner has not uploaded business data yet.
+                  This owner has not shared their business data yet.
                 </p>
+
               ) : (
                 <>
                   {/* BUSINESS METRICS */}

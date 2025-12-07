@@ -7,11 +7,12 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  LabelList
 } from "recharts";
 
 export default function RecommendationsPanel({ advisorId, owners = [] }) {
+
   const [ownerId, setOwnerId] = useState("");
   const [scenarios, setScenarios] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -22,13 +23,15 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadGeneralRecommendations();
-  }, []);
-
-  useEffect(() => {
-    if (ownerId) loadScenarios(ownerId);
+    if (ownerId) {
+      loadScenarios(ownerId);
+      loadGeneralRecommendations();
+    }
   }, [ownerId]);
 
+  // ============================
+  // LOAD GENERAL RECOMMENDATIONS
+  // ============================
   const loadGeneralRecommendations = async () => {
     try {
       const res = await axios.get(
@@ -37,13 +40,18 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
 
       const all = res.data || [];
 
-      // Filter general recs (no scenarioId)
-      setGeneralItems(all.filter((x) => !x.scenarioId));
+      setGeneralItems(
+        all.filter((x) => !x.scenarioId && x.ownerId === ownerId)
+      );
+
     } catch (err) {
       console.error("Error loading recommendations:", err);
     }
   };
 
+  // ============================
+  // LOAD SCENARIOS + FILTER ZERO BREAK-EVEN
+  // ============================
   const loadScenarios = async (id) => {
     try {
       const res = await axios.get(
@@ -51,17 +59,17 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
       );
 
       const data = res.data.scenarios || [];
-
       setScenarios(data);
 
-      const formatted = data.map((s) => ({
-        name: s.productName || s.scenarioName || "Scenario",
-        breakEven: Number(s.breakEvenUnits || s.breakEvenPoint || 0),
-        profit: Number(s.profit || 0),
-        sales: Number(s.salesVolume || s.quantity || 0),
-      }));
+      const formatted = data
+        .map((s) => ({
+          name: s.productName || s.scenarioName || "Scenario",
+          breakEven: Number(s.breakEvenUnits || s.breakEvenPoint || 0),
+        }))
+        .filter((s) => s.breakEven > 0); 
 
       setChartData(formatted);
+
     } catch (err) {
       console.error("Error loading scenarios", err);
       setScenarios([]);
@@ -69,11 +77,11 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
     }
   };
 
-  // -----------------------------------------
+  // ============================
   // SEND GENERAL RECOMMENDATION
-  // -----------------------------------------
+  // ============================
   const sendGeneralRecommendation = async () => {
-    if (!generalText.trim()) return;
+    if (!generalText.trim() || !ownerId) return;
 
     setLoading(true);
     try {
@@ -81,7 +89,7 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
         "http://localhost:5001/api/advisor/recommendations",
         {
           advisorId,
-          ownerId: null,
+          ownerId,
           scenarioId: null,
           text: generalText,
         }
@@ -89,8 +97,8 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
 
       const newRec = res.data.recommendation;
       setGeneralItems((prev) => [newRec, ...prev]);
-
       setGeneralText("");
+
     } catch (err) {
       console.error("Error sending general recommendation", err);
     } finally {
@@ -98,14 +106,11 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
     }
   };
 
-  // -----------------------------------------
-  // UI
-  // -----------------------------------------
   return (
     <div className="support-container">
       <h1 className="support-title">Scenario Recommendations</h1>
 
-      {/* OWNER SELECT */}
+      {/* OWNER SELECTION */}
       <div className="support-card">
         <div className="ticket-form">
           <label className="form-label">Owner</label>
@@ -124,21 +129,28 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
         </div>
       </div>
 
-      {/* CHART */}
+      {/* BREAK-EVEN GRAPH */}
       {chartData.length > 0 && (
         <div className="support-card" style={{ marginTop: "1.5rem" }}>
-          <h2 className="section-title">Scenario Comparison Chart</h2>
+          <h2 className="section-title">Break-Even Analysis</h2>
 
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={450}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="name"
+              interval={0} 
+              tick={{ fontSize: 12 }}
+              />
               <YAxis />
-              <Tooltip />
 
-              <Bar dataKey="breakEven" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="profit" fill="#9333ea" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="sales" fill="#16a34a" radius={[6, 6, 0, 0]} />
+              <Bar
+                dataKey="breakEven"
+                name="Break-Even Units"
+                fill="#0ea5e9"
+                radius={[6, 6, 0, 0]}
+              >
+                <LabelList dataKey="breakEven" position="inside" fill="#fff" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -153,19 +165,19 @@ export default function RecommendationsPanel({ advisorId, owners = [] }) {
           rows={4}
           value={generalText}
           onChange={(e) => setGeneralText(e.target.value)}
-          placeholder="Write a general recommendation for the owner..."
+          placeholder="Write a general recommendation..."
         />
 
         <button
           className="submit-btn"
-          onClick={sendGeneralRecommendation}
           disabled={loading}
+          onClick={sendGeneralRecommendation}
         >
           {loading ? "Sending..." : "Send General Recommendation"}
         </button>
       </div>
 
-      {/* LIST GENERAL RECOMMENDATIONS */}
+      {/* GENERAL RECOMMENDATIONS LIST */}
       <div className="support-card" style={{ marginTop: "1.5rem" }}>
         <h2 className="section-title">All General Recommendations</h2>
 

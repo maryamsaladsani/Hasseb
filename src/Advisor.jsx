@@ -31,13 +31,15 @@ export default function Advisor() {
       );
       const data = await res.json();
       setOwners(data.owners || []);
+    // Fetch feedback (correct route after switching to User model)
+    const fb = await fetch(
+      `http://localhost:5001/api/advisor/feedback/all/${advisorId}`
+    );
+    const fbData = await fb.json();
 
-      // Fetch feedback
-      const fb = await fetch(
-        `http://localhost:5001/api/advisor/feedback/${advisorId}`
-      );
-      const fbData = await fb.json();
-      setFeedback(fbData.feedback || []);
+    // backend may return array directly
+    setFeedback(fbData.feedback || fbData || []);
+
     } catch (err) {
       console.error("Error loading advisor data:", err);
     }

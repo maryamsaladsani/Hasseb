@@ -5,7 +5,6 @@ import axios from "axios";
 import {
   LineChart, Line,
   AreaChart, Area,
-  BarChart, Bar,
   PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from "recharts";
@@ -27,7 +26,7 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
       try {
         setLoadingOwners(true);
         const res = await axios.get(
-          `http://localhost:5001/api/advisor/dashboard/${advisorId}`
+          `http://localhost:5001/api/advisor/owners/${advisorId}`
         );
 
         const ownersList = res.data?.owners || [];
@@ -81,23 +80,16 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
       value: c.netCashFlow
     })) || [];
 
-  const scenarioChart =
-    businessData?.pricingScenarios?.map((s) => ({
-      name: s.scenario,
-      profit: s.profit
-    })) || [];
-    // ================================================
-  // BREAK-EVEN SCENARIOS CHART
-  // ================================================
+  // BREAK-EVEN CHART
   const breakEvenData =
     businessData?.scenarios?.map((s) => ({
       name: s.scenarioName || s.productName || "Scenario",
       sales: Number(s.breakEvenSales || 0),
     })) || [];
 
-
   const positiveMonths =
     businessData?.cashFlow?.filter((c) => c.netCashFlow > 0).length || 0;
+
   const negativeMonths =
     businessData?.cashFlow?.filter((c) => c.netCashFlow < 0).length || 0;
 
@@ -135,25 +127,12 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
         </div>
       </div>
 
-      {/* ============================
-          ACTION BUTTONS (NEW)
-      ============================ */}
+      {/* ACTION BUTTONS */}
       <div className="support-card" style={{ marginTop: "1rem" }}>
         <div style={{ display: "flex", gap: "1rem" }}>
-          
-          {/* WRITE FEEDBACK */}
           <button
             className="submit-btn"
-            style={{
-              background: "#2563eb",
-              color: "white",
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-            }}
+            style={{ background: "#2563eb", color: "white" }}
             onClick={() => {
               localStorage.setItem("selectedFeedbackOwner", selectedOwnerId);
               setTab("feedback");
@@ -162,19 +141,9 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
             ✨ Write Feedback
           </button>
 
-          {/* WRITE RECOMMENDATION */}
           <button
             className="submit-btn"
-            style={{
-              background: "#9333ea",
-              color: "white",
-              padding: "10px 16px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-            }}
+            style={{ background: "#9333ea", color: "white" }}
             onClick={() => {
               localStorage.setItem("selectedRecommendationOwner", selectedOwnerId);
               setTab("recommendations");
@@ -182,20 +151,17 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
           >
             📝 Write Recommendation
           </button>
-
         </div>
       </div>
 
-      {/* ============================
-          BUSINESS DATA VIEW
-      ============================ */}
+      {/* BUSINESS DATA VIEW */}
       {loadingOwnerData ? (
         <p style={{ marginTop: "1rem" }}>Loading business data...</p>
       ) : !businessData ? (
         <p style={{ marginTop: "1rem" }}>No business data found.</p>
       ) : (
         <>
-          {/* AREA CHART: Cash Flow Trend */}
+          {/* AREA CHART */}
           <div className="support-card" style={{ marginTop: "1.5rem" }}>
             <h2 className="section-title">Cash Flow Trend</h2>
 
@@ -242,25 +208,7 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
             </ResponsiveContainer>
           </div>
 
-          {/* BAR CHART: Pricing Scenarios */}
-          <div className="support-card" style={{ marginTop: "1.5rem" }}>
-            <h2 className="section-title">Pricing Scenarios (Profit)</h2>
-
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={scenarioChart}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar
-                  dataKey="profit"
-                  fill="#9333ea"
-                  radius={[8, 8, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* PIE CHART: Positive vs Negative */}
+          {/* PIE CHART */}
           <div className="support-card" style={{ marginTop: "1.5rem" }}>
             <h2 className="section-title">Cash Flow Health</h2>
 
@@ -274,10 +222,7 @@ export default function AnalyzerPanel({ advisorId, setTab }) {
                   label
                 >
                   {pieChartData.map((entry, index) => (
-                    <Cell
-                      key={index}
-                      fill={PIE_COLORS[index]}
-                    />
+                    <Cell key={index} fill={PIE_COLORS[index]} />
                   ))}
                 </Pie>
                 <Tooltip />

@@ -23,10 +23,13 @@ export default function FeedbackPanel({
   const fetchFeedback = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5001/api/advisor/feedback/${advisorId}`
+        `http://localhost:5001/api/advisor/feedback/all/${advisorId}`
       );
-      setItems(res.data.feedback || []);
-      if (setFeedback) setFeedback(res.data.feedback || []);
+
+      const list = Array.isArray(res.data) ? res.data : res.data.feedback;
+      setItems(list || []);
+
+      if (setFeedback) setFeedback(list || []);
     } catch (err) {
       console.error("Error loading feedback", err);
     }
@@ -47,10 +50,8 @@ export default function FeedbackPanel({
       );
 
       const fb = res.data?.feedback || res.data;
-      if (fb) {
-        setItems(prev => [fb, ...prev]);
-        if (setFeedback) setFeedback(prev => [fb, ...prev]);
-      }
+      setItems(prev => [fb, ...prev]);
+      if (setFeedback) setFeedback(prev => [fb, ...prev]);
 
       setContent("");
       setOwnerId("");
@@ -73,7 +74,7 @@ export default function FeedbackPanel({
     try {
       const res = await axios.put(
         `http://localhost:5001/api/advisor/feedback/${active}`,
-        { advisorId, content: editText }
+        { content: editText }
       );
 
       const updated = res.data.feedback || res.data;
@@ -99,8 +100,7 @@ export default function FeedbackPanel({
   const deleteFeedback = async (id) => {
     try {
       await axios.delete(
-        `http://localhost:5001/api/advisor/feedback/${id}`,
-        { data: { advisorId } }
+        `http://localhost:5001/api/advisor/feedback/${id}`
       );
 
       setItems(prev => prev.filter(it => it._id !== id));
@@ -123,7 +123,6 @@ export default function FeedbackPanel({
       <h1 className="support-title">Feedback</h1>
 
       <div className="two-column-grid">
-        {/* FORM */}
         <div className="support-card">
           <h2 className="card-title">Create Feedback</h2>
 
@@ -165,7 +164,6 @@ export default function FeedbackPanel({
           </div>
         </div>
 
-        {/* LIST */}
         <div className="tickets-section">
           <div className="d-flex justify-content-between align-items-center"
             style={{ marginBottom: "0.75rem" }}>

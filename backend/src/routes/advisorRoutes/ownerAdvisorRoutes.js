@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const Advisor = require("../../models/advisorModels/advisor.js");
-const Owner = require("../../models/Owner.js");
-/* =====================================================
-   LINK OWNER TO ADVISOR
-===================================================== */
+
+const Assignment = require("../../models/Assignment");
+const Owner = require("../../models/Owner");
+
+// Create assignment
 router.post("/link", async (req, res) => {
   try {
     const { ownerId, advisorId } = req.body;
@@ -13,54 +13,65 @@ router.post("/link", async (req, res) => {
       return res.status(400).json({ msg: "Missing IDs" });
     }
 
-    const advisor = await Advisor.findById(advisorId);
-    if (!advisor) return res.status(404).json({ msg: "Advisor not found" });
-
-    const owner = await Owner.findById(ownerId);
-    if (!owner) return res.status(404).json({ msg: "Owner not found" });
-
-    if (!advisor.owners.includes(ownerId)) {
-      advisor.owners.push(ownerId);
-      await advisor.save();
+    const existing = await Assignment.findOne({ ownerId, advisorId });
+    if (existing) {
+      return res.status(400).json({ msg: "Already linked" });
     }
 
-    owner.advisor = advisorId;
-    await owner.save();
+    const created = await Assignment.create({ ownerId, advisorId });
 
     return res.json({
-      msg: "Linked successfully",
-      advisor,
-      owner,
+      success: true,
+      msg: "Owner linked to advisor successfully",
+      assignment: created,
     });
+
   } catch (err) {
-    console.error("Link error:", err);
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
 
-/* =====================================================
-   ADVISOR DASHBOARD → GET OWNERS OF THIS ADVISOR
-===================================================== */
-router.get("/dashboard/:advisorId", async (req, res) => {
+// Get advisor for owner
+router.get("/owner/:ownerId", async (req, res) => {
   try {
-    const advisorId = req.params.advisorId;
+    const { ownerId } = req.params;
 
-    // 1) Check if advisor exists
-    const advisor = await Advisor.findById(advisorId).lean();
-    if (!advisor) return res.status(404).json({ msg: "Advisor not found" });
+    const assignment = await Assignment.findOne({ ownerId }).lean();
 
-    // 2) Fetch matched owners (based on owner.advisor)
-    const owners = await Owner.find({ advisor: advisorId })
-      .populate("businessData")
-      .lean();
+    if (!assignment) {
+      return res.status(404).json({ message: "No advisor assigned." });
+    }
 
-    return res.json({
-      advisor,
-      owners,
-    });
+    return res.json(assignment);
+
   } catch (err) {
-    console.error("Dashboard error:", err);
-    return res.status(500).json({ msg: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete assignment
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Assignment.findByIdAndDelete(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Assignment not found" });
+    }
+
+    return res.json({ message: "Assignment removed", deleted });
+
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+// All assignments
+router.get("/", async (req, res) => {
+  try {
+    const list = await Assignment.find().lean();
+    return res.json(list);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
   }
 });
 

@@ -2,17 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const User = require("../models/User");
-const Advisor = require("../models/advisorModels/advisor");
 const Owner = require("../models/Owner");
 const bcrypt = require("bcryptjs");
-const { sendWelcomeEmail } = require("../utils/email");
-const { sendPasswordChangedEmail } = require("../utils/email");
+const { sendWelcomeEmail, sendPasswordChangedEmail } = require("../utils/email");
 
-// Password strength regex
+// Password strength
 const strongPasswordRegex =
   /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
-// Generate unique username
+// Generate username
 function generateUsername(role, fullName, year) {
   const clean = fullName.split(" ")[0].toLowerCase();
   const random = Math.floor(10000 + Math.random() * 90000);
@@ -45,52 +43,13 @@ router.post("/signup", async (req, res) => {
       role,
       password,
       username,
-      joinedYear: year
+      joinedYear: year,
     });
 
     await newUser.save();
-
-    // Send welcome email
     await sendWelcomeEmail(newUser.email, newUser.fullName, newUser.username);
 
-    let advisorRecord = null;
     let ownerRecord = null;
-
-    if (role === "advisor") {
-      advisorRecord = await Advisor.create({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        username: newUser.username,
-        points: 320,
-        level: 1,
-        activity: [
-          { day: "Sat", valueA: 450, valueB: 320 },
-          { day: "Sun", valueA: 300, valueB: 150 },
-          { day: "Mon", valueA: 200, valueB: 280 },
-          { day: "Tue", valueA: 480, valueB: 200 },
-          { day: "Wed", valueA: 120, valueB: 180 },
-          { day: "Thu", valueA: 350, valueB: 290 },
-          { day: "Fri", valueA: 260, valueB: 210 }
-        ],
-        topRisks: [
-          {
-            name: "Norah",
-            msg: "Low cash buffer",
-            tags: ["Medium"],
-            date: "23 Mar 2024",
-            time: "12:45 PM"
-          },
-          {
-            name: "Rakib",
-            msg: "High variable costs",
-            tags: ["High priority"],
-            date: "23 Mar 2024",
-            time: "1:30 PM"
-          }
-        ],
-        owners: []
-      });
-    }
 
     if (role === "owner") {
       ownerRecord = await Owner.create({
@@ -98,7 +57,6 @@ router.post("/signup", async (req, res) => {
         fullName: newUser.fullName,
         email: newUser.email,
         businessName: "",
-        advisor: null
       });
     }
 
@@ -110,9 +68,8 @@ router.post("/signup", async (req, res) => {
         username: newUser.username,
         role: newUser.role,
         userId: newUser._id,
-        advisorId: advisorRecord ? advisorRecord._id : null,
-        ownerId: ownerRecord ? ownerRecord._id : null
-      }
+        ownerId: ownerRecord ? ownerRecord._id : null,
+      },
     });
 
   } catch (err) {
@@ -139,15 +96,11 @@ router.post("/login", async (req, res) => {
     if (!matched)
       return res.status(400).json({ msg: "Invalid username or password" });
 
-    // mark active
     user.status = "active";
     user.lastLoginAt = new Date();
     await user.save();
 
-    let advisor = null;
     let owner = null;
-
-    if (user.role === "advisor") advisor = await Advisor.findById(user._id);
     if (user.role === "owner") owner = await Owner.findById(user._id);
 
     return res.json({
@@ -158,9 +111,8 @@ router.post("/login", async (req, res) => {
         username: user.username,
         role: user.role,
         userId: user._id,
-        advisorId: advisor ? advisor._id : null,
-        ownerId: owner ? owner._id : null
-      }
+        ownerId: owner ? owner._id : null,
+      },
     });
 
   } catch (err) {
@@ -202,12 +154,9 @@ router.post("/forgot-password/reset", async (req, res) => {
     if (!userId || !newPassword)
       return res.status(400).json({ msg: "Missing fields" });
 
-    const strongPasswordRegex =
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
     if (!strongPasswordRegex.test(newPassword))
       return res.status(400).json({
-        msg: "Weak password — must contain uppercase, lowercase, number, and symbol"
+        msg: "Weak password — must contain uppercase, lowercase, number, and symbol",
       });
 
     const user = await User.findById(userId);
@@ -228,21 +177,59 @@ router.post("/forgot-password/reset", async (req, res) => {
 });
 
 /* ============================================
-   GET USER DETAILS (OWNER OR ADVISOR)
+   GET USER DETAILS (ONLY OWNER NOW)
 ============================================ */
-router.get("/:id", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const { id } = req.params;
+    const users = await User.find().sort({ createdAt: -1 });
 
-    let owner = await Owner.findById(id);
-    if (owner) return res.json({ role: "owner", owner });
+    const formatted = users.map(u => ({
+      id: u._id.toString(),   
+      name: u.fullName || u.username || "",  
+      email: u.email,
+      role: u.role,
+      status: u.status || "inactive",
+      createdAt: u.createdAt,
+      lastLoginAt: u.lastLoginAt,
+    }));
 
-    let advisor = await Advisor.findById(id);
-    if (advisor) return res.json({ role: "advisor", advisor });
+    res.json(formatted);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load users" });
+  }
+});
 
-    return res.status(404).json({ msg: "User not found" });
+
+/* ===========================
+   GET CURRENT USER 
+=========================== */
+router.get("/me", async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId)
+      return res.status(400).json({ msg: "Missing userId in query" });
+
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ msg: "User not found" });
+
+    let owner = null;
+    if (user.role === "owner") {
+      owner = await Owner.findById(user._id);
+    }
+
+    return res.json({
+      fullName: user.fullName,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      userId: user._id,
+      ownerId: owner ? owner._id : null,
+    });
 
   } catch (err) {
+    console.error("/me error:", err);
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
@@ -265,7 +252,7 @@ router.get("/fix-manager", async (req, res) => {
     return res.json({
       msg: "Manager password re-hashed successfully",
       username: user.username,
-      role: user.role
+      role: user.role,
     });
 
   } catch (err) {
@@ -275,47 +262,3 @@ router.get("/fix-manager", async (req, res) => {
 });
 
 module.exports = router;
-/* ===========================
-      GET CURRENT USER (ME)
-   =========================== */
-router.get("/me", async (req, res) => {
-  try {
-    const { userId } = req.query;
-
-    if (!userId) {
-      return res.status(400).json({ msg: "Missing userId in query" });
-    }
-
-    // Find user by _id from DB
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    // If you want advisor/owner IDs like in login response:
-    let advisor = null;
-    let owner = null;
-
-    if (user.role === "advisor") {
-      advisor = await Advisor.findById(user._id);
-    }
-
-    if (user.role === "owner") {
-      owner = await Owner.findById(user._id);
-    }
-
-    // Return same shape as /login response
-    return res.json({
-      fullName: user.fullName,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      userId: user._id,
-      advisorId: advisor ? advisor._id : null,
-      ownerId: owner ? owner._id : null,
-    });
-  } catch (err) {
-    console.error("/me error:", err);
-    return res.status(500).json({ msg: "Server error", error: err.message });
-  }
-});

@@ -56,9 +56,8 @@ export default function AccountPanel({ settings, setSettings }) {
           return;
         }
 
-        const res = await axios.get(
-          `http://localhost:5001/api/users/${userId}`
-        );
+        const res = await axios.get(`http://localhost:5001/api/manager/users/${userId}`);
+
 
         const u = res.data || {};
         const fullName = u.fullName || "";

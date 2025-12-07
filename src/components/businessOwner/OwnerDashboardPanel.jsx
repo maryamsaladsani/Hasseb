@@ -3,13 +3,10 @@ import React, { useState, useEffect } from "react";
 import { generateDashboardInsights } from "./InsightEngine";
 import "./OwnerDashboardPanel.css";
 
-const TICKETS_API_URL = "http://localhost:5001/api/tickets";
+const NOTIF_API_URL = "http://localhost:5001/api/advisor/notifications";
 
 export default function Dashboard() {
 
-  // -----------------------------
-  // STATE
-  // -----------------------------
   const [businessData, setBusinessData] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -18,15 +15,14 @@ export default function Dashboard() {
   const [shareError, setShareError] = useState("");
   const [shareSuccess, setShareSuccess] = useState("");
 
-  // -----------------------------
-  // ALWAYS FETCH BUSINESS DATA USING ownerId
-  // -----------------------------
+  // ----------------------------------------
+  // FETCH BUSINESS DATA
+  // ----------------------------------------
   useEffect(() => {
     const logged = JSON.parse(localStorage.getItem("loggedUser") || "null");
     const ownerId = logged?.ownerId;
 
     if (!ownerId) {
-      console.error("❌ No ownerId in loggedUser");
       setLoadError("Cannot find owner account. Please log in again.");
       setLoadingData(false);
       return;
@@ -47,7 +43,6 @@ export default function Dashboard() {
         setBusinessData(data.data);
 
       } catch (err) {
-        console.error("❌ Error fetching business data:", err);
         setLoadError(err.message || "Failed to load business data.");
       } finally {
         setLoadingData(false);
@@ -57,20 +52,13 @@ export default function Dashboard() {
     fetchBusinessData();
   }, []);
 
-  // -----------------------------
-  // LOADING / ERROR HANDLING
-  // -----------------------------
   if (loadingData) return <div>Loading…</div>;
 
   if (!businessData) {
     return <div>{loadError || "No data available. Please upload your sheets."}</div>;
   }
 
-  // -----------------------------
-  // INSIGHTS ENGINE
-  // -----------------------------
   const insights = generateDashboardInsights(businessData);
-
   if (!insights) return <div>No data available.</div>;
 
   const {
@@ -82,7 +70,7 @@ export default function Dashboard() {
   } = insights;
 
   // ================================================================
-  // CSV EXPORT
+  // RESTORE CSV EXPORT BUTTON (SAME STYLE AS BEFORE)
   // ================================================================
   function handleExportCSV() {
     const rows = [];
@@ -117,7 +105,7 @@ export default function Dashboard() {
   }
 
   // ================================================================
-  // SHARE WITH ADVISOR (TICKET)
+  // SHARE FULL BUSINESS DATA WITH ADVISOR
   // ================================================================
   async function handleShareWithAdvisor() {
     try {
@@ -125,57 +113,57 @@ export default function Dashboard() {
       setShareError("");
       setShareSuccess("");
 
-      const logged = JSON.parse(localStorage.getItem("loggedUser") || "null");
+      const logged = JSON.parse(localStorage.getItem("loggedUser"));
+      const ownerId = logged?.userId;
 
-      if (!logged || !logged.userId) {
-        setShareError("Cannot find logged in owner information.");
+      if (!ownerId) {
+        setShareError("Owner ID not found.");
         return;
       }
 
-      const subject = "Simulation shared for advisor feedback";
-      const topRecs = recommendations.slice(0, 3).join(" | ");
+      // 1️⃣ Get advisor
+      const advRes = await fetch(
+        `http://localhost:5001/api/assignments/owner/${ownerId}`
+      );
+      const advData = await advRes.json();
 
-      const message = `
-Owner has shared a new simulation.
+      if (!advData?.advisorId) {
+        setShareError("No advisor assigned to this owner.");
+        return;
+      }
 
-Health score: ${healthScore}/100
-Real burn rate: ${cashInsights.realBurnRate} SAR/month
+      const advisorId = advData.advisorId;
 
-Top recommendations:
-${topRecs || "No recommendations generated."}
-      `.trim();
-
-      const res = await fetch(TICKETS_API_URL, {
+      // 2️⃣ Send FULL DATA
+      const fullRes = await fetch("http://localhost:5001/api/owner/share/full-business", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fromUserId: logged.userId,
-          fromRole: "owner",
-          subject,
-          message,
-        }),
+          ownerId,
+          advisorId,
+          businessData
+        })
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to share with advisor.");
-      }
+      const fullData = await fullRes.json();
 
-      setShareSuccess("Shared with advisor successfully!");
+      if (!fullData.success) throw new Error(fullData.msg);
+
+      setShareSuccess("Full business data sent to advisor!");
+
     } catch (err) {
-      console.error("handleShareWithAdvisor error:", err);
-      setShareError(err.message || "Failed to share with advisor.");
+      setShareError(err.message);
     } finally {
       setShareLoading(false);
     }
   }
 
-  // -----------------------------
-  // RENDER
-  // -----------------------------
+  // ----------------------------------------
+  // RENDER UI
+  // ----------------------------------------
   return (
     <div className="dashboard-container">
-      
+
       <div className="dashboard-header">
         <h1 className="dashboard-title">Business Dashboard</h1>
         <p className="dashboard-subtitle">
@@ -194,9 +182,6 @@ ${topRecs || "No recommendations generated."}
       <div className="health-score-card">
         <h3>Health Score</h3>
         <p className="health-score-number">{healthScore}/100</p>
-        <p className="health-score-desc">
-          This score evaluates pricing strength, break-even feasibility, and cash flow resilience.
-        </p>
       </div>
 
       {/* CASH FLOW */}
@@ -209,23 +194,12 @@ ${topRecs || "No recommendations generated."}
               {cashInsights.realBurnRate.toLocaleString()} SAR / month
             </p>
           </div>
-          <div className="insight-box">
-            <h4>Danger Months</h4>
-            <p className="insight-number">{cashInsights.dangerMonths}</p>
-          </div>
-          <div className="insight-box">
-            <h4>First Danger Month</h4>
-            <p className="insight-number">
-              {cashInsights.firstDangerMonth || "None"}
-            </p>
-          </div>
         </div>
       </div>
 
       {/* BREAK EVEN */}
       <div className="section-card">
         <h3>Break-Even Insights</h3>
-        {bepInsights.length === 0 && <p>No break-even insights yet.</p>}
         {bepInsights.map((b, i) => (
           <div key={i} className={`bep-item ${b.issue ? "bep-warning" : ""}`}>
             <strong>{b.product}:</strong> {b.message}
@@ -236,10 +210,9 @@ ${topRecs || "No recommendations generated."}
       {/* PRICING */}
       <div className="section-card">
         <h3>Pricing Insights</h3>
-        {pricingInsights.length === 0 && <p>No pricing insights yet.</p>}
         {pricingInsights.map((p, i) => (
           <div key={i} className="pricing-item">
-            <strong>{p.product}:</strong> {p.margin.toFixed(1)}% margin — {p.opportunity}
+            <strong>{p.product}:</strong> {p.margin.toFixed(1)}% margin
           </div>
         ))}
       </div>
@@ -247,19 +220,21 @@ ${topRecs || "No recommendations generated."}
       {/* RECOMMENDATIONS */}
       <div className="section-card">
         <h3>Recommendations</h3>
-        {recommendations.length === 0 ? (
-          <p>No recommendations generated yet.</p>
-        ) : (
-          <ul className="recs-list">
-            {recommendations.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ul>
-        )}
+        <ul className="recs-list">
+          {recommendations.map((r, i) => (
+            <li key={i}>{r}</li>
+          ))}
+        </ul>
       </div>
 
+      {/* ACTION BUTTONS */}
       <div className="dashboard-actions">
-        <button className="export-btn" onClick={handleExportCSV}>
+
+        {/* EXACT OLD TURQUOISE CSV BUTTON */}
+        <button
+          className="export-btn"
+          onClick={handleExportCSV}
+        >
           Export CSV
         </button>
 
@@ -270,6 +245,7 @@ ${topRecs || "No recommendations generated."}
         >
           {shareLoading ? "Sharing…" : "Share with Advisor"}
         </button>
+
       </div>
     </div>
   );

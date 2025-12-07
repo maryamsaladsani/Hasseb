@@ -17,12 +17,6 @@ const UserSchema = new mongoose.Schema({
 
   joinedYear: { type: Number, default: new Date().getFullYear() },
 
-  advisorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Advisor",
-    default: null
-  },
-  
      status: {
       type: String,
       enum: ["active", "inactive", "suspended"],
