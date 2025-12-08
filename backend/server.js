@@ -14,7 +14,6 @@ const businessDataRoutes = require("./src/routes/businessDataRoutes");
 const advisorRoute = require("./src/routes/advisorRoutes/advisorRoute");
 const ownerAdvisorRoutes = require("./src/routes/advisorRoutes/ownerAdvisorRoutes");
 const ownerRoutes = require("./src/routes/OwnerRoutes");
-const feedbackRoutes = require("./src/routes/feedbackRoutes");
 
 
 // Pricing Scenarios 
@@ -69,7 +68,7 @@ app.use("/api/business-data", require("./src/routes/businessDataOwnerRoute"));
 // serve uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/feedback", feedbackRoutes);
+
 // ===============================
 //  START SERVER
 // ===============================

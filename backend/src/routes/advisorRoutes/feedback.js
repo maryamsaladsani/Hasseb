@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const Feedback = require("../models/Feedback"); // adjust path
+const Feedback = require("../models/Feedback"); 
 
 // where files will be saved
 const storage = multer.diskStorage({

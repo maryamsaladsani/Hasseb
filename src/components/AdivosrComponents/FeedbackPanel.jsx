@@ -36,18 +36,20 @@ export default function FeedbackPanel({
   };
 
   const addFeedback = async () => {
+    console.log("advisorId FRONT:", advisorId);
+    console.log("ownerId FRONT:", ownerId);
+    console.log("content FRONT:", content);
+
     if (!ownerId || !content.trim()) return;
 
     setSending(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5001/api/advisor/feedback",
-        {
+      const res = await axios.post("http://localhost:5001/api/advisor/feedback", {
           advisorId,
           ownerId,
           content
-        }
-      );
+        });
+
 
       const fb = res.data?.feedback || res.data;
       setItems(prev => [fb, ...prev]);

@@ -6,6 +6,7 @@ export default function ScenarioComparison({ ownerId }) {
     const [selectedIds, setSelectedIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [advisorRecs, setAdvisorRecs] = useState([]);
 
     // Load scenarios for this owner
     useEffect(() => {
@@ -38,6 +39,22 @@ export default function ScenarioComparison({ ownerId }) {
 
         loadScenarios();
     }, [ownerId]);
+    useEffect(() => {
+        async function loadRecs() {
+            try {
+                const res = await fetch(
+                    `http://localhost:5001/api/advisor/recommendations/owner/${ownerId}`
+                );
+                const data = await res.json();
+                setAdvisorRecs(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Error loading advisor recommendations:", err);
+            }
+        }
+
+        if (ownerId) loadRecs();
+    }, [ownerId]);
+
 
     function toggleSelection(id) {
         setSelectedIds((prev) => {
@@ -397,6 +414,24 @@ export default function ScenarioComparison({ ownerId }) {
                     </p>
                 </div>
             )}
+            {advisorRecs.length > 0 && (
+                <div className="recommendation-box" style={{ marginTop: "2rem" }}>
+                    <h3 className="recommendation-title">Advisor Recommendation</h3>
+
+                    <p style={{ marginBottom: "1rem" }}>
+                        Your financial advisor has sent the following recommendation:
+                    </p>
+
+                    <div className="advisor-recommendation-text">
+                        {advisorRecs[0].text}
+                    </div>
+
+                    <p className="recommendation-footnote">
+                        Sent on: {new Date(advisorRecs[0].createdAt).toLocaleString()}
+                    </p>
+                </div>
+            )}
+
         </div>
     );
 }

@@ -9,11 +9,9 @@ export default function OwnerFeedbackPanel({ ownerId }) {
         if (!ownerId) return;
 
         axios
-            .get(`http://localhost:5001/api/feedback/owner/${ownerId}`)
+            .get(`http://localhost:5001/api/advisor/feedback/owner/${ownerId}`)
             .then((res) => {
-                if (res.data.success) {
-                    setFeedbackList(res.data.feedback || []);
-                }
+                setFeedbackList(Array.isArray(res.data) ? res.data : []);
             })
             .catch((err) => console.error("Feedback fetch error:", err));
     }, [ownerId]);

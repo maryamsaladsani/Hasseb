@@ -4,7 +4,6 @@ const router = express.Router();
 
 const Ticket = require("../../models/SupportTicket");
 const User = require("../../models/User");
-console.log("TicketRoutes loaded SUCCESSFULLY");
 
 
 // map DB → frontend

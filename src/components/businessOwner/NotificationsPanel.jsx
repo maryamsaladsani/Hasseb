@@ -14,9 +14,9 @@ export default function NotificationsPanel() {
     async function load() {
       try {
         const res = await axios.get(
-            `http://localhost:5001/api/users/notifications/${ownerId}`
+            `http://localhost:5001/api/owner/notifications/${ownerId}`
         );
-        setNotifications(res.data);
+        setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error(err);
       } finally {

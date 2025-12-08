@@ -5,12 +5,13 @@ const multer = require("multer");
 const router = express.Router();
 
 // Models
-const User = require("../../models/User");     // advisor now is User with role="advisor"
+const User = require("../../models/User");    
 const Owner = require("../../models/Owner");
 const BusinessData = require("../../models/BusinessData");
 const Feedback = require("../../models/advisorModels/Feedback");
 const Recommendation = require("../../models/advisorModels/Recommendation");
 const Notification = require("../../models/advisorModels/Notification");
+const OwnerNotification = require("../../models/OwnerNotification");
 const Assignment = require("../../models/Assignment");
 const Ticket = require("../../models/Ticket");
 const SharedBusinessData = require("../../models/SharedBusinessData");
@@ -95,7 +96,18 @@ router.post("/feedback", async (req, res) => {
       return res.status(400).json({ msg: "Missing required fields" });
     }
 
+    // Create feedback
     const fb = await Feedback.create({ advisorId, ownerId, content });
+    console.log("📩 Creating owner notification for:", ownerId);
+
+
+    // Create notification for the owner
+    await OwnerNotification.create({
+      ownerId,
+      title: "New Feedback",
+      message: "Your advisor sent you new feedback.",
+    });
+
 
     return res.json({
       success: true,
@@ -106,6 +118,7 @@ router.post("/feedback", async (req, res) => {
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
+
 
 // List all feedback
 router.get("/feedback/all/:advisorId", async (req, res) => {
@@ -156,29 +169,55 @@ router.put("/feedback/:id", async (req, res) => {
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
+// Get feedback for a specific owner
+router.get("/feedback/owner/:ownerId", async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+
+    const list = await Feedback.find({ ownerId }).sort({ createdAt: -1 });
+
+    return res.json(list);
+
+  } catch (err) {
+    console.error("Owner feedback fetch error:", err);
+    return res.status(500).json({ msg: "Server error" });
+  }
+});
 
 router.post("/recommendations", async (req, res) => {
   try {
-    const { advisorId, ownerId, scenarioId, text } = req.body;
+    const { advisorId, ownerId, text } = req.body;
 
-    if (!advisorId || !text?.trim()) {
+    if (!advisorId || !ownerId || !text?.trim()) {
       return res.status(400).json({ msg: "Missing required fields" });
     }
 
     const newRec = await Recommendation.create({
       advisorId,
-      ownerId: ownerId || null,
-      scenarioId: scenarioId || null,
+      ownerId,
+      scenarioId: null,
       text,
     });
 
-    return res.json({ success: true, recommendation: newRec });
+    // Create notification for the owner
+    const OwnerNotification = require("../../models/OwnerNotification");
+    await OwnerNotification.create({
+      ownerId,
+      title: "New Recommendation",
+      message: "Your advisor sent you a new recommendation.",
+    });
+
+    // Return the created recommendation
+    return res.json({
+      success: true,
+      recommendation: newRec,
+    });
 
   } catch (err) {
+    console.error("Error creating recommendation:", err);
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 });
-
 
 // Advisor recommendations
 router.get("/recommendations/:advisorId", async (req, res) => {
@@ -305,6 +344,7 @@ router.post("/notifications", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 router.get("/shared-business/:ownerId", async (req, res) => {
   try {
