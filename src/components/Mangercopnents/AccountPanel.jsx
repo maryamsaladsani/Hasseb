@@ -56,11 +56,11 @@ export default function AccountPanel({ settings, setSettings }) {
           return;
         }
 
-        const res = await axios.get(`http://localhost:5001/api/manager/users/${userId}`);
+        const res = await axios.get(`http://localhost:5001/api/users/${userId}`);
 
 
         const u = res.data || {};
-        const fullName = u.fullName || "";
+        const fullName = u.fullName || u.name || "";
         const [first, ...rest] = fullName.split(" ");
         const last = rest.join(" ");
 
@@ -100,15 +100,12 @@ const onSave = async () => {
 
     const fullName = `${form.firstName} ${form.lastName}`.trim();
 
-    await axios.put(
-      `http://localhost:5001/api/users/${accountMeta.id}`,
-      {
+      await axios.put(`http://localhost:5001/api/users/${accountMeta.id}`, {
         name: fullName,
         email: form.email,
         role: accountMeta.role,
         status: accountMeta.status,
-      }
-    );
+      });
 
     setDirty(false);
     alert("Profile saved");
